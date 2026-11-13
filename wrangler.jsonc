@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "worthwise",
+  "main": "./custom-worker.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "worthwise" }],
+  "observability": { "enabled": true },
+  // Workers AI (assistente). Remova se for usar apenas provedor externo.
+  "ai": { "binding": "AI" },
+  "triggers": {
+    // monitoramento a cada 30 min; limpeza/retensão diária às 06:17 UTC
+    "crons": ["*/30 * * * *", "17 6 * * *"]
+  },
+  "vars": {
+    "APP_URL": "https://worthwise.com.br",
+    "NEXT_PUBLIC_APP_URL": "https://worthwise.com.br",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://uahetwewcuhcmpikvnzp.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_MsdNjCNByK2ngy0Tymxa8w_SRPiM1u5",
+    "HEROPAY_API_URL": "https://api.beta.heropay.tech",
+    "AI_PROVIDER": "workers-ai",
+    "AI_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+  }
+  // Segredos (wrangler secret put ...): WW_SERVER_SECRET, CRON_SECRET, HEROPAY_JWT_TOKEN,
+  // HEROPAY_WEBHOOK_SECRET, MELI_CLIENT_ID, MELI_CLIENT_SECRET, TURNSTILE_SECRET_KEY, AI_API_KEY
+}

@@ -1,0 +1,28 @@
+/** Variáveis públicas (embutidas no build). */
+export const publicEnv = {
+  appUrl: (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
+  turnstileSiteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "",
+};
+
+/** Segredos e configuração do servidor. Nunca importe em componentes de cliente. */
+export function serverEnv() {
+  const e = process.env;
+  return {
+    serverSecret: e.WW_SERVER_SECRET ?? "",
+    cronSecret: e.CRON_SECRET ?? "",
+    meliClientId: e.MELI_CLIENT_ID ?? "",
+    meliClientSecret: e.MELI_CLIENT_SECRET ?? "",
+    heropayUrl: (e.HEROPAY_API_URL ?? "https://api.beta.heropay.tech").replace(/\/$/, ""),
+    heropayToken: e.HEROPAY_JWT_TOKEN ?? "",
+    heropayWebhookSecret: e.HEROPAY_WEBHOOK_SECRET ?? "",
+    turnstileSecret: e.TURNSTILE_SECRET_KEY ?? "",
+    aiProvider: (e.AI_PROVIDER ?? "workers-ai") as "workers-ai" | "openai-compatible",
+    aiModel: e.AI_MODEL ?? "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    aiBaseUrl: (e.AI_BASE_URL ?? "").replace(/\/$/, ""),
+    aiApiKey: e.AI_API_KEY ?? "",
+  };
+}
+
+export const isSupabaseConfigured = () => Boolean(publicEnv.supabaseUrl && publicEnv.supabaseKey);

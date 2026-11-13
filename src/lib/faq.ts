@@ -1,0 +1,11 @@
+export const FAQ_ITEMS = [
+  { q: "De onde vêm os dados do Worthwise?", a: "Somente de APIs oficiais dos marketplaces, de catálogos autorizados e de bases públicas (como a consulta de CNPJ da Receita Federal). Cada informação mostra a fonte e a data da coleta. Não fazemos scraping nem contornamos limites das plataformas." },
+  { q: "Vocês mostram quantas unidades um produto vende?", a: "Só quando a fonte informa esse número de forma legítima. Os marketplaces, em geral, não divulgam vendas de anúncios de terceiros. Nesses casos mostramos indicadores indiretos de interesse — como posição entre os mais vendidos e volume de avaliações — sempre identificados como estimativa, nunca como vendas reais." },
+  { q: "Todos os marketplaces já estão integrados?", a: "Não. O Mercado Livre é a primeira integração. Shopee, Amazon, TikTok Shop e SHEIN dependem de credenciamento junto a cada plataforma, e aparecem na interface com o estado real. Você acompanha a situação de cada fonte na página Fontes de dados." },
+  { q: "Como funciona o teste gratuito?", a: "Toda conta nova tem três pesquisas de produtos, no total, sem precisar de cartão. Uma pesquisa só é descontada quando entrega resultados; reabrir uma pesquisa já feita não consome crédito." },
+  { q: "O histórico de preços é real?", a: "Sim. Ele é formado apenas por observações que o Worthwise coletou e armazenou ao longo do tempo. Um produto recém-monitorado mostra poucos pontos — não preenchemos o gráfico com dados artificiais." },
+  { q: "O Worthwise Score garante que vou lucrar?", a: "Não. O Score resume evidências (margem simulada, concorrência, sinais de demanda, preço) e vem acompanhado de um grau de confiança. Ele ajuda a comparar oportunidades, mas não é promessa de vendas ou de lucro." },
+  { q: "Como cancelo a assinatura?", a: "Em Planos e configurações, a qualquer momento. O acesso continua até o fim do período já pago e não há novas cobranças. Para trocar de plano, você cancela o atual e assina o novo — não há cobrança proporcional automática." },
+  { q: "Quais dados pessoais vocês guardam?", a: "O mínimo para a conta funcionar: e-mail, nome e suas preferências. Para prevenir abuso do teste gratuito guardamos um identificador derivado do IP por até 90 dias. Não vendemos dados e você pode excluir sua conta quando quiser." },
+];
+
