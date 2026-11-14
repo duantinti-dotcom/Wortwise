@@ -61,7 +61,7 @@ export default function HomePage() {
           </Reveal>
           <h1 className="display mx-auto mt-8 max-w-[1000px] text-[40px] sm:text-[64px] lg:text-[82px]">
             <span className="word block" style={{ animationDelay: "60ms" }}>Encontre o produto</span>
-            <TextRotator className="pb-[0.08em] text-brand" phrases={["que mais vende.", "com a melhor margem.", "com o fornecedor certo.", "antes da concorrência."]} />
+            <TextRotator className="pb-[0.08em] text-brand-glow" phrases={["que mais vende.", "com a melhor margem.", "com o fornecedor certo.", "antes da concorrência."]} interval={3400} />
           </h1>
           <p className="animate-fade-up mx-auto mt-7 max-w-[620px] text-[17px] leading-relaxed text-muted [animation-delay:380ms] md:text-[19px]">
             Ranking oficial de mais vendidos com foto, preço e link direto. Fornecedores comparados pelo custo total e o lucro real de cada venda — com a fonte de cada número.
@@ -78,9 +78,9 @@ export default function HomePage() {
           <ScrollFrame><HeroPreview /></ScrollFrame>
         </div>
         <div className="container-page mt-14">
-          <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 bg-tint/10 md:grid-cols-4">
+          <ul className="glass-cells grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 md:grid-cols-4">
             {SOURCES.map((s) => (
-              <li key={s.label} className="flex items-center gap-3 bg-ink px-5 py-4 text-[13.5px] text-soft"><s.icon size={16} className="shrink-0 text-brand" />{s.label}</li>
+              <li key={s.label} className="flex items-center gap-3 px-5 py-4 text-[13.5px] text-soft"><s.icon size={16} className="shrink-0 text-brand" />{s.label}</li>
             ))}
           </ul>
         </div>
@@ -102,9 +102,9 @@ export default function HomePage() {
       {/* Números */}
       <section aria-label="Worthwise em números" className="pt-16 md:pt-36">
         <div className="container-page">
-          <Stagger className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 bg-tint/10 lg:grid-cols-4">
+          <Stagger className="glass-cells grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 lg:grid-cols-4">
             {[["R$ 0", "para começar, sem cartão"], ["100%", "dos preços com fonte e data"], ["30 min", "atualização do ranking"], ["0", "números inventados"]].map(([big, small]) => (
-              <StaggerItem key={small} className="bg-ink p-6 md:p-8">
+              <StaggerItem key={small} className="p-6 md:p-8">
                 <div className="tabular text-[34px] font-semibold tracking-[-0.04em] md:text-[44px]">{big}</div>
                 <div className="mt-1 font-mono text-[11.5px] uppercase tracking-wider text-faint">{small}</div>
               </StaggerItem>

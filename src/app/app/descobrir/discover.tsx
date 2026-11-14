@@ -161,9 +161,9 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
                   </div>
                   <ActiveChips f={refine} set={setRefine} reset={resetRefine} />
                   {stats ? (
-                    <div className="mb-4 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line text-center">
+                    <div className="glass-cells mb-4 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line text-center">
                       {[["Menor preço", stats.min], ["Mediana", stats.median], ["Maior preço", stats.max]].map(([l, v]) => (
-                        <div key={l as string} className="bg-surface px-3 py-2.5"><div className="font-mono text-[10.5px] uppercase tracking-wider text-faint">{l}</div><div className="tabular mt-0.5 text-[15px] font-semibold">{formatMoney(v as number)}</div></div>
+                        <div key={l as string} className="px-3 py-2.5"><div className="font-mono text-[10.5px] uppercase tracking-wider text-faint">{l}</div><div className="tabular mt-0.5 text-[15px] font-semibold">{formatMoney(v as number)}</div></div>
                       ))}
                     </div>
                   ) : null}

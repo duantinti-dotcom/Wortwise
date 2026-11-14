@@ -538,3 +538,120 @@ html.theme-vt::view-transition-new(root) { animation: theme-reveal .7s var(--eas
     backdrop-filter: blur(12px) saturate(210%) brightness(1.08);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v10 · Papel de parede vivo + Liquid Glass transparente
+   O vidro só parece vidro com cor viva atrás. O fundo agora é um "wallpaper" em
+   movimento (laranja, magenta, violeta, âmbar) e o vidro é claro, com reflexo
+   especular forte e borda luminosa.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ambient { background: var(--bg); }
+.ambient .blob { display: block !important; filter: blur(90px); will-change: transform; animation: drift 24s ease-in-out infinite alternate; }
+.ambient .b1 { width: 62vw; height: 62vw; left: -14vw; top: -22vw; background: radial-gradient(closest-side, #ff7a00, rgba(255,122,0,0)); opacity: .62 !important; animation-duration: 26s; }
+.ambient .b2 { width: 52vw; height: 52vw; right: -12vw; top: -6vw; left: auto; background: radial-gradient(closest-side, #ff2d78, rgba(255,45,120,0)); opacity: .42 !important; animation-duration: 31s; animation-delay: -6s; }
+.ambient .b3 { width: 46vw; height: 46vw; left: 22vw; top: 42vh; background: radial-gradient(closest-side, #7c3aed, rgba(124,58,237,0)); opacity: .34 !important; animation-duration: 35s; animation-delay: -12s; }
+.ambient .b4 { width: 40vw; height: 40vw; right: -6vw; bottom: -14vw; top: auto; background: radial-gradient(closest-side, #ffb020, rgba(255,176,32,0)); opacity: .32 !important; animation-duration: 29s; animation-delay: -3s; }
+.ambient .b5 { width: 34vw; height: 34vw; left: -8vw; bottom: -10vw; top: auto; background: radial-gradient(closest-side, #2f6bff, rgba(47,107,255,0)); opacity: .2 !important; animation-duration: 38s; animation-delay: -18s; }
+.ambient-veil { background: radial-gradient(130% 100% at 50% 35%, transparent 45%, color-mix(in oklab, var(--bg) 70%, transparent) 100%) !important; }
+@media (max-width: 767.98px) {
+  .ambient .b1 { width: 120vw; height: 120vw; left: -40vw; top: -40vw; }
+  .ambient .b2 { width: 100vw; height: 100vw; right: -50vw; top: 10vh; }
+  .ambient .b3 { width: 90vw; height: 90vw; left: 10vw; top: 55vh; }
+  .ambient .b4 { width: 80vw; height: 80vw; }
+  .ambient .b5 { width: 70vw; height: 70vw; }
+}
+/* Dentro do app: o mesmo papel de parede, mais calmo, para não competir com os dados */
+.ambient-calm .b1 { opacity: .34 !important; }
+.ambient-calm .b2 { opacity: .2 !important; }
+.ambient-calm .b3 { opacity: .16 !important; }
+.ambient-calm .b4 { opacity: .16 !important; }
+.ambient-calm .b5 { opacity: .1 !important; }
+/* Tema claro: tons pastel vivos */
+[data-theme="light"] .ambient .b1 { opacity: .42 !important; }
+[data-theme="light"] .ambient .b2 { opacity: .26 !important; }
+[data-theme="light"] .ambient .b3 { opacity: .2 !important; }
+[data-theme="light"] .ambient .b4 { opacity: .3 !important; }
+[data-theme="light"] .ambient .b5 { opacity: .14 !important; }
+[data-theme="light"] .ambient-calm .b1 { opacity: .24 !important; }
+[data-theme="light"] .ambient-calm .b2, [data-theme="light"] .ambient-calm .b3, [data-theme="light"] .ambient-calm .b4 { opacity: .12 !important; }
+
+/* Vidro: transparente, com reflexo especular e borda luminosa */
+:root, [data-theme="dark"], .theme-dark {
+  --glass-fill:
+    radial-gradient(140% 70% at 18% -10%, rgb(255 255 255 / 0.22), transparent 46%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.12) 0%, rgb(255 255 255 / 0.04) 42%, rgb(255 255 255 / 0.06) 100%);
+  --glass-base: rgb(18 18 22 / 0.18);
+  --card-glass-base: rgb(16 16 20 / 0.42);
+  --glass-strong-base: rgb(18 18 22 / 0.62);
+  --glass-rim: linear-gradient(150deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.22) 20%, rgb(255 255 255 / 0.04) 48%, rgb(255 255 255 / 0.18) 75%, rgb(255 255 255 / 0.6));
+  --glass-shadow:
+    inset 0 1px 0.5px rgb(255 255 255 / 0.45),
+    inset 0 -10px 20px -14px rgb(255 255 255 / 0.18),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.08),
+    0 1px 2px rgb(0 0 0 / 0.25),
+    0 20px 50px -18px rgb(0 0 0 / 0.55);
+}
+[data-theme="light"], .theme-light {
+  --glass-fill:
+    radial-gradient(140% 70% at 18% -10%, rgb(255 255 255 / 0.95), transparent 50%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.62) 0%, rgb(255 255 255 / 0.34) 45%, rgb(255 255 255 / 0.42) 100%);
+  --glass-base: rgb(255 255 255 / 0.12);
+  --card-glass-base: rgb(255 255 255 / 0.38);
+  --glass-strong-base: rgb(255 255 255 / 0.72);
+  --glass-rim: linear-gradient(150deg, rgb(255 255 255 / 1), rgb(255 255 255 / 0.7) 22%, rgb(255 255 255 / 0.15) 50%, rgb(255 255 255 / 0.6) 78%, rgb(255 255 255 / 1));
+  --glass-shadow:
+    inset 0 1px 0.5px rgb(255 255 255 / 1),
+    inset 0 -10px 20px -14px rgb(255 255 255 / 0.9),
+    0 0 0 0.5px rgb(120 60 20 / 0.1),
+    0 2px 6px rgb(120 60 20 / 0.06),
+    0 20px 50px -20px rgb(120 60 20 / 0.3);
+}
+@layer components {
+  .glass, .liquid {
+    -webkit-backdrop-filter: blur(16px) saturate(220%) brightness(1.1) contrast(1.02);
+    backdrop-filter: blur(16px) saturate(220%) brightness(1.1) contrast(1.02);
+  }
+  .card, .lg {
+    -webkit-backdrop-filter: blur(30px) saturate(200%) brightness(1.04);
+    backdrop-filter: blur(30px) saturate(200%) brightness(1.04);
+  }
+  .glass::before, .liquid::before, .lg::before, .card::before, .btn-secondary::before, .btn-glass::before, .icon-btn::before, .chip::before { padding: 1.2px; }
+  /* Botão principal: cápsula laranja "gel", com brilho de vidro por cima */
+  .btn-primary {
+    color: #fff; text-shadow: 0 1px 1px rgb(120 40 0 / 0.35);
+    background:
+      radial-gradient(120% 90% at 30% -20%, rgb(255 255 255 / 0.55), transparent 50%),
+      linear-gradient(180deg, #ff9a2e 0%, #ff6a00 55%, #f04f00 100%);
+    box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.6), inset 0 -2px 6px rgb(160 40 0 / 0.35), 0 0 0 0.5px rgb(255 140 50 / 0.6),
+      0 8px 24px -8px rgb(255 100 0 / 0.75), 0 2px 4px rgb(0 0 0 / 0.2);
+  }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.08) saturate(1.06); box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.65), inset 0 -2px 6px rgb(160 40 0 / 0.35), 0 0 0 0.5px rgb(255 160 70 / 0.8), 0 14px 34px -10px rgb(255 100 0 / 0.9), 0 2px 4px rgb(0 0 0 / 0.2); }
+  /* Selos e números em laranja com brilho */
+  .text-brand-glow { color: #ff8a1f; text-shadow: 0 0 24px rgb(255 122 0 / 0.45); }
+}
+[data-theme="light"] .text-brand-glow { color: #f05a00; text-shadow: none; }
+
+/* Blocos .tile também viram vidro (o papel de parede aparece através deles) */
+.tile, [data-theme="light"] .tile,
+.tile-berry, .tile-ocean, .tile-mint, .tile-night,
+[data-theme="light"] .tile-berry, [data-theme="light"] .tile-ocean, [data-theme="light"] .tile-mint, [data-theme="light"] .tile-night {
+  color: var(--fg);
+  border: 0 !important;
+  background: radial-gradient(90% 70% at 100% 0%, rgb(255 122 0 / 0.16), transparent 60%), var(--glass-fill), var(--card-glass-base);
+  -webkit-backdrop-filter: blur(30px) saturate(200%) brightness(1.04);
+  backdrop-filter: blur(30px) saturate(200%) brightness(1.04);
+  box-shadow: var(--glass-shadow);
+}
+.tile::after {
+  box-shadow: none !important;
+  padding: 1.2px; background: var(--glass-rim);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
+}
+.tile .tile-muted { color: var(--muted) !important; }
+/* Telas de exemplo dentro dos blocos: vidro escuro/claro mais denso, para leitura */
+.demo-screen { background: var(--glass-fill), var(--glass-strong-base) !important; border: 0 !important; box-shadow: var(--glass-shadow) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
+/* Faixas em grade (fontes, números, resumo de preços) */
+.glass-cells { background: rgb(var(--tint) / 0.1); }
+.glass-cells > * { background: color-mix(in oklab, var(--bg) 52%, transparent); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); }
