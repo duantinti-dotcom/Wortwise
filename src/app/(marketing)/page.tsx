@@ -10,6 +10,8 @@ import { ProfitCalculator } from "@/components/profit-calculator";
 import { Reveal } from "@/components/ui/reveal";
 import { Spot } from "@/components/ui/spot";
 import { Tilt } from "@/components/ui/tilt";
+import { Words } from "@/components/ui/words";
+import { BorderBeam } from "@/components/ui/fx";
 import { publicEnv } from "@/lib/env";
 import { FAQ_ITEMS } from "@/lib/faq";
 import { cn } from "@/lib/utils";
@@ -51,17 +53,17 @@ export default function HomePage() {
       {/* Hero */}
       <section id="produto" className="relative pt-36 md:pt-48">
         <div className="container-page text-center">
-          <h1 className="display animate-fade-up mx-auto max-w-5xl text-[52px] sm:text-[80px] lg:text-[112px]">
-            Descubra produtos que <span className="accent">realmente</span> valem a pena.
+          <h1 className="display mx-auto max-w-5xl text-[52px] sm:text-[80px] lg:text-[112px]">
+            <Words parts={["Descubra produtos que", { text: "realmente", className: "accent" }, "valem a pena."]} />
           </h1>
-          <p className="animate-fade-up mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-[#cfcfcf] [animation-delay:100ms] md:text-xl">
+          <p className="animate-fade-up mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-[#cfcfcf] [animation-delay:550ms] md:text-xl">
             Encontre oportunidades, compare fornecedores, acompanhe preços e descubra quanto você pode lucrar — tudo em um só lugar.
           </p>
-          <div className="animate-fade-up mt-10 flex flex-wrap justify-center gap-3 [animation-delay:180ms]">
+          <div className="animate-fade-up mt-10 flex flex-wrap justify-center gap-3 [animation-delay:650ms]">
             <Link href="/cadastro" className="btn btn-primary btn-lg !h-14 !rounded-2xl !px-8 !text-base">Começar grátis <ArrowRight size={18} /></Link>
             <Link href="#demonstracao" className="btn btn-glass btn-lg !h-14 !rounded-2xl !px-8 !text-base">Ver demonstração</Link>
           </div>
-          <ul className="animate-fade-up mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted [animation-delay:240ms]">
+          <ul className="animate-fade-up mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted [animation-delay:750ms]">
             {["3 pesquisas grátis", "Sem cartão de crédito", "Cancele quando quiser"].map((t) => <li key={t} className="flex items-center gap-1.5"><Check size={15} className="text-brand" />{t}</li>)}
           </ul>
         </div>
@@ -106,9 +108,9 @@ export default function HomePage() {
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
               <Reveal key={s.title} delay={i * 0.07} className="h-full">
-                <Spot as="li" className="lg card-hover flex h-full flex-col rounded-[28px] p-7">
-                  <span className="serif text-[64px] leading-none text-brand-hi">{i + 1}</span>
-                  <h3 className="mt-8 text-2xl font-semibold tracking-tight">{s.title}</h3>
+                <Spot as="li" className="lg card-hover flex h-full flex-col rounded-[28px] p-6 md:p-7">
+                  <span className="serif text-[48px] leading-none text-brand-hi md:text-[64px]">{i + 1}</span>
+                  <h3 className="mt-4 text-2xl font-semibold tracking-tight md:mt-8">{s.title}</h3>
                   <p className="mt-3 text-[15px] leading-relaxed text-muted">{s.text}</p>
                 </Spot>
               </Reveal>
@@ -155,7 +157,8 @@ export default function HomePage() {
       <section className="pb-28 pt-8 md:pb-36">
         <div className="container-page">
           <Reveal>
-            <div className="lg lg-refract relative overflow-hidden rounded-[40px] px-6 py-24 text-center md:py-32">
+            <div className="lg lg-refract relative overflow-hidden rounded-[40px] px-6 py-20 text-center md:py-32">
+              <BorderBeam />
               <div aria-hidden className="absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(60%_80%_at_50%_120%,rgba(255,121,0,0.45),transparent_70%)]" />
               <h2 className="display relative mx-auto max-w-4xl text-[44px] md:text-[76px]">Sua próxima compra merece <span className="accent">dados melhores.</span></h2>
               <p className="relative mx-auto mt-6 max-w-xl text-lg text-[#cfcfcf]">Crie sua conta e faça três pesquisas completas por nossa conta.</p>

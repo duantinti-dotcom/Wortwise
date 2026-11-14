@@ -38,7 +38,7 @@ export function Navbar() {
         </ul>
         <div className="flex items-center gap-1.5">
           <Link href="/entrar" className="btn btn-ghost hidden sm:inline-flex">Entrar</Link>
-          <Link href="/cadastro" className="btn btn-primary !rounded-xl">Começar grátis <ArrowRight size={15} className="hidden sm:block" /></Link>
+          <Link href="/cadastro" className="btn btn-primary !rounded-xl max-sm:!h-9 max-sm:!px-3.5 max-sm:!text-[13px]">Começar grátis <ArrowRight size={15} className="hidden sm:block" /></Link>
           <D.Root open={open} onOpenChange={setOpen}>
             <D.Trigger className="btn btn-ghost !px-2.5 lg:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>
             <D.Portal>

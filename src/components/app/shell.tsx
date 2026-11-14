@@ -139,9 +139,9 @@ export function AppShell(props: ShellProps) {
           <Ambient variant="calm" />
           {/* Sidebar — desktop */}
           <aside className="lg glass-strong fixed bottom-3 left-3 top-3 z-30 hidden w-[252px] flex-col overflow-hidden rounded-[26px] lg:flex">
-            <Link href="/app" className="relative flex h-16 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
-            <nav aria-label="Aplicação" className="relative flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
-            <div className="p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
+            <Link href="/app" className="relative flex h-16 shrink-0 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
+            <nav aria-label="Aplicação" className="relative min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
+            <div className="shrink-0 p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
           </aside>
 
           {/* Barra superior */}
@@ -154,8 +154,8 @@ export function AppShell(props: ShellProps) {
                   <div className="flex h-14 items-center justify-between px-4"><D.Title asChild><Logo size={26} /></D.Title>
                     <D.Close className="btn btn-ghost !px-2.5" aria-label="Fechar menu"><X size={20} /></D.Close></div>
                   <D.Description className="sr-only">Navegação da aplicação</D.Description>
-                  <nav aria-label="Aplicação" className="flex-1 overflow-y-auto px-3"><NavList onNavigate={() => setDrawer(false)} unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
-                  <div className="p-3 pb-[max(12px,env(safe-area-inset-bottom))]"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
+                  <nav aria-label="Aplicação" className="min-h-0 flex-1 overflow-y-auto px-3"><NavList onNavigate={() => setDrawer(false)} unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
+                  <div className="shrink-0 p-3 pb-[max(12px,env(safe-area-inset-bottom))]"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
                 </D.Content>
               </D.Portal>
             </D.Root>

@@ -184,12 +184,12 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
           <div className="flex items-end gap-2">
             <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={1} maxLength={1500} disabled={!available} aria-label="Mensagem para o assistente"
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(input); } }}
-              placeholder={available ? "Pergunte sobre produtos, preços, fornecedores ou lucro…" : "Assistente indisponível neste ambiente"}
+              placeholder={available ? "Pergunte sobre produtos, preços ou lucro…" : "Assistente indisponível"}
               className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-faint" />
             <button type="submit" disabled={!available || !input.trim() || Boolean(status)} className="btn btn-primary !size-11 shrink-0 !rounded-xl !p-0" aria-label="Enviar"><ArrowUp size={19} /></button>
           </div>
           <div className="flex items-center justify-between px-3 pb-1 pt-0.5 text-[11px] text-faint">
-            <span className="flex items-center gap-1.5"><MessagesSquare size={11} />{remaining == null ? "Cota do plano" : `${remaining} mensagens restantes`} · buscas feitas pelo assistente consomem pesquisas do plano</span>
+            <span className="flex items-center gap-1.5"><MessagesSquare size={11} />{remaining == null ? "Cota do plano" : `${remaining} mensagens restantes`}<span className="hidden sm:inline"> · buscas feitas pelo assistente consomem pesquisas do plano</span></span>
           </div>
         </form>
       </section>

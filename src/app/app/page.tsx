@@ -1,5 +1,6 @@
 import { ArrowRight, BarChart3, Bell, Bookmark, Calculator, Clock, MessagesSquare, Scale, Search, Store, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { BorderBeam } from "@/components/ui/fx";
 import { getUsage, quotaOf, requireUser } from "@/lib/auth";
 import { PERIOD_LABELS, RESOURCE_LABELS } from "@/lib/plans";
 import { supabaseServer } from "@/lib/supabase/server";
@@ -40,6 +41,7 @@ export default async function Dashboard() {
   return (
     <div className="space-y-6">
       <section className="lg relative overflow-hidden rounded-[32px] p-6 md:p-10">
+        <BorderBeam />
         <div aria-hidden className="grid-bg absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_60%_80%_at_100%_0%,#000,transparent)]" />
         <div aria-hidden className="aurora -right-20 -top-24 h-72 w-72 bg-brand/25" />
         <div className="relative">

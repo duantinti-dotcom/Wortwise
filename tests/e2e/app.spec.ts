@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { expect, test, type Page } from "@playwright/test";
+import { devices, expect, test, type Page } from "@playwright/test";
 
 const EMAIL = process.env.E2E_EMAIL;
 const PASSWORD = process.env.E2E_PASSWORD;
@@ -173,6 +173,21 @@ test("cron autenticado executa o monitoramento e a retenção", async ({ page })
   expect(await monitor.json()).toMatchObject({ task: "monitor" });
   const purge = await page.request.post("/api/cron/purge", { headers: { authorization: `Bearer ${secret}` } });
   expect(purge.status()).toBe(200);
+});
+
+test("no celular, nenhuma tela do app fica mais larga que a tela", async ({ browser }) => {
+  const ctx = await browser.newContext({ ...devices["iPhone 13"] });
+  const page = await ctx.newPage();
+  await login(page);
+  for (const path of ["", "/descobrir", "/oportunidades", "/mercado", "/fornecedores", "/comparar", "/calculadora", "/monitoramento", "/assistente", "/favoritos", "/relatorios", "/configuracoes"]) {
+    await page.goto(`/app${path}`);
+    await page.waitForLoadState("networkidle").catch(() => {});
+    const extra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(extra, `largura extra em /app${path}`).toBeLessThanOrEqual(1);
+  }
+  await page.getByRole("button", { name: "Mais" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await ctx.close();
 });
 
 test("logout encerra a sessão", async ({ page }) => {

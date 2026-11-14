@@ -2,6 +2,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BorderBeam } from "@/components/ui/fx";
 import { Spot } from "@/components/ui/spot";
 import { DEFAULT_PLANS, type PlanInfo } from "@/lib/plans";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -26,6 +27,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
         const featured = p.id === "pro";
         return (
           <Spot key={p.id} className={cn("lg card-hover relative flex flex-col rounded-[32px] p-8", featured && "edge-brand lg:-my-4 lg:py-12")}>
+            {featured ? <BorderBeam /> : null}
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>
               {featured ? <span className="rounded-full bg-brand px-3 py-1 text-xs font-semibold text-black">Mais escolhido</span> : null}

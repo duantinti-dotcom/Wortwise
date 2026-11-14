@@ -93,7 +93,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
             <SlidersHorizontal size={17} /><span className="hidden sm:inline">Filtros</span>
             {activeFilters ? <span className="flex size-5 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-black">{activeFilters}</span> : null}
           </button>
-          <button type="submit" disabled={loading} className="btn btn-primary !h-12 !px-5">{loading ? "Pesquisando…" : "Pesquisar"}</button>
+          <button type="submit" disabled={loading} aria-label="Pesquisar" className="btn btn-primary !h-12 !px-4 sm:!px-5"><Search size={17} className="sm:hidden" /><span className="hidden sm:inline">{loading ? "Pesquisando…" : "Pesquisar"}</span></button>
         </div>
         <div className={cn("grid transition-[grid-template-rows,opacity] duration-300 ease-out", showFilters ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
           <div className="overflow-hidden">

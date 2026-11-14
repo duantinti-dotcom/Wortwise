@@ -1,6 +1,7 @@
 import { ArrowDownRight, BadgeCheck, BarChart3, Bell, Bookmark, Calculator, Headphones, Home, Lamp, MessagesSquare, Scale, Search, Sparkles, Star, Store, TrendingDown, Watch } from "lucide-react";
 import type { ReactNode } from "react";
 import { ScoreRing } from "@/components/score-ring";
+import { BorderBeam } from "@/components/ui/fx";
 import { cn } from "@/lib/utils";
 
 /**
@@ -62,7 +63,7 @@ export function VisualCompare() {
     <div className="space-y-2.5">
       {rows.map(([n, v, w, best, s]) => (
         <div key={n} className={cn("rounded-xl border px-3.5 py-3", best ? "border-brand/40 bg-brand/[0.07]" : "border-white/8 bg-white/[0.03]")}>
-          <div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2 font-medium">{n}{best ? <span className="badge badge-brand !h-5 !text-[10.5px]">menor custo total</span> : null}</span><span className="tabular font-semibold">{v}<span className="text-xs font-normal text-faint"> /un</span></span></div>
+          <div className="flex items-start justify-between gap-2 text-sm"><span className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium"><span className="whitespace-nowrap">{n}</span>{best ? <span className="badge badge-brand !h-5 !text-[10.5px]">menor custo total</span> : null}</span><span className="tabular whitespace-nowrap font-semibold">{v}<span className="text-xs font-normal text-faint"> /un</span></span></div>
           <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/8"><div className={cn("h-full rounded-full", best ? "bg-gradient-to-r from-brand to-brand-hi" : "bg-white/30")} style={{ width: `${w}%` }} /></div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">{best ? <BadgeCheck size={13} className="text-pos" /> : null}{s}</div>
         </div>
@@ -128,11 +129,12 @@ export function HeroPreview({ widget }: { widget?: ReactNode }) {
   return (
     <div className="relative mx-auto w-full max-w-[1120px]">
       <div className="animate-tilt-in relative [transform-origin:50%_0%]">
-        <div className="lg glass-strong overflow-hidden rounded-[26px] shadow-[0_80px_160px_-50px_rgba(0,0,0,1)]">
+        <div className="lg glass-strong relative overflow-hidden rounded-[26px] shadow-[0_80px_160px_-50px_rgba(0,0,0,1)]">
+          <BorderBeam />
           <div aria-hidden className="beam absolute inset-x-10 top-0 z-10 h-px opacity-80" />
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
             <span className="flex gap-1.5">{["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="size-2.5 rounded-full opacity-80" style={{ background: c }} />)}</span>
-            <span className="mx-auto flex h-7 w-[46%] items-center justify-center rounded-lg border border-white/10 bg-black/30 px-3 text-[11px] text-muted"><span className="truncate">app.worthwise<span className="hidden sm:inline"> · análise de produto</span></span></span>
+            <span className="mx-auto flex h-7 w-[46%] items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3"><span className="live-dot !size-1.5" /><span className="mono-label truncate !text-[10px] !text-muted">app.worthwise<span className="hidden sm:inline"> / produto</span></span></span>
             <DemoTag className="hidden md:inline-flex" />
           </div>
           <div className="grid md:grid-cols-[184px_1fr]">
@@ -145,14 +147,14 @@ export function HeroPreview({ widget }: { widget?: ReactNode }) {
               <div className="flex flex-wrap items-center gap-3">
                 <Thumb p={PRODUCTS[0]!} size="size-12" />
                 <div className="min-w-0 flex-1"><div className="truncate text-[15px] font-semibold">Fone Bluetooth TWS com estojo de carga</div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-muted"><span className="flex items-center gap-1"><Star size={11} className="fill-brand text-brand" /> 4,7 · 1.284 avaliações</span><span>34 ofertas concorrentes</span><span className="hidden sm:inline">coletado há 12 min</span></div></div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-muted"><span className="flex items-center gap-1"><Star size={11} className="fill-brand text-brand" /> 4,7 · 1.284 avaliações</span><span className="hidden sm:inline">34 ofertas concorrentes</span><span className="mono-label hidden !text-[10px] md:inline">coletado há 12 min</span></div></div>
                 <span className="btn btn-primary btn-sm pointer-events-none"><Bell size={13} /> Monitorar</span>
               </div>
               <div className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"><VisualChart id="hero" />
                   <div className="mt-3 grid grid-cols-3 gap-2 text-xs">{[["Menor", "R$ 52,00"], ["Mediana", "R$ 62,70"], ["Maior", "R$ 89,90"]].map(([l, v]) => <div key={l} className="rounded-lg bg-white/[0.05] px-2.5 py-2"><div className="text-faint">{l}</div><div className="tabular mt-0.5 font-medium">{v}</div></div>)}</div>
                 </div>
-                <div className="flex flex-col gap-4">
+                <div className="hidden flex-col gap-4 sm:flex">
                   <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                     <div className="flex items-center gap-4"><ScoreRing value={82} size={78} /><div><div className="text-sm font-semibold">Worthwise Score</div><div className="mt-0.5 text-xs text-muted">Grau de confiança: <span className="text-fg">moderado</span></div></div></div>
                     <div className="mt-4 space-y-2">{[["Margem estimada", 76], ["Evidências de demanda", 68], ["Preço competitivo", 84]].map(([l, w]) => (
@@ -171,6 +173,7 @@ export function HeroPreview({ widget }: { widget?: ReactNode }) {
         </div>
         {widget ? <div className="absolute -bottom-28 -left-4 hidden lg:block xl:-left-14">{widget}</div> : null}
       </div>
+      {widget ? <div className="mt-6 flex justify-center lg:hidden">{widget}</div> : null}
       <div className="mt-5 flex justify-center md:hidden"><DemoTag /></div>
     </div>
   );

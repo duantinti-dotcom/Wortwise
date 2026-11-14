@@ -3,6 +3,7 @@ import { Info, RotateCcw, Save, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildScenarios, calculateProfit, CHANNEL_PRESETS, compareChannels, DEFAULT_INPUTS, priceForTargetMargin, profitCurve, type ProfitInputs } from "@/lib/profit/calc";
+import { AnimatedNumber, BorderBeam } from "@/components/ui/fx";
 import { EXAMPLE } from "@/lib/profit/example";
 import { cn, formatMoney, formatPercent } from "@/lib/utils";
 
@@ -110,7 +111,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
       <div className="card overflow-hidden !rounded-3xl">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-4 md:px-7">
           <div className="text-[15px] font-semibold tracking-tight">Seus números</div>
-          {isExample ? <span className="badge badge-brand"><Sparkles size={12} />Exemplo — troque pelos seus valores</span> : null}
+          {isExample ? <span className="badge badge-brand max-sm:order-3 max-sm:w-full max-sm:justify-center"><Sparkles size={12} />Exemplo — troque pelos seus valores</span> : null}
           <button className="btn btn-ghost btn-sm -mr-2" onClick={() => { setI({ ...DEFAULT_INPUTS, quantity: 1 }); setPreset(""); setIsExample(false); }}><RotateCcw size={14} /> Limpar</button>
         </div>
         <Section title="Compra" sub="o que você paga ao fornecedor">
@@ -151,11 +152,12 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
 
       <div className="space-y-4 lg:sticky lg:top-24">
         <div className={cn("edge-grad relative overflow-hidden rounded-3xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),#121212]" : "edge-brand bg-[linear-gradient(160deg,rgba(255,121,0,0.16),rgba(255,121,0,0.02)_55%),#121212]")}>
+          <BorderBeam />
           <div aria-hidden className="aurora -right-16 -top-20 h-56 w-56 bg-brand/20" />
           <div className="relative">
             <div className="text-[13px] text-muted">{ready && r.profit < 0 ? "Prejuízo estimado do lote" : "Lucro estimado do lote"}</div>
             <div className={cn("tabular mt-1 text-[44px] font-semibold leading-none tracking-[-0.04em] transition-colors md:text-5xl", !ready ? "text-faint" : r.profit >= 0 ? "text-fg" : "text-[#ff8a87]")}
-              data-testid="profit-total">{ready ? formatMoney(r.profit) : "R$ —"}</div>
+              data-testid="profit-total">{ready ? <AnimatedNumber value={r.profit} format={(v) => formatMoney(v)} /> : "R$ —"}</div>
             <div className="mt-5 grid grid-cols-3 gap-2">
               {[["Por unidade", ready ? formatMoney(r.profitPerUnit) : "—", "profit-unit"], ["Margem", ready ? formatPercent(r.marginPct) : "—", "profit-margin"], ["Retorno", ready ? formatPercent(r.roiPct) : "—", "profit-roi"]].map(([k, v, t]) => (
                 <div key={k} className="rounded-xl border border-white/[0.08] bg-black/25 px-3 py-2.5"><div className="text-[11px] text-muted">{k}</div><div className="tabular mt-0.5 text-[15px] font-semibold" data-testid={t}>{v}</div></div>
@@ -167,11 +169,11 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
               <div className="relative mt-3">
                 <input type="range" aria-label="Preço de venda" min={sliderMin} max={sliderMax} step={0.1} value={Math.min(Math.max(i.salePrice, sliderMin), sliderMax)}
                   onChange={(e) => set("salePrice")(Number(e.target.value))} className="relative z-10 w-full accent-[#ff7900]" disabled={!ready} />
-                <div className="pointer-events-none relative mt-1 h-8 text-[10.5px]">
+                <div className="pointer-events-none relative mt-1 h-11 text-[10.5px]">
                   {ready && r.minPrice != null && pos(r.minPrice) != null ? (
-                    <span className="absolute -translate-x-1/2 text-center text-[#ff9a97]" style={{ left: `${pos(r.minPrice)}%` }}><span className="mx-auto block h-2 w-px bg-current" />mínimo {formatMoney(r.minPrice)}</span>) : null}
+                    <span className="absolute -translate-x-1/2 whitespace-nowrap text-center text-[#ff9a97]" style={{ left: `${pos(r.minPrice)}%` }}><span className="mx-auto block h-2 w-px bg-current" />mínimo {formatMoney(r.minPrice)}</span>) : null}
                   {ready && target != null && pos(target) != null ? (
-                    <span className="absolute -translate-x-1/2 text-center text-brand-hi" style={{ left: `${pos(target)}%` }}><span className="mx-auto block h-2 w-px bg-current" />{targetMargin}% · {formatMoney(target)}</span>) : null}
+                    <span className="absolute top-3.5 -translate-x-1/2 whitespace-nowrap text-center text-brand-hi" style={{ left: `${pos(target)}%` }}><span className="mx-auto block h-1 w-px bg-current" />{targetMargin}% · {formatMoney(target)}</span>) : null}
                 </div>
               </div>
               <label className="mt-2 flex items-center justify-between gap-3 text-[13px] text-muted" htmlFor="pc-target">
