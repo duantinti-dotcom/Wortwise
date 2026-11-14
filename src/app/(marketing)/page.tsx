@@ -7,6 +7,7 @@ import { LiveTrending } from "@/components/marketing/live-trending";
 import { QuestionMarquee } from "@/components/marketing/marquee";
 import { Pricing } from "@/components/marketing/pricing";
 import { ScrollFrame } from "@/components/marketing/scroll-frame";
+import { TextRotator } from "@/components/marketing/text-rotator";
 import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualCompare, VisualSearch, VisualWatch } from "@/components/marketing/visuals";
 import { ProfitCalculator } from "@/components/profit-calculator";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/reveal";
@@ -55,17 +56,16 @@ export default function HomePage() {
           <Reveal y={10}>
             <Link href="/cadastro" className="group mx-auto inline-flex items-center gap-2.5 rounded-full border border-tint/10 bg-tint/[0.03] py-1 pl-1 pr-3 text-[13px] text-muted backdrop-blur transition-colors hover:border-tint/25 hover:text-fg">
               <span className="rounded-full bg-tint/10 px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-fg">Novo</span>
-              Ranking de mais vendidos do Mercado Livre
+              Ranking de mais vendidos<span className="hidden sm:inline"> do Mercado Livre</span>
               <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5" />
             </Link>
           </Reveal>
-          <h1 className="display mx-auto mt-8 max-w-[980px] text-[42px] sm:text-[64px] lg:text-[80px]">
-            <span className="word" style={{ animationDelay: "60ms" }}>Descubra os produtos</span>{" "}
-            <span className="word" style={{ animationDelay: "140ms" }}>que mais vendem.</span>{" "}
-            <span className="word text-faint" style={{ animationDelay: "240ms" }}>Com dados oficiais e a margem na conta.</span>
+          <h1 className="display mx-auto mt-8 max-w-[1000px] text-[40px] sm:text-[64px] lg:text-[82px]">
+            <span className="word block" style={{ animationDelay: "60ms" }}>Encontre o produto</span>
+            <TextRotator className="pb-[0.08em] text-brand" phrases={["que mais vende.", "com a melhor margem.", "com o fornecedor certo.", "antes da concorrência."]} />
           </h1>
           <p className="animate-fade-up mx-auto mt-7 max-w-[620px] text-[17px] leading-relaxed text-muted [animation-delay:380ms] md:text-[19px]">
-            Ranking de mais vendidos com foto, preço e link direto, fornecedores comparados pelo custo total e o lucro real de cada venda — com a fonte de cada número.
+            Ranking oficial de mais vendidos com foto, preço e link direto. Fornecedores comparados pelo custo total e o lucro real de cada venda — com a fonte de cada número.
           </p>
           <div className="animate-fade-up mt-9 flex flex-wrap justify-center gap-3 [animation-delay:480ms]">
             <Link href="/cadastro" className="btn btn-primary btn-xl">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
@@ -154,9 +154,9 @@ export default function HomePage() {
       {/* Como funciona */}
       <section id="como-funciona" className="scroll-mt-24 py-24 md:py-32">
         <div className="container-page">
-          <Reveal className="mb-14 flex flex-wrap items-end justify-between gap-6">
-            <div><span className="eyebrow">Como funciona</span><Title className="mt-5 max-w-2xl">Da dúvida à decisão em <span className="accent">quatro passos</span></Title></div>
-            <Link href="/cadastro" className="btn btn-secondary btn-lg">Começar agora <ArrowRight className="btn-arrow" size={16} /></Link>
+          <Reveal className="mx-auto mb-14 max-w-3xl text-center">
+            <span className="eyebrow">Como funciona</span>
+            <Title className="mt-5">Da dúvida à decisão em <span className="accent">quatro passos</span></Title>
           </Reveal>
           <Stagger as="ol" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
@@ -172,6 +172,7 @@ export default function HomePage() {
               </StaggerItem>
             ))}
           </Stagger>
+          <div className="mt-10 flex justify-center"><Link href="/cadastro" className="btn btn-primary btn-lg">Começar agora <ArrowRight className="btn-arrow" size={16} /></Link></div>
         </div>
       </section>
 
@@ -203,13 +204,13 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section id="perguntas" className="scroll-mt-24 py-24 md:py-32">
-        <div className="container-page grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-          <Reveal>
+        <div className="container-page !max-w-3xl">
+          <Reveal className="mb-12 text-center">
             <span className="eyebrow">Dúvidas</span>
-            <Title className="mt-5 !text-[40px] md:!text-[52px]">Perguntas <span className="accent">frequentes</span></Title>
-            <p className="mt-6 text-muted">Quer os detalhes? Leia a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link> e veja o estado das <Link href="/fontes-de-dados" className="text-brand-hi underline underline-offset-4">fontes de dados</Link>.</p>
+            <Title className="mt-5">Perguntas <span className="accent">frequentes</span></Title>
+            <p className="mt-5 text-muted">Quer os detalhes? Leia a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link> e veja o estado das <Link href="/fontes-de-dados" className="text-brand-hi underline underline-offset-4">fontes de dados</Link>.</p>
           </Reveal>
-          <Reveal delay={0.08}><div className="lg rounded-2xl px-6 py-2 md:px-8"><Faq /></div></Reveal>
+          <Reveal delay={0.08}><div className="lg rounded-[24px] px-6 py-2 md:px-8"><Faq /></div></Reveal>
         </div>
       </section>
 

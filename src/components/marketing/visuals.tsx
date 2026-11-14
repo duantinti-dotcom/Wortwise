@@ -167,7 +167,7 @@ export function HeroPreview({ widget }: { widget?: ReactNode }) {
             </div>
           </div>
         </div>
-        <div className="glass animate-float absolute -right-3 top-28 z-20 hidden w-60 rounded-2xl p-3.5 lg:block xl:-right-7">
+        <div className="glass glass-lens animate-float absolute -right-3 top-28 z-20 hidden w-60 rounded-2xl p-3.5 lg:block xl:-right-7">
           <div className="flex items-center gap-2.5"><span className="flex size-8 items-center justify-center rounded-lg bg-pos/20 text-pos"><ArrowDownRight size={15} /></span>
             <div><div className="text-xs font-medium">Preço abaixo do alvo</div><div className="text-[11px] text-muted">R$ 58,90 → R$ 53,40</div></div></div>
         </div>

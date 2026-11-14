@@ -389,3 +389,100 @@ html.theme-vt::view-transition-new(root) { animation: theme-reveal .7s var(--eas
 .theme-dark, .theme-light { color: var(--fg); }
 /* Telas do produto dentro de cartões coloridos: vidro opaco para não "tingir" de laranja. */
 .tile .theme-dark { --card-bg: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.01) 60%), #111113; --pop-bg: #141416; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v8 · Liquid Glass (inspirado no material da Apple)
+   - desfoque com saturação e um leve brilho do que está atrás;
+   - borda especular: forte no topo/canto esquerdo, fraca no meio, volta no canto oposto;
+   - lente nas bordas (html.lens → filtro SVG #lg-lens, só em Chromium);
+   - controles em cápsula; conteúdo em cartões de vidro mais calmos.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root, [data-theme="dark"], .theme-dark {
+  --glass-fill: linear-gradient(180deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.025));
+  --glass-base: rgb(22 22 24 / 0.38);
+  --glass-rim: linear-gradient(135deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.10) 28%, rgb(255 255 255 / 0.02) 50%, rgb(255 255 255 / 0.10) 72%, rgb(255 255 255 / 0.32));
+  --glass-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), inset 0 -1px 0 rgb(255 255 255 / 0.05), inset 0 0 24px rgb(255 255 255 / 0.03), 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px -14px rgb(0 0 0 / 0.55);
+  --glass-strong-base: rgb(20 20 22 / 0.72);
+  --card-glass-base: rgb(20 20 22 / 0.5);
+}
+[data-theme="light"], .theme-light {
+  --glass-fill: linear-gradient(180deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.5));
+  --glass-base: rgb(255 255 255 / 0.25);
+  --glass-rim: linear-gradient(135deg, rgb(255 255 255 / 1), rgb(255 255 255 / 0.55) 30%, rgb(13 13 15 / 0.06) 55%, rgb(255 255 255 / 0.5) 80%, rgb(255 255 255 / 0.95));
+  --glass-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 -1px 0 rgb(13 13 15 / 0.04), 0 0 0 1px rgb(13 13 15 / 0.06), 0 1px 2px rgb(60 40 20 / 0.06), 0 16px 40px -16px rgb(60 40 20 / 0.25);
+  --glass-strong-base: rgb(255 255 255 / 0.82);
+  --card-glass-base: rgb(255 255 255 / 0.55);
+}
+
+@layer components {
+  /* Material de vidro base (navegação, controles, menus, cartões flutuantes) */
+  .glass, .liquid {
+    position: relative; isolation: isolate; border: 0 !important;
+    background: var(--glass-fill), var(--glass-base);
+    -webkit-backdrop-filter: blur(18px) saturate(190%) brightness(1.06);
+    backdrop-filter: blur(18px) saturate(190%) brightness(1.06);
+    box-shadow: var(--glass-shadow);
+  }
+  .glass::before, .liquid::before, .lg::before, .card::before, .btn-secondary::before, .btn-glass::before, .icon-btn::before, .chip::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; z-index: 1;
+    background: var(--glass-rim);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
+  }
+  .glass-strong { background: var(--glass-fill), var(--glass-strong-base) !important; }
+
+  /* Cartões de conteúdo: o mesmo vidro, mais calmo e legível */
+  .card, .lg {
+    border: 0 !important;
+    background: var(--glass-fill), var(--card-glass-base);
+    -webkit-backdrop-filter: blur(28px) saturate(170%); backdrop-filter: blur(28px) saturate(170%);
+    box-shadow: var(--glass-shadow);
+  }
+  .card { border-radius: 20px; }
+  .card-hover:hover { transform: translateY(-3px); box-shadow: var(--glass-shadow), 0 30px 60px -30px rgb(var(--shade) / 0.55); }
+
+  /* Lente nas bordas (Chromium) para os controles flutuantes */
+  html.lens .glass-lens {
+    -webkit-backdrop-filter: url(#lg-lens) blur(7px) saturate(200%) brightness(1.08);
+    backdrop-filter: url(#lg-lens) blur(7px) saturate(200%) brightness(1.08);
+  }
+
+  /* Botões em cápsula */
+  .btn { border-radius: 999px; font-weight: 500; }
+  .btn-sm, .btn-lg, .btn-xl { border-radius: 999px; }
+  .btn-secondary, .btn-glass {
+    color: var(--fg); border: 0; background: var(--glass-fill), var(--glass-base);
+    -webkit-backdrop-filter: blur(14px) saturate(190%) brightness(1.06); backdrop-filter: blur(14px) saturate(190%) brightness(1.06);
+    box-shadow: var(--glass-shadow);
+  }
+  .btn-secondary:hover:not(:disabled), .btn-glass:hover:not(:disabled) { background: var(--glass-fill), var(--glass-base); filter: brightness(1.12); }
+  .btn-primary {
+    color: #170800; background: linear-gradient(180deg, rgb(255 160 70), rgb(255 116 0));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55), inset 0 -1px 0 rgb(120 40 0 / 0.25), inset 0 0 18px rgb(255 220 180 / 0.25), 0 1px 2px rgb(0 0 0 / 0.25), 0 10px 28px -10px rgb(255 121 0 / 0.75);
+  }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.07); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 -1px 0 rgb(120 40 0 / 0.25), inset 0 0 18px rgb(255 220 180 / 0.3), 0 2px 4px rgb(0 0 0 / 0.25), 0 16px 36px -12px rgb(255 121 0 / 0.85); }
+  .btn-contrast { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 1px 2px rgb(0 0 0 / 0.25), 0 10px 24px -12px rgb(0 0 0 / 0.5); }
+  .icon-btn { border: 0; background: var(--glass-fill), var(--glass-base); box-shadow: var(--glass-shadow); position: relative; }
+  .chip { position: relative; border: 0; border-radius: 999px; background: var(--glass-fill), var(--glass-base); box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(12px) saturate(180%); backdrop-filter: blur(12px) saturate(180%); }
+  .chip:hover { background: var(--glass-fill), var(--glass-base); filter: brightness(1.12); }
+  .seg { border-radius: 999px; padding: 4px; }
+  .seg > button { border-radius: 999px; }
+  .input { border-radius: 12px; }
+  .badge { border-radius: 999px; padding: 0 9px; }
+}
+
+/* Fundo com cor quente o bastante para o vidro "ter o que refratar" */
+.ambient .b1 { width: 70vw; height: 46vw; left: 15vw; top: -30vw; opacity: .32; animation: drift 30s ease-in-out infinite alternate; }
+.ambient .b2 { display: block; width: 36vw; height: 36vw; right: -10vw; top: 30vh; background: radial-gradient(closest-side, #ff4d1a, rgba(255,77,26,0) 100%); opacity: .14; animation-duration: 34s; }
+.ambient .b3 { display: block; width: 32vw; height: 32vw; left: -10vw; top: 55vh; background: radial-gradient(closest-side, #ffb347, rgba(255,179,71,0) 100%); opacity: .1; animation-duration: 38s; animation-delay: -12s; }
+[data-theme="light"] .ambient .b1 { opacity: .2; }
+[data-theme="light"] .ambient .b2 { opacity: .1; }
+[data-theme="light"] .ambient .b3 { opacity: .12; }
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .liquid, .card, .lg, .btn-secondary { background: var(--surface) !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .liquid, .card, .lg, .btn-secondary, .chip, .icon-btn { background: var(--surface) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}

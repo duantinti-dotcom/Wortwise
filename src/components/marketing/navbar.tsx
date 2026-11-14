@@ -29,8 +29,8 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-3 pt-3 md:pt-4">
       <nav aria-label="Principal"
-        className={cn("flex h-[60px] w-full items-center justify-between rounded-2xl border px-2.5 pl-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          scrolled ? "glass max-w-[1060px]" : "max-w-[1280px] border-transparent bg-transparent")}>
+        className={cn("flex h-[60px] w-full items-center justify-between rounded-full border px-2.5 pl-5 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          scrolled ? "glass glass-lens max-w-[1060px]" : "max-w-[1280px] border-transparent bg-transparent")}>
         <Link href="/" aria-label="Worthwise — página inicial"><Logo /></Link>
         <ul className="hidden items-center gap-0.5 lg:flex">
           {LINKS.map((l) => (

@@ -46,7 +46,7 @@ export function ThemeToggle({ className, size = "md" }: { className?: string; si
     <button type="button" role="switch" aria-checked={light} aria-label={light ? "Mudar para o modo escuro" : "Mudar para o modo claro"}
       title={light ? "Modo escuro" : "Modo claro"}
       onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setTheme(light ? "dark" : "light", { x: r.left + r.width / 2, y: r.top + r.height / 2 }); }}
-      className={cn("relative inline-flex shrink-0 items-center rounded-full border border-tint/15 bg-tint/[0.06] p-[2px] transition-colors hover:border-tint/30", className)}
+      className={cn("liquid glass-lens relative inline-flex shrink-0 items-center rounded-full p-[3px] transition-[filter] hover:brightness-110", className)}
       style={{ width: s.w, height: s.h }}>
       <span aria-hidden className="absolute inset-0 flex items-center justify-between px-[7px] text-faint">
         <Moon size={size === "sm" ? 12 : 14} /><Sun size={size === "sm" ? 12 : 14} />

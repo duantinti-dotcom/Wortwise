@@ -143,7 +143,7 @@ export function AppShell(props: ShellProps) {
         <div className="min-h-dvh lg:pl-[276px]">
           <Ambient variant="calm" />
           {/* Sidebar — desktop */}
-          <aside className="lg glass-strong fixed bottom-3 left-3 top-3 z-30 hidden w-[252px] flex-col overflow-hidden rounded-[18px] lg:flex">
+          <aside className="glass fixed bottom-3 left-3 top-3 z-30 hidden w-[252px] flex-col overflow-hidden rounded-[24px] lg:flex">
             <Link href="/app" className="relative flex h-16 shrink-0 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
             <nav aria-label="Aplicação" className="relative min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
             <div className="shrink-0 p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
@@ -168,7 +168,7 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="lg h-10 w-full !rounded-[10px] pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)] " />
+                className="liquid glass-lens h-10 w-full rounded-full pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)] " />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
@@ -186,13 +186,13 @@ export function AppShell(props: ShellProps) {
           </main>
 
           {/* Navegação inferior — mobile */}
-          <nav aria-label="Atalhos" className="lg glass-strong fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-[22px] p-1.5 lg:hidden">
+          <nav aria-label="Atalhos" className="glass glass-lens fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-full p-1.5 lg:hidden">
             {TABS.map((t) => {
               const on = t.href === "/app" ? path === "/app" : path.startsWith(t.href);
               return (
                 <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
                   className={cn("relative isolate flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:scale-95", on ? "font-semibold text-fg" : "text-muted")}>
-                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-xl bg-tint/[0.08]" /> : null}
+                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-full bg-tint/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]" /> : null}
                   <t.icon size={19} className={on ? "text-brand" : undefined} />{t.href === "/app/em-alta" ? "Em alta" : t.label.split(" ")[0]}
                 </Link>
               );
