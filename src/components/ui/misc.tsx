@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { HowTo } from "./how-to";
 
 export function EmptyState({ icon: Icon, title, children, action }: { icon: LucideIcon; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
@@ -33,16 +34,19 @@ export function EmptyState({ icon: Icon, title, children, action }: { icon: Luci
   );
 }
 
-export function PageHeader({ title, description, action, eyebrow }: { title: string; description?: string; action?: ReactNode; eyebrow?: string }) {
+export function PageHeader({ title, description, action, eyebrow, help }: { title: string; description?: string; action?: ReactNode; eyebrow?: string; help?: { id: string; steps: string[] } }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
-      <div className="min-w-0">
-        {eyebrow ? <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-hi">{eyebrow}</div> : null}
-        <h1 className="display text-[34px] md:text-[44px]">{title}</h1>
-        {description ? <p className="mt-2 max-w-2xl text-[14.5px] leading-relaxed text-muted">{description}</p> : null}
+    <>
+      <div className={cn("flex flex-wrap items-end justify-between gap-5", help ? "mb-5" : "mb-8")}>
+        <div className="min-w-0">
+          {eyebrow ? <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-hi">{eyebrow}</div> : null}
+          <h1 className="display text-[34px] md:text-[44px]">{title}</h1>
+          {description ? <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{description}</p> : null}
+        </div>
+        {action}
       </div>
-      {action}
-    </div>
+      {help ? <HowTo id={help.id} steps={help.steps} /> : null}
+    </>
   );
 }
 

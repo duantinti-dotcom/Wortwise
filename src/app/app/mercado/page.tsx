@@ -25,7 +25,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
 
   return (
     <>
-      <PageHeader title="Análise de mercado" description="Panorama de preços e concorrência calculado sobre os resultados reais das suas pesquisas. Sem projeções: apenas o que foi coletado." />
+      <PageHeader title="Resumo de preços" description="Um resumo das suas pesquisas: menor preço, preço do meio e quantos vendedores disputam cada produto." help={{ id: "mercado", steps: ["Faça pesquisas na tela Pesquisar produtos", "Aqui aparece o resumo de preços de cada pesquisa", "Use para decidir um preço de venda competitivo"] }} />
       {!searches.length ? (
         <EmptyState icon={BarChart3} title="Faça uma pesquisa para analisar o mercado" action={<Link href="/app/descobrir" className="btn btn-primary">Descobrir produtos</Link>}>
           A análise usa os anúncios retornados pelas fontes nas suas pesquisas.</EmptyState>

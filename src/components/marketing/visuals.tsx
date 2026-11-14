@@ -13,9 +13,9 @@ export function DemoTag({ className }: { className?: string }) {
 }
 
 const PRODUCTS = [
-  { name: "Fone Bluetooth TWS", price: "R$ 58,90", rating: "4,7", icon: Headphones, tone: "from-[#3a2412] to-[#17120d]", color: "text-brand-hi" },
-  { name: "Smartwatch esportivo", price: "R$ 129,00", rating: "4,5", icon: Watch, tone: "from-[#14263a] to-[#0e1319]", color: "text-[#7cc0ff]" },
-  { name: "Luminária de mesa LED", price: "R$ 74,50", rating: "4,8", icon: Lamp, tone: "from-[#2b2440] to-[#13111b]", color: "text-[#b9a4ff]" },
+  { name: "Fone Bluetooth TWS", price: "R$ 58,90", rating: "4,7", icon: Headphones, tone: "from-brand/20 to-brand/5", color: "text-brand-hi" },
+  { name: "Smartwatch esportivo", price: "R$ 129,00", rating: "4,5", icon: Watch, tone: "from-sky-500/20 to-sky-500/5", color: "text-sky-500" },
+  { name: "Luminária de mesa LED", price: "R$ 74,50", rating: "4,8", icon: Lamp, tone: "from-violet-500/20 to-violet-500/5", color: "text-violet-500" },
 ];
 
 function Thumb({ p, size = "size-10" }: { p: (typeof PRODUCTS)[number]; size?: string }) {

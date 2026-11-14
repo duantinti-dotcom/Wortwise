@@ -16,21 +16,21 @@ import { cn } from "@/lib/utils";
 import { UpgradeProvider, useUpgrade } from "./upgrade";
 
 const NAV = [
-  { href: "/app", label: "Início", icon: Home },
-  { href: "/app/em-alta", label: "Em alta", icon: Flame },
-  { href: "/app/descobrir", label: "Descobrir produtos", icon: Search },
-  { href: "/app/oportunidades", label: "Oportunidades", icon: TrendingUp },
-  { href: "/app/fornecedores", label: "Fornecedores", icon: Store },
-  { href: "/app/comparar", label: "Comparar", icon: Scale },
-  { href: "/app/mercado", label: "Análise de mercado", icon: BarChart3 },
-  { href: "/app/calculadora", label: "Calculadora de lucro", icon: Calculator },
-  { href: "/app/monitoramento", label: "Monitoramento", icon: Bell },
-  { href: "/app/assistente", label: "Assistente Worthwise", icon: MessagesSquare },
-  { href: "/app/favoritos", label: "Favoritos", icon: Bookmark },
-  { href: "/app/relatorios", label: "Relatórios", icon: FileText },
-  { href: "/app/configuracoes", label: "Planos e configurações", icon: Settings },
+  { href: "/app", label: "Início", icon: Home, hint: "Comece por aqui" },
+  { href: "/app/em-alta", label: "Mais vendidos", icon: Flame, hint: "O que está vendendo agora" },
+  { href: "/app/descobrir", label: "Pesquisar produtos", icon: Search, hint: "Preço, avaliações e quem vende" },
+  { href: "/app/oportunidades", label: "Achados de preço", icon: TrendingUp, hint: "Bem mais baratos que o normal" },
+  { href: "/app/fornecedores", label: "Meus fornecedores", icon: Store, hint: "Contatos e CNPJ conferido" },
+  { href: "/app/comparar", label: "Comparar fornecedores", icon: Scale, hint: "Quem sai mais barato" },
+  { href: "/app/mercado", label: "Resumo de preços", icon: BarChart3, hint: "Menor, médio e maior preço" },
+  { href: "/app/calculadora", label: "Calculadora de lucro", icon: Calculator, hint: "Quanto sobra em cada venda" },
+  { href: "/app/monitoramento", label: "Alertas de preço", icon: Bell, hint: "Aviso quando o preço cair" },
+  { href: "/app/assistente", label: "Assistente (IA)", icon: MessagesSquare, hint: "Tire dúvidas em português" },
+  { href: "/app/favoritos", label: "Salvos", icon: Bookmark, hint: "Produtos que você guardou" },
+  { href: "/app/relatorios", label: "Relatórios", icon: FileText, hint: "Análises salvas" },
+  { href: "/app/configuracoes", label: "Plano e conta", icon: Settings, hint: "Assinatura e dados" },
 ];
-const TABS = [NAV[0]!, NAV[1]!, NAV[2]!, NAV[9]!];
+const TABS = [NAV[0]!, NAV[1]!, NAV[2]!, NAV[7]!];
 
 export interface ShellProps {
   user: { email: string; name: string | null; avatarUrl: string | null };
@@ -45,10 +45,10 @@ export interface ShellProps {
 
 const GROUPS: { label: string; items: string[] }[] = [
   { label: "", items: ["/app"] },
-  { label: "Produtos", items: ["/app/em-alta", "/app/descobrir", "/app/oportunidades", "/app/mercado"] },
-  { label: "Fornecedores", items: ["/app/fornecedores", "/app/comparar"] },
-  { label: "Ferramentas", items: ["/app/calculadora", "/app/monitoramento", "/app/assistente"] },
-  { label: "Biblioteca", items: ["/app/favoritos", "/app/relatorios"] },
+  { label: "Encontrar produtos", items: ["/app/em-alta", "/app/descobrir", "/app/oportunidades"] },
+  { label: "Fazer as contas", items: ["/app/calculadora", "/app/comparar", "/app/fornecedores", "/app/mercado"] },
+  { label: "Acompanhar", items: ["/app/monitoramento", "/app/favoritos", "/app/relatorios"] },
+  { label: "Ajuda", items: ["/app/assistente"] },
   { label: "Conta", items: ["/app/configuracoes"] },
 ];
 
@@ -65,7 +65,7 @@ function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNa
               const on = active(n.href);
               return (
                 <li key={n.href}>
-                  <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined}
+                  <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined} title={n.hint}
                     className={cn("group relative isolate flex h-9 items-center gap-3 rounded-[9px] px-3 text-[13.5px] transition-colors duration-200",
                       on ? "font-semibold text-fg" : "text-muted hover:bg-tint/[0.05] hover:text-fg")}>
                     {on ? <motion.span layoutId={`nav-pill-${layoutKey}`} aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }}
@@ -193,7 +193,7 @@ export function AppShell(props: ShellProps) {
                 <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
                   className={cn("relative isolate flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:scale-95", on ? "font-semibold text-fg" : "text-muted")}>
                   {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-full bg-tint/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]" /> : null}
-                  <t.icon size={19} className={on ? "text-brand" : undefined} />{t.href === "/app/em-alta" ? "Em alta" : t.label.split(" ")[0]}
+                  <t.icon size={19} className={on ? "text-brand" : undefined} />{({ "/app": "Início", "/app/em-alta": "Em alta", "/app/descobrir": "Pesquisar", "/app/calculadora": "Lucro" } as Record<string, string>)[t.href] ?? t.label}
                 </Link>
               );
             })}

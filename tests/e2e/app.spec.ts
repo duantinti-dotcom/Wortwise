@@ -57,9 +57,9 @@ test("usuário comum não acessa a administração", async ({ page }) => {
 
 test("simulação de lucro é salva e respeita a cota do plano", async ({ page }) => {
   await page.goto("/app/calculadora");
-  await page.getByLabel("Preço de aquisição (un.)").fill("18");
-  await page.getByLabel("Preço de venda (un.)").fill("49,90");
-  await page.getByLabel("Quantidade").fill("100");
+  await page.getByLabel("Quanto você paga em cada unidade?").fill("18");
+  await page.getByLabel("Por quanto vai vender cada uma?").fill("49,90");
+  await page.getByLabel("Quantas unidades vai comprar?").fill("100");
   const name = `Teste E2E ${Date.now()}`;
   page.once("dialog", (d) => d.accept(name));
   await page.getByRole("button", { name: "Salvar simulação" }).click();

@@ -30,11 +30,15 @@ test.describe("site público", () => {
     await page.goto("/calculadora-de-lucro");
     await expect(page.getByText("Exemplo — troque pelos seus valores")).toBeVisible();
     await page.getByRole("button", { name: "Limpar" }).click();
-    await page.getByLabel("Preço de aquisição (un.)").fill("20");
-    await page.getByLabel("Quantidade").fill("100");
-    await page.getByLabel("Preço de venda (un.)").fill("60");
+    // Modo Simples (padrão): perguntas em linguagem do dia a dia
+    await page.getByLabel("Quanto você paga em cada unidade?").fill("20");
+    await page.getByLabel("Quantas unidades vai comprar?").fill("100");
+    await page.getByLabel("Por quanto vai vender cada uma?").fill("60");
+    await expect(page.getByTestId("profit-verdict")).toContainText("Você ganha");
+    // Modo Completo: comissão e frete da compra
+    await page.getByRole("tab", { name: "Completo" }).click();
     await page.getByLabel("Comissão do marketplace").fill("12");
-    await page.getByLabel("Frete de compra (total)").fill("200");
+    await page.getByLabel("Frete da compra (total)").fill("200");
     // receita 6000 − (2000 + 200 + 720) = 3080
     await expect(page.getByTestId("profit-total")).toContainText("3.080,00");
     await expect(page.getByTestId("profit-unit")).toContainText("30,80");

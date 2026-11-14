@@ -152,7 +152,7 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
                 <div className="relative flex size-16 items-center justify-center rounded-[20px] border border-brand/40 bg-gradient-to-b from-brand/30 to-brand/5 text-brand-hi shadow-[0_0_40px_-8px_rgba(255,121,0,0.7)]"><Sparkles size={28} /></div>
               </div>
               <h1 className="text-grad mt-7 text-3xl font-semibold tracking-[-0.035em] md:text-[40px]">Assistente Worthwise</h1>
-              <p className="mt-2 text-muted">Um analista comercial que consulta os dados da plataforma, faz as contas e cita as fontes. Ele não inventa preços, vendas nem fornecedores.</p>
+              <p className="mt-2 text-muted">Pergunte em português, como perguntaria a um amigo que entende de vendas. Ele consulta os dados, faz as contas e mostra de onde tirou cada número.</p>
               {!available ? <div role="status" className="mx-auto mt-6 flex w-fit items-center gap-2.5 rounded-2xl border border-tint/10 bg-tint/[0.04] px-4 py-2.5 text-left text-sm text-muted"><span className="size-2 shrink-0 rounded-full bg-brand" />Assistente ainda não disponível neste ambiente — as demais ferramentas funcionam normalmente.</div> : null}
               <div className="mt-10 grid gap-3 text-left sm:grid-cols-2">
                 {SUGGESTIONS.map((s, i) => (

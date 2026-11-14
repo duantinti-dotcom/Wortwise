@@ -1,6 +1,7 @@
 import { ArrowUpRight, Flame, Search, Settings2, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HowTo } from "@/components/ui/how-to";
 import { EmptyState } from "@/components/ui/misc";
 import { getUsage, isAdmin } from "@/lib/auth";
 import { loadTrending } from "@/lib/trending";
@@ -32,11 +33,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
             <span className="relative flex size-2"><span className="absolute inset-0 animate-ping rounded-full bg-brand/60" /><span className="relative size-2 rounded-full bg-brand" /></span>
             Ranking oficial do Mercado Livre
           </div>
-          <h1 className="display mt-2 text-[36px] md:text-[48px]">Produtos <span className="accent">em alta</span></h1>
-          <p className="mt-2 max-w-2xl text-[15px] text-muted">Os mais vendidos de cada categoria, com foto, preço atual e acesso direto ao anúncio. A posição vem do próprio Mercado Livre; o Worthwise não estima vendas.</p>
+          <h1 className="display mt-2 text-[36px] md:text-[48px]">Mais vendidos</h1>
+          <p className="mt-2 max-w-2xl text-[15px] text-muted">O que mais está vendendo agora em cada categoria, com foto, preço e link do anúncio. A posição vem do próprio Mercado Livre.</p>
         </div>
         {data.updatedAt ? <span className="badge"><TrendingUp size={13} className="text-brand" />atualizado {relativeTime(data.updatedAt)}</span> : null}
       </div>
+
+      <HowTo id="em-alta" steps={["Escolha uma categoria logo abaixo", "Veja os produtos mais vendidos, com foto e preço", "Toque em Analisar para ver se vale a pena revender"]} />
 
       {/* Categorias */}
       <nav aria-label="Categorias" className="-mx-4 mb-6 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">

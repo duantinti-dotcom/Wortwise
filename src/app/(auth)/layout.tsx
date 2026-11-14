@@ -19,13 +19,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <aside className="tile relative m-3 hidden lg:flex lg:flex-col lg:justify-center lg:px-14 xl:px-20" aria-hidden="true">
         
         <div className="relative max-w-lg">
-          <p className="display text-[44px] text-white">Decida o que vender com evidências, não com palpites.</p>
+          <p className="display text-[44px]">Decida o que vender com evidências, não com palpites.</p>
           <ul className="tile-muted mt-8 space-y-3 text-[15px] font-medium">
             {["Dados com fonte e data de coleta", "Histórico de preços formado por observações reais", "Lucro calculado com todas as despesas"].map((t) => (
               <li key={t} className="flex items-center gap-3"><span className="flex size-5 items-center justify-center rounded-md bg-brand/15 text-brand"><Check size={12} strokeWidth={3} /></span>{t}</li>
             ))}
           </ul>
-          <div className="theme-dark relative mt-12">
+          <div className="relative mt-12">
             <div className="glass rounded-2xl p-5"><VisualChart id="auth" /></div>
             <div className="glass animate-float absolute -bottom-10 -right-6 flex items-center gap-3 rounded-2xl p-3.5 pr-5">
               <ScoreRing value={82} size={58} />

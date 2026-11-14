@@ -64,7 +64,7 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
   const mountTurnstile = () => {
     if (!needsCaptcha || tsLoaded.current || !tsRef.current || !window.turnstile) return;
     tsLoaded.current = true;
-    window.turnstile.render(tsRef.current, { sitekey: publicEnv.turnstileSiteKey, theme: "dark", callback: (t: string) => setCaptcha(t), "expired-callback": () => setCaptcha(undefined) });
+    window.turnstile.render(tsRef.current, { sitekey: publicEnv.turnstileSiteKey, theme: "auto", callback: (t: string) => setCaptcha(t), "expired-callback": () => setCaptcha(undefined) });
   };
   useEffect(mountTurnstile);
 

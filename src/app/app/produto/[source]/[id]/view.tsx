@@ -150,6 +150,7 @@ export function ProductView({ source, id }: { source: string; id: string }) {
                 <span className="tabular font-mono font-semibold">#{formatNumber(p.salesRank.rank)}</span> no ranking de vendas da {SOURCE_LABELS[p.source] ?? p.source}{p.salesRank.category ? ` em ${p.salesRank.category}` : ""}
               </div>
             ) : null}
+            <Verdict status={score.status} score={score.score} />
             <div className="mt-5 flex flex-wrap gap-2">
               <button className="btn btn-primary" onClick={() => setWatchOpen(true)}><Bell size={15} /> Monitorar preço</button>
               <button className="btn btn-secondary" onClick={saveReport}><FileText size={15} /> Salvar relatório</button>
@@ -327,5 +328,21 @@ function Gallery({ images, title, overlay }: { images: string[]; title: string; 
         </ul>
       ) : null}
     </div>
+  );
+}
+
+/** Resumo em linguagem simples: "vale a pena?" a partir do Score (sem prometer resultado). */
+function Verdict({ status, score }: { status: "ok" | "insufficient"; score: number | null }) {
+  const v = status !== "ok" || score == null
+    ? { tone: "border-tint/12 bg-tint/[0.04]", dot: "bg-faint", title: "Ainda não dá para dizer", text: "Faltam dados. Preencha a calculadora de lucro mais abaixo para incluir a sua margem na avaliação." }
+    : score >= 70 ? { tone: "border-pos/30 bg-pos/[0.07]", dot: "bg-pos", title: "Parece uma boa oportunidade", text: "Os dados disponíveis são favoráveis. Confira o lucro e os riscos abaixo antes de comprar." }
+    : score >= 45 ? { tone: "border-brand/30 bg-brand/[0.07]", dot: "bg-brand", title: "Pode valer, com atenção", text: "Há pontos positivos e negativos. Veja os riscos e simule o lucro antes de decidir." }
+    : { tone: "border-neg/30 bg-neg/[0.07]", dot: "bg-neg", title: "Cuidado", text: "Os dados não favorecem este produto agora: margem baixa, muita concorrência ou poucas evidências." };
+  return (
+    <a href="#conclusao" className={cn("mt-5 flex items-start gap-3 rounded-2xl border px-4 py-3.5 transition-colors hover:brightness-110", v.tone)}>
+      <span className={cn("mt-1.5 size-2.5 shrink-0 rounded-full", v.dot)} />
+      <span><span className="block text-[15px] font-semibold">Vale a pena? {v.title}{score != null && status === "ok" ? <span className="ml-1.5 font-normal text-muted">· Score {score}/100</span> : null}</span>
+        <span className="mt-0.5 block text-[13.5px] leading-relaxed text-muted">{v.text}</span></span>
+    </a>
   );
 }

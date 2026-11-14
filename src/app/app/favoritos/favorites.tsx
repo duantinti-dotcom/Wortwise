@@ -72,7 +72,7 @@ export function Favorites() {
 
   return (
     <>
-      <PageHeader title="Favoritos e coleções" description="Worthwise Collections: organize produtos em listas privadas, como “Produtos para testar” ou “Oportunidades para dezembro”."
+      <PageHeader title="Salvos" description="Os produtos que você marcou com o ícone de salvar. Organize em listas, como “Para testar” ou “Para dezembro”."
         action={<button className="btn btn-secondary" onClick={() => setCreating(true)}><FolderPlus size={16} /> Nova coleção</button>} />
       {data.loading ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-56 !rounded-2xl" />)}</div>
         : data.error ? <ErrorNote onRetry={data.reload}>{data.error}</ErrorNote> : (

@@ -85,7 +85,7 @@ export function Compare() {
 
   return (
     <>
-      <PageHeader title="Comparar fornecedores" description="Worthwise Compare: custo final por unidade = (preço × quantidade + frete + impostos + outras despesas) ÷ quantidade. Cada custo indica se foi informado ou estimado."
+      <PageHeader title="Comparar fornecedores" description="Descubra qual fornecedor sai mais barato de verdade: somamos preço, frete e impostos e dividimos pela quantidade." help={{ id: "comparar", steps: ["Toque em Adicionar cotação e dê um nome à comparação (ex.: “Fone TWS”)", "Coloque o preço, a quantidade e o frete de cada fornecedor", "O mais barato no custo final aparece destacado"] }}
         action={<button className="btn btn-primary" onClick={() => setOpen(true)}><Plus size={16} /> Adicionar cotação</button>} />
       {d.loading ? <Skeleton className="h-64 !rounded-2xl" /> : d.error ? <ErrorNote onRetry={d.reload}>{d.error}</ErrorNote> : !names.length ? (
         <EmptyState icon={Scale} title="Nenhuma cotação cadastrada" action={<button className="btn btn-primary" onClick={() => setOpen(true)}>Adicionar a primeira cotação</button>}>

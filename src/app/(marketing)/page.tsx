@@ -28,10 +28,10 @@ const SOURCES = [
 ];
 
 const STEPS = [
-  { title: "Pesquise", text: "Digite o que você pensa em vender. O Worthwise consulta as fontes autorizadas e mostra o que cada uma retornou.", icon: Search },
-  { title: "Analise", text: "Preço, concorrência, sinais de demanda e riscos — com a origem e a data de cada dado.", icon: LineChart },
-  { title: "Compare", text: "Fornecedores e canais lado a lado pelo custo total e pela margem, não pelo preço anunciado.", icon: Scale },
-  { title: "Decida", text: "Score com grau de confiança, cenários de lucro e alertas para acompanhar a oportunidade.", icon: Check },
+  { title: "Pesquise", text: "Digite o que você pensa em vender ou veja os mais vendidos de cada categoria.", icon: Search },
+  { title: "Analise", text: "Veja preço, avaliações, concorrência e os riscos — com a fonte de cada número.", icon: LineChart },
+  { title: "Calcule", text: "Descubra quanto sobra em cada venda e qual fornecedor sai mais barato.", icon: Scale },
+  { title: "Decida", text: "Uma resposta simples — vale a pena ou não — e alertas para comprar na hora certa.", icon: Check },
 ];
 
 function Title({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -134,12 +134,12 @@ export default function HomePage() {
             <p className="mt-5 text-lg text-muted">Seis ferramentas que conversam entre si. Cada uma mostra de onde veio o dado.</p>
           </Reveal>
           <div className="grid gap-4 md:grid-cols-2 md:gap-5">
-            <FeatureTile tone="tile-sunset" icon={<Search />} title="Descubra o que vender" text="Pesquise e veja ofertas reais com preço, vendedor, avaliação, fonte e o momento exato da coleta."><VisualSearch /></FeatureTile>
-            <FeatureTile tone="tile-berry" icon={<Scale />} title="Compare fornecedores" text="Custo final por unidade — preço, frete e impostos rateados — e quem tem CNPJ verificado na Receita." flip><VisualCompare /></FeatureTile>
-            <FeatureTile tone="tile-ocean" icon={<LineChart />} title="Entenda o mercado" text="Evolução de preço observada, ofertas comparáveis e concorrência, separando dado confirmado de estimativa." flip><VisualChart id="ft" /></FeatureTile>
-            <FeatureTile tone="tile-ember" icon={<Calculator />} title="Saiba quanto sobra" text="Comissão, frete, impostos, anúncios e devoluções na mesma conta, com preço mínimo e cenários."><VisualCalc /></FeatureTile>
-            <FeatureTile tone="tile-mint" icon={<Bell />} title="Receba alertas" text="Defina um preço-alvo e seja avisado quando ele for atingido, a partir de observações reais."><VisualWatch /></FeatureTile>
-            <FeatureTile tone="tile-night" icon={<MessagesSquare />} title="Pergunte ao assistente" text="Um analista comercial que consulta os dados, faz as contas e cita as fontes. Nunca inventa números." flip><VisualAssistant /></FeatureTile>
+            <FeatureTile tone="tile-sunset" icon={<Search />} title="Descubra o que vender" text="Digite um produto e veja preço, avaliações e quem vende — com foto e link para o anúncio."><VisualSearch /></FeatureTile>
+            <FeatureTile tone="tile-berry" icon={<Scale />} title="Compare fornecedores" text="Some preço, frete e impostos e descubra quem sai mais barato de verdade. E confira se a empresa existe na Receita." flip><VisualCompare /></FeatureTile>
+            <FeatureTile tone="tile-ocean" icon={<LineChart />} title="Entenda o preço" text="Veja se o preço está subindo ou caindo, o menor e o maior preço e quantos vendedores disputam o produto." flip><VisualChart id="ft" /></FeatureTile>
+            <FeatureTile tone="tile-ember" icon={<Calculator />} title="Saiba quanto sobra" text="Responda 6 perguntas e veja quanto fica no seu bolso em cada venda — e o menor preço sem ter prejuízo."><VisualCalc /></FeatureTile>
+            <FeatureTile tone="tile-mint" icon={<Bell />} title="Receba alertas" text="Escolha um preço e seja avisado quando o produto chegar nele. Bom para comprar na hora certa."><VisualWatch /></FeatureTile>
+            <FeatureTile tone="tile-night" icon={<MessagesSquare />} title="Pergunte ao assistente" text="Pergunte em português, como para um amigo que entende de vendas. Ele faz as contas e mostra de onde tirou cada número." flip><VisualAssistant /></FeatureTile>
           </div>
           <div className="mt-6 flex justify-center"><DemoTag /></div>
         </div>
@@ -219,12 +219,12 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal>
             <div className="tile relative px-6 py-20 text-center md:py-28">
-              <div aria-hidden className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgb(255_255_255/0.04)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/0.04)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(60%_70%_at_50%_100%,#000,transparent)]" />
-              <h2 className="display relative mx-auto max-w-3xl text-[38px] text-white md:text-[60px]">Sua próxima compra merece dados melhores.</h2>
+              <div aria-hidden className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgb(var(--tint)/0.05)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--tint)/0.05)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(60%_70%_at_50%_100%,#000,transparent)]" />
+              <h2 className="display relative mx-auto max-w-3xl text-[38px] md:text-[60px]">Sua próxima compra merece dados melhores.</h2>
               <p className="tile-muted relative mx-auto mt-5 max-w-xl text-lg">Crie sua conta e faça três pesquisas completas por nossa conta.</p>
               <div className="relative mt-10 flex flex-wrap justify-center gap-3">
                 <Link href="/cadastro" className="btn btn-primary btn-xl">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
-                <Link href="/precos" className="btn btn-xl border-white/15 bg-white/[0.04] text-white hover:bg-white/10">Ver planos</Link>
+                <Link href="/precos" className="btn btn-secondary btn-xl">Ver planos</Link>
               </div>
             </div>
           </Reveal>

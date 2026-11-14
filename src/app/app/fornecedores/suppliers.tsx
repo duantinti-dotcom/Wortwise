@@ -66,7 +66,7 @@ export function Suppliers() {
 
   return (
     <>
-      <PageHeader title="Fornecedores" description="Cadastre seus fornecedores, verifique o CNPJ na base pública da Receita Federal e consulte o diretório Worthwise. Um preço baixo nunca é tratado como sinal de confiabilidade."
+      <PageHeader title="Meus fornecedores" description="Guarde os contatos de quem te vende e confira na Receita Federal se a empresa existe e está ativa." help={{ id: "fornecedores", steps: ["Toque em Adicionar fornecedor e preencha nome e CNPJ", "Toque em Verificar CNPJ para consultar a Receita Federal", "Use em Comparar fornecedores para ver quem sai mais barato"] }}
         action={<button className="btn btn-primary" onClick={() => setOpen(true)}><Plus size={16} /> Adicionar fornecedor</button>} />
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div className="flex gap-1 rounded-xl bg-surface-2 p-1" role="tablist">

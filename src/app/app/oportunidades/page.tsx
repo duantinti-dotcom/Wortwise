@@ -21,7 +21,7 @@ export default async function Page() {
 
   return (
     <>
-      <PageHeader title="Oportunidades" description="Worthwise Opportunities: anúncios com preço bem abaixo da mediana de anúncios comparáveis (mesmo produto e mesma variante) nas suas pesquisas. Cada item mostra as evidências e os riscos." />
+      <PageHeader title="Achados de preço" description="Produtos das suas pesquisas que estão bem mais baratos que o normal — bom para comprar e revender. Cada achado mostra o motivo e os riscos." help={{ id: "achados", steps: ["Faça pesquisas na tela Pesquisar produtos", "Quando um anúncio está 12% ou mais abaixo do preço comum, ele aparece aqui", "Confira os riscos antes de comprar"] }} />
       {!searches.length ? (
         <EmptyState icon={TrendingUp} title="Ainda não há dados para identificar oportunidades" action={<Link href="/app/descobrir" className="btn btn-primary">Fazer uma pesquisa</Link>}>
           As oportunidades são calculadas sobre resultados reais das suas pesquisas — nada é sugerido sem evidência.</EmptyState>

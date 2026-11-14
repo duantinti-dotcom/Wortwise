@@ -51,7 +51,7 @@ export function Reports() {
 
   return (
     <>
-      <PageHeader title="Relatórios" description="Análises de produto, comparações de fornecedores e respostas do assistente que você salvou. Cada relatório guarda os dados como estavam no momento em que foi criado." />
+      <PageHeader title="Relatórios" description="Tudo o que você salvou para ver depois: análises de produtos, comparações de fornecedores e respostas do assistente." />
       {d.loading ? <Skeleton className="h-48 !rounded-2xl" /> : d.error ? <ErrorNote onRetry={d.reload}>{d.error}</ErrorNote> : !d.data?.length ? (
         <EmptyState icon={FileText} title="Nenhum relatório salvo">Use “Salvar relatório” na página de um produto, no Worthwise Compare ou em uma resposta do assistente.</EmptyState>
       ) : (

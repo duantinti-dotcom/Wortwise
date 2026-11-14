@@ -47,7 +47,7 @@ export function Simulator() {
 
   return (
     <>
-      <PageHeader title="Calculadora de lucro" description="Worthwise Simulator: informe todos os custos e veja lucro, margens, ponto de equilíbrio, preço mínimo e cenários. Os resultados são simulações com os seus números — não previsões." />
+      <PageHeader title="Calculadora de lucro" description="Descubra quanto sobra no seu bolso em cada venda, depois de pagar produto, taxas, frete e impostos." help={{ id: "calculadora", steps: ["Responda: quanto paga, quantas unidades e por quanto vai vender", "Escolha onde vai vender — as taxas do marketplace entram sozinhas", "Verde é lucro, vermelho é prejuízo. Arraste o preço para testar"] }} />
       <ProfitCalculator key={loaded?.id ?? "new"} initial={loaded?.inputs} onSave={save} saving={saving} />
 
       <section className="mt-12">

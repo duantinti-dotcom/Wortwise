@@ -90,6 +90,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
   const [targetMargin, setTargetMargin] = useState(20);
   const [tab, setTab] = useState<Tab>("composicao");
   const [preset, setPreset] = useState("");
+  const [mode, setMode] = useState<"simple" | "full">("simple");
   const set = <K extends keyof ProfitInputs>(k: K) => (v: number) => { setIsExample(false); setI((p) => ({ ...p, [k]: v })); };
 
   // Publica os valores atuais para quem quiser reagir (ex.: Score na página do produto).
@@ -105,6 +106,8 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
   const sliderMax = Math.max(sliderMin + 10, Math.ceil(Math.max(i.salePrice, r.minPrice ?? 0, target ?? 0) * 1.4) || 100);
   const pos = (v: number | null) => (v == null ? null : Math.min(100, Math.max(0, ((v - sliderMin) / (sliderMax - sliderMin)) * 100)));
   const best = Math.max(...channels.map((x) => x.result.profit));
+  const hiddenCosts = [i.purchaseFreight > 0 && "frete da compra", i.otherCosts > 0 && "outros custos", i.packaging > 0 && "embalagem", i.adsPct > 0 && "anúncios",
+    i.paymentFeePct > 0 && "taxa do pagamento", i.returnsPct > 0 && "devoluções", i.lossPct > 0 && "perdas"].filter(Boolean).join(", ").replace(/, ([^,]*)$/, " e $1");
 
   return (
     <div className={cn("grid items-start gap-5", compact ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)]")}>
@@ -114,21 +117,20 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
           {isExample ? <span className="badge badge-brand max-sm:order-3 max-sm:w-full max-sm:justify-center"><Sparkles size={12} />Exemplo — troque pelos seus valores</span> : null}
           <button className="btn btn-ghost btn-sm -mr-2" onClick={() => { setI({ ...DEFAULT_INPUTS, quantity: 1 }); setPreset(""); setIsExample(false); }}><RotateCcw size={14} /> Limpar</button>
         </div>
-        <Section title="Compra" sub="o que você paga ao fornecedor">
-          <NumField id="pc-cost" label="Preço de aquisição (un.)" prefix="R$" value={i.costPrice} onChange={set("costPrice")} />
-          <NumField id="pc-qty" label="Quantidade" value={i.quantity} onChange={set("quantity")} suffix="un." />
-          <NumField id="pc-pfreight" label="Frete de compra (total)" prefix="R$" value={i.purchaseFreight} onChange={set("purchaseFreight")} />
-          <NumField id="pc-other" label="Outros custos (total)" prefix="R$" value={i.otherCosts} onChange={set("otherCosts")} />
-        </Section>
-        <Section title="Venda" sub="por unidade vendida">
-          <NumField id="pc-price" label="Preço de venda (un.)" prefix="R$" value={i.salePrice} onChange={set("salePrice")} />
-          <NumField id="pc-ship" label="Frete de venda (un.)" prefix="R$" value={i.saleShipping} onChange={set("saleShipping")} hint="Parte paga por você" />
-          <NumField id="pc-pack" label="Embalagem (un.)" prefix="R$" value={i.packaging} onChange={set("packaging")} />
-          <NumField id="pc-ads" label="Publicidade" suffix="%" value={i.adsPct} onChange={set("adsPct")} hint="% do preço de venda" />
-        </Section>
-        <Section title="Taxas e impostos" sub="percentuais sobre a venda">
+        <div className="border-b border-tint/[0.07] px-5 pt-4 md:px-7">
+          <div className="seg mb-4 max-w-xs" role="tablist" aria-label="Modo da calculadora">
+            <button type="button" role="tab" aria-selected={mode === "simple"} onClick={() => setMode("simple")}>Simples</button>
+            <button type="button" role="tab" aria-selected={mode === "full"} onClick={() => setMode("full")}>Completo</button>
+          </div>
+        </div>
+        {mode === "simple" ? (
+          <Section title="Responda 6 perguntas" sub="o resto a gente calcula">
+            <NumField id="pc-cost" label="Quanto você paga em cada unidade?" prefix="R$" value={i.costPrice} onChange={set("costPrice")} />
+            <NumField id="pc-qty" label="Quantas unidades vai comprar?" value={i.quantity} onChange={set("quantity")} suffix="un." />
+            <NumField id="pc-price" label="Por quanto vai vender cada uma?" prefix="R$" value={i.salePrice} onChange={set("salePrice")} />
+            <NumField id="pc-ship" label="Frete que você paga por venda" prefix="R$" value={i.saleShipping} onChange={set("saleShipping")} hint="0 se o comprador paga" />
           <label className="col-span-2 block" htmlFor="pc-channel">
-            <span className="label">Canal de venda (preenche as taxas)</span>
+            <span className="label">Onde você vai vender?</span>
             <select id="pc-channel" className="input" value={preset} onChange={(e) => {
               setPreset(e.target.value);
               setIsExample(false);
@@ -139,15 +141,50 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
               {CHANNEL_PRESETS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
             <span className="mt-2 flex gap-1.5 text-[11.5px] leading-relaxed text-faint"><Info size={13} className="mt-0.5 shrink-0" />
-              Valores de partida, não tarifas oficiais: as taxas mudam por categoria e tipo de anúncio. Confira no marketplace e ajuste.</span>
+              Preenche a comissão com um valor de partida ({formatPercent(i.marketplaceFeePct)}{i.marketplaceFixedFee ? ` + ${formatMoney(i.marketplaceFixedFee)} por venda` : ""}). As taxas reais mudam por categoria: confira no marketplace.</span>
+          </label>
+            <NumField id="pc-tax" label="Imposto sobre a venda" suffix="%" value={i.taxPct} onChange={set("taxPct")} hint="MEI costuma usar 0; Simples, 4 a 6" />
+            {hiddenCosts ? (
+              <p className="col-span-2 flex gap-1.5 rounded-xl bg-tint/[0.04] px-3 py-2.5 text-[12px] leading-relaxed text-muted"><Info size={13} className="mt-0.5 shrink-0 text-brand" />
+                A conta também inclui {hiddenCosts}. <button type="button" className="font-medium text-brand-hi hover:underline" onClick={() => setMode("full")}>Ajustar no modo Completo</button></p>
+            ) : null}
+          </Section>
+        ) : (<>
+        <Section title="Compra" sub="o que você paga ao fornecedor">
+          <NumField id="pc-cost" label="Quanto você paga em cada unidade?" prefix="R$" value={i.costPrice} onChange={set("costPrice")} />
+          <NumField id="pc-qty" label="Quantas unidades vai comprar?" value={i.quantity} onChange={set("quantity")} suffix="un." />
+          <NumField id="pc-pfreight" label="Frete da compra (total)" prefix="R$" value={i.purchaseFreight} onChange={set("purchaseFreight")} hint="o que paga para receber o lote" />
+          <NumField id="pc-other" label="Outros custos (total)" prefix="R$" value={i.otherCosts} onChange={set("otherCosts")} hint="ex.: etiquetas, fotos" />
+        </Section>
+        <Section title="Venda" sub="por unidade vendida">
+          <NumField id="pc-price" label="Por quanto vai vender cada uma?" prefix="R$" value={i.salePrice} onChange={set("salePrice")} />
+          <NumField id="pc-ship" label="Frete que você paga por venda" prefix="R$" value={i.saleShipping} onChange={set("saleShipping")} hint="0 se o comprador paga" />
+          <NumField id="pc-pack" label="Embalagem por unidade" prefix="R$" value={i.packaging} onChange={set("packaging")} />
+          <NumField id="pc-ads" label="Anúncios pagos" suffix="%" value={i.adsPct} onChange={set("adsPct")} hint="% do preço gasto em anúncios" />
+        </Section>
+        <Section title="Taxas e impostos" sub="percentuais sobre a venda">
+          <label className="col-span-2 block" htmlFor="pc-channel">
+            <span className="label">Onde você vai vender?</span>
+            <select id="pc-channel" className="input" value={preset} onChange={(e) => {
+              setPreset(e.target.value);
+              setIsExample(false);
+              const p = CHANNEL_PRESETS.find((x) => x.id === e.target.value);
+              if (p) setI((s) => ({ ...s, marketplaceFeePct: p.marketplaceFeePct, marketplaceFixedFee: p.marketplaceFixedFee, paymentFeePct: p.paymentFeePct }));
+            }}>
+              <option value="">Personalizado</option>
+              {CHANNEL_PRESETS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            <span className="mt-2 flex gap-1.5 text-[11.5px] leading-relaxed text-faint"><Info size={13} className="mt-0.5 shrink-0" />
+              Preenche a comissão com um valor de partida ({formatPercent(i.marketplaceFeePct)}{i.marketplaceFixedFee ? ` + ${formatMoney(i.marketplaceFixedFee)} por venda` : ""}). As taxas reais mudam por categoria: confira no marketplace.</span>
           </label>
           <NumField id="pc-fee" label="Comissão do marketplace" suffix="%" value={i.marketplaceFeePct} onChange={(v) => { setPreset(""); set("marketplaceFeePct")(v); }} />
-          <NumField id="pc-fixed" label="Tarifa fixa (un.)" prefix="R$" value={i.marketplaceFixedFee} onChange={(v) => { setPreset(""); set("marketplaceFixedFee")(v); }} />
-          <NumField id="pc-pay" label="Taxa de pagamento" suffix="%" value={i.paymentFeePct} onChange={set("paymentFeePct")} />
-          <NumField id="pc-tax" label="Impostos sobre a venda" suffix="%" value={i.taxPct} onChange={set("taxPct")} />
-          <NumField id="pc-ret" label="Devoluções" suffix="%" value={i.returnsPct} onChange={set("returnsPct")} hint="% das vendas desfeitas" />
-          <NumField id="pc-loss" label="Perdas e avarias" suffix="%" value={i.lossPct} onChange={set("lossPct")} hint="% das unidades compradas" />
+          <NumField id="pc-fixed" label="Tarifa fixa por venda" prefix="R$" value={i.marketplaceFixedFee} onChange={(v) => { setPreset(""); set("marketplaceFixedFee")(v); }} />
+          <NumField id="pc-pay" label="Taxa do pagamento" suffix="%" value={i.paymentFeePct} onChange={set("paymentFeePct")} hint="cartão/Pix, se não estiver na comissão" />
+          <NumField id="pc-tax" label="Imposto sobre a venda" suffix="%" value={i.taxPct} onChange={set("taxPct")} />
+          <NumField id="pc-ret" label="Devoluções" suffix="%" value={i.returnsPct} onChange={set("returnsPct")} hint="de cada 100 vendas, quantas voltam" />
+          <NumField id="pc-loss" label="Perdas e avarias" suffix="%" value={i.lossPct} onChange={set("lossPct")} hint="% das unidades que estragam" />
         </Section>
+        </>)}
       </div>
 
       <div className="space-y-4 lg:sticky lg:top-24">
@@ -155,12 +192,17 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
           <BorderBeam />
           <div aria-hidden className="aurora -right-16 -top-20 h-56 w-56 bg-brand/20" />
           <div className="relative">
-            <div className="text-[13px] text-muted">{ready && r.profit < 0 ? "Prejuízo estimado do lote" : "Lucro estimado do lote"}</div>
+            <div className="text-[13px] text-muted">{ready && r.profit < 0 ? `Prejuízo total (${i.quantity} unidades)` : `Lucro total (${i.quantity} unidades)`}</div>
             <div className={cn("tabular mt-1 text-[44px] font-semibold leading-none tracking-[-0.04em] transition-colors md:text-5xl", !ready ? "text-faint" : r.profit >= 0 ? "text-fg" : "text-danger")}
               data-testid="profit-total">{ready ? <AnimatedNumber value={r.profit} format={(v) => formatMoney(v)} /> : "R$ —"}</div>
+            <p className="mt-3 text-[14px] leading-relaxed text-soft" data-testid="profit-verdict">
+              {!ready ? "Preencha quanto você paga e por quanto vai vender para ver o resultado."
+                : r.profit >= 0 ? <>Você ganha <b className="text-pos">{formatMoney(r.profitPerUnit)}</b> em cada venda: {formatPercent(r.marginPct)} do preço fica com você depois de todos os custos.</>
+                : <>Você <b className="text-danger">perde {formatMoney(Math.abs(r.profitPerUnit))}</b> em cada venda.{r.minPrice != null ? <> Para não ter prejuízo, venda por pelo menos <b>{formatMoney(r.minPrice)}</b>.</> : null}</>}
+            </p>
             <div className="mt-5 grid grid-cols-3 gap-2">
-              {[["Por unidade", ready ? formatMoney(r.profitPerUnit) : "—", "profit-unit"], ["Margem", ready ? formatPercent(r.marginPct) : "—", "profit-margin"], ["Retorno", ready ? formatPercent(r.roiPct) : "—", "profit-roi"]].map(([k, v, t]) => (
-                <div key={k} className="rounded-xl border border-tint/[0.08] bg-black/25 px-3 py-2.5"><div className="text-[11px] text-muted">{k}</div><div className="tabular mt-0.5 text-[15px] font-semibold" data-testid={t}>{v}</div></div>
+              {[["Por venda", ready ? formatMoney(r.profitPerUnit) : "—", "profit-unit"], ["Margem", ready ? formatPercent(r.marginPct) : "—", "profit-margin"], ["Retorno do investimento", ready ? formatPercent(r.roiPct) : "—", "profit-roi"]].map(([k, v, t]) => (
+                <div key={k} className="rounded-xl border border-tint/[0.08] bg-tint/[0.05] px-3 py-2.5"><div className="text-[11px] text-muted">{k}</div><div className="tabular mt-0.5 text-[15px] font-semibold" data-testid={t}>{v}</div></div>
               ))}
             </div>
 

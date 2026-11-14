@@ -47,7 +47,7 @@ export function Monitoring() {
   const unread = (d.data?.alerts ?? []).filter((a) => !a.read_at).length;
   return (
     <>
-      <PageHeader title="Monitoramento" description="Worthwise Watch: o sistema consulta as fontes periodicamente, registra observações reais de preço e cria alertas quando suas regras são atendidas." />
+      <PageHeader title="Alertas de preço" description="Escolha um produto e um preço: a gente confere de tempos em tempos e te avisa quando o preço chegar lá." help={{ id: "alertas", steps: ["Abra um produto e toque em Monitorar preço", "Diga quando quer ser avisado (ex.: abaixo de R$ 50)", "Os avisos aparecem no sino e nesta tela"] }} />
       {d.loading ? <Skeleton className="h-64 !rounded-2xl" /> : d.error ? <ErrorNote onRetry={d.reload}>{d.error}</ErrorNote> : (
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
           <section>

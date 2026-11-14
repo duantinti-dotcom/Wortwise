@@ -18,7 +18,7 @@ export function ScrollFrame({ children }: { children: ReactNode }) {
     <div ref={ref} className="[perspective:1600px]">
       <motion.div style={{ rotateX, scale, y, transformOrigin: "50% 0%" }} className="liquid relative rounded-[24px] p-1.5 shadow-[0_40px_120px_-40px_rgba(255,121,0,0.35)] sm:rounded-[30px] sm:p-2.5">
         <div aria-hidden className="pointer-events-none absolute inset-x-[15%] -top-px h-px bg-gradient-to-r from-transparent via-brand to-transparent" />
-        <div className="theme-dark relative">{children}</div>
+        <div className="relative">{children}</div>
       </motion.div>
     </div>
   );

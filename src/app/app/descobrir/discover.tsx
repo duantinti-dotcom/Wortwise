@@ -86,7 +86,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
 
   return (
     <>
-      <PageHeader title="Descobrir produtos" description="Pesquise em fontes autorizadas. Cada resultado mostra a origem e o momento da coleta; campos que a fonte não informa aparecem como “não disponível”." />
+      <PageHeader title="Pesquisar produtos" description="Digite o nome de um produto e veja preço, avaliações e quem vende — com foto e link para o anúncio." help={{ id: "pesquisar", steps: ["Digite o produto, por exemplo “fone bluetooth”, e toque em Pesquisar", "Use os filtros para ficar só com os melhores (preço, nota, frete grátis)", "Toque em Analisar para saber se vale a pena e quanto você lucra"] }} />
 
       <form onSubmit={(e) => { e.preventDefault(); void run(query); }} className="glass relative z-10 rounded-[22px] p-2" role="search">
         <div className="flex items-center gap-2">

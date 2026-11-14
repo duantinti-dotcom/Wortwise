@@ -31,12 +31,12 @@ export function FeatureTile({ tone, icon, title, text, children, className, flip
       className={cn("tile group flex flex-col p-6 sm:p-8", tone, className)}>
       <div className={cn("flex flex-col", flip && "order-2 mt-8")}>
         <div className="flex items-center gap-3">
-          <span className="flex size-9 items-center justify-center rounded-[9px] border border-white/10 bg-white/[0.05] text-brand [&>svg]:size-[17px]">{icon}</span>
+          <span className="flex size-9 items-center justify-center rounded-[9px] border border-tint/10 bg-tint/[0.05] text-brand [&>svg]:size-[17px]">{icon}</span>
           <h3 className="text-[21px] font-semibold leading-tight tracking-[-0.03em] sm:text-[24px]">{title}</h3>
         </div>
         <p className="tile-muted mt-3 max-w-[46ch] text-[15px] leading-relaxed">{text}</p>
       </div>
-      <motion.div style={reduce ? undefined : { x, y, rotate }} className={cn("theme-dark relative rounded-[14px] border border-white/[0.08] bg-[#0c0c0e] p-4 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)] sm:p-5", flip ? "order-1" : "mt-8")}>
+      <motion.div style={reduce ? undefined : { x, y, rotate }} className={cn("demo-screen relative rounded-[14px] p-4 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)] sm:p-5", flip ? "order-1" : "mt-8")}>
         {children}
       </motion.div>
     </motion.article>
