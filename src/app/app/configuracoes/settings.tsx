@@ -96,14 +96,14 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
                 : <p className="mt-1 text-sm text-muted">Três pesquisas gratuitas no total{requireCard ? "" : ", sem cartão"}.</p>}</div>
             {live ? <span className={cn("badge", SUB_STATUS[subscription!.status]?.cls)}>{SUB_STATUS[subscription!.status]?.label ?? subscription!.status}</span> : null}
           </div>
-          {subscription?.status === "past_due" ? <p className="mt-4 rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-sm text-[#ffb3b1]">A última cobrança foi recusada. A HeroPay tentará novamente; você pode atualizar o meio de pagamento pelo link enviado ao seu e-mail.</p> : null}
+          {subscription?.status === "past_due" ? <p className="mt-4 rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-sm text-danger">A última cobrança foi recusada. A HeroPay tentará novamente; você pode atualizar o meio de pagamento pelo link enviado ao seu e-mail.</p> : null}
           <ul className="mt-5 space-y-3">
             {usage.quotas.map((q) => {
               const pct = q.limit > 0 ? Math.min(100, (q.used / q.limit) * 100) : q.used > 0 ? 100 : 0;
               return (
                 <li key={q.resource}><div className="flex justify-between text-sm"><span className="text-muted">{RESOURCE_LABELS[q.resource] ?? q.resource}</span>
                   <span className="tabular">{q.used} / {q.limit} <span className="text-faint">{PERIOD_LABELS[q.period]}</span></span></div>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/8"><div className={cn("h-full rounded-full", pct >= 100 ? "bg-neg" : "bg-brand")} style={{ width: `${pct}%` }} /></div></li>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-tint/8"><div className={cn("h-full rounded-full", pct >= 100 ? "bg-neg" : "bg-brand")} style={{ width: `${pct}%` }} /></div></li>
               );
             })}
           </ul>

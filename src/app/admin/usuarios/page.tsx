@@ -17,7 +17,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
     <>
       <PageHeader title="Usuários" description="Contas, planos e sinais de abuso. Bloquear impede pesquisas; a ação fica registrada na auditoria." />
       <form className="mb-4 flex max-w-md gap-2"><input name="q" defaultValue={q} className="input" placeholder="Buscar por e-mail ou nome" aria-label="Buscar usuários" /><button className="btn btn-secondary">Buscar</button></form>
-      {error ? <p role="alert" className="card p-5 text-sm text-[#ffb3b1]">Não foi possível carregar os usuários.</p> : (
+      {error ? <p role="alert" className="card p-5 text-sm text-danger">Não foi possível carregar os usuários.</p> : (
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead><tr className="border-b border-line text-left text-xs text-faint">{["Usuário", "Plano", "Pesquisas", "Cadastro", "Sinal", ""].map((h) => <th key={h} className="px-4 py-3 font-normal">{h}</th>)}</tr></thead>

@@ -15,7 +15,7 @@ export interface ProductRef { source: string; externalId: string; title: string;
 
 export function ProductImage({ src, alt, className }: { src: string | null; alt: string; className?: string }) {
   const [failed, setFailed] = useState(false);
-  if (!src || failed) return <div className={cn("flex flex-col items-center justify-center gap-2 bg-[linear-gradient(160deg,#1c1c1c,#111)] text-faint", className)} aria-label="Imagem não disponível"><ImageOff size={22} /><span className="text-[11px]">Imagem não disponível</span></div>;
+  if (!src || failed) return <div className={cn("flex flex-col items-center justify-center gap-2 bg-surface-2 text-faint", className)} aria-label="Imagem não disponível"><ImageOff size={22} /><span className="text-[11px]">Imagem não disponível</span></div>;
   return (
     <div className={cn("flex items-center justify-center bg-[radial-gradient(circle_at_50%_40%,#ffffff,#ececec)] p-4", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -48,7 +48,7 @@ export function FavoriteButton({ product, initial, onChange, className }: { prod
   }
   return (
     <button onClick={toggle} aria-pressed={on} aria-label={on ? "Remover dos favoritos" : "Salvar nos favoritos"}
-      className={cn("flex size-9 items-center justify-center rounded-full border border-line-strong bg-ink/70 backdrop-blur transition-colors hover:border-white/30", className)}>
+      className={cn("flex size-9 items-center justify-center rounded-full border border-line-strong bg-ink/70 backdrop-blur transition-colors hover:border-tint/30", className)}>
       <motion.span key={String(on)} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}>
         <Bookmark size={16} className={on ? "fill-brand text-brand" : "text-fg"} />
       </motion.span>

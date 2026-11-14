@@ -58,7 +58,7 @@ export default async function Dashboard() {
           </form>
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted">
             {searchQuota ? <span className="mr-1">{searchQuota.remaining} pesquisa{searchQuota.remaining === 1 ? "" : "s"} disponíve{searchQuota.remaining === 1 ? "l" : "is"} {PERIOD_LABELS[searchQuota.period]}</span> : null}
-            {interests.map((c) => <Link key={c} href={`/app/descobrir?q=${encodeURIComponent(c)}`} className="badge hover:!border-white/25 hover:!text-fg">{c}</Link>)}
+            {interests.map((c) => <Link key={c} href={`/app/descobrir?q=${encodeURIComponent(c)}`} className="badge hover:!border-tint/25 hover:!text-fg">{c}</Link>)}
           </div>
         </div>
       </section>
@@ -81,7 +81,7 @@ export default async function Dashboard() {
             <div key={q.resource} className="card !rounded-2xl p-5">
               <div className="flex items-center justify-between text-xs text-muted"><span className="flex items-center gap-2"><Icon size={14} className="text-faint" />{RESOURCE_LABELS[q.resource]}</span><span>{PERIOD_LABELS[q.period]}</span></div>
               <div className="tabular mt-3 text-[28px] font-semibold leading-none tracking-tight">{q.used}<span className="text-base font-normal text-faint"> / {q.limit}</span></div>
-              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.07]"><div className={cn("h-full rounded-full", pct >= 100 ? "bg-neg" : "bg-gradient-to-r from-brand to-brand-hi")} style={{ width: `${Math.max(pct, 1.5)}%` }} /></div>
+              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-tint/[0.07]"><div className={cn("h-full rounded-full", pct >= 100 ? "bg-neg" : "bg-gradient-to-r from-brand to-brand-hi")} style={{ width: `${Math.max(pct, 1.5)}%` }} /></div>
             </div>
           );
         })}
@@ -94,8 +94,8 @@ export default async function Dashboard() {
             {[["1", "Pesquise um produto", "Veja ofertas reais, com fonte e data da coleta.", "/app/descobrir", Search], ["2", "Simule o lucro", "Inclua comissão, frete, impostos e publicidade.", "/app/calculadora", Calculator], ["3", "Compare fornecedores", "Cadastre cotações e veja o custo final por unidade.", "/app/comparar", Scale]].map(([n, t, d, href, I]) => {
               const Icon = I as typeof Search;
               return (
-                <li key={n as string}><Link href={href as string} className="group relative flex h-full flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 transition-all hover:border-white/15 hover:bg-white/[0.04]">
-                  <div className="flex items-center justify-between"><span className="flex size-10 items-center justify-center rounded-xl bg-white/[0.06] text-brand-hi"><Icon size={18} /></span><span className="font-mono text-xs text-faint">0{n as string}</span></div>
+                <li key={n as string}><Link href={href as string} className="group relative flex h-full flex-col rounded-2xl border border-tint/[0.07] bg-tint/[0.02] p-5 transition-all hover:border-tint/15 hover:bg-tint/[0.04]">
+                  <div className="flex items-center justify-between"><span className="flex size-10 items-center justify-center rounded-xl bg-tint/[0.06] text-brand-hi"><Icon size={18} /></span><span className="font-mono text-xs text-faint">0{n as string}</span></div>
                   <span className="mt-5 block font-semibold group-hover:text-brand-hi">{t as string}</span><span className="mt-1 block text-sm leading-relaxed text-muted">{d as string}</span></Link></li>
               );
             })}
@@ -107,7 +107,7 @@ export default async function Dashboard() {
         <Panel title="Histórico de pesquisas" href="/app/descobrir" icon={Clock} empty="Nenhuma pesquisa ainda. Reabrir uma pesquisa já feita nunca consome crédito.">
           {(searches.data ?? []).map((s) => (
             <li key={s.id as string}><Link href={`/app/descobrir?s=${s.id}`} className="group flex items-center justify-between gap-3 py-3 text-sm">
-              <span className="flex min-w-0 items-center gap-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-faint"><Search size={14} /></span><span className="truncate group-hover:text-brand-hi">{s.query as string}</span></span>
+              <span className="flex min-w-0 items-center gap-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-tint/[0.05] text-faint"><Search size={14} /></span><span className="truncate group-hover:text-brand-hi">{s.query as string}</span></span>
               <span className="shrink-0 text-xs text-faint">{s.result_count as number} resultados · {relativeTime(s.created_at as string)}</span></Link></li>
           ))}
         </Panel>
@@ -150,9 +150,9 @@ function Panel({ title, href, icon: Icon, empty, children }: { title: string; hr
   const items = (Array.isArray(children) ? children.flat() : [children]).filter(Boolean);
   return (
     <section className="card !rounded-3xl p-6">
-      <div className="flex items-center justify-between"><h2 className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Icon size={14} className="text-brand-hi" /></span>{title}</h2>
+      <div className="flex items-center justify-between"><h2 className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Icon size={14} className="text-brand-hi" /></span>{title}</h2>
         <Link href={href} className="flex items-center gap-1 text-xs text-muted hover:text-fg">Ver tudo <ArrowRight className="btn-arrow" size={12} /></Link></div>
-      {items.length ? <ul className="mt-3 divide-y divide-white/[0.06]">{items}</ul> : <p className="mt-5 rounded-xl border border-dashed border-white/[0.08] px-4 py-5 text-center text-sm text-muted">{empty}</p>}
+      {items.length ? <ul className="mt-3 divide-y divide-tint/[0.06]">{items}</ul> : <p className="mt-5 rounded-xl border border-dashed border-tint/[0.08] px-4 py-5 text-center text-sm text-muted">{empty}</p>}
     </section>
   );
 }

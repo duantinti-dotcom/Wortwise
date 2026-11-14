@@ -136,7 +136,7 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
         <div className="mt-4 text-xs font-medium text-faint">Conversas</div>
         <ul className="mt-2 space-y-0.5">
           {(convs.data ?? []).map((c) => (
-            <li key={c.id}><button onClick={() => openConversation(c.id)} className={cn("w-full rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-white/5", c.id === conversationId ? "bg-white/8 text-fg" : "text-muted")}>
+            <li key={c.id}><button onClick={() => openConversation(c.id)} className={cn("w-full rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-tint/5", c.id === conversationId ? "bg-tint/8 text-fg" : "text-muted")}>
               <span className="block truncate">{c.title}</span><span className="text-[11px] text-faint">{relativeTime(c.updated_at)}</span></button></li>
           ))}
           {!convs.loading && !convs.data?.length ? <li className="px-2.5 py-2 text-xs text-faint">Nenhuma conversa ainda.</li> : null}
@@ -153,11 +153,11 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
               </div>
               <h1 className="text-grad mt-7 text-3xl font-semibold tracking-[-0.035em] md:text-[40px]">Assistente Worthwise</h1>
               <p className="mt-2 text-muted">Um analista comercial que consulta os dados da plataforma, faz as contas e cita as fontes. Ele não inventa preços, vendas nem fornecedores.</p>
-              {!available ? <div role="status" className="mx-auto mt-6 flex w-fit items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-left text-sm text-muted"><span className="size-2 shrink-0 rounded-full bg-brand" />Assistente ainda não disponível neste ambiente — as demais ferramentas funcionam normalmente.</div> : null}
+              {!available ? <div role="status" className="mx-auto mt-6 flex w-fit items-center gap-2.5 rounded-2xl border border-tint/10 bg-tint/[0.04] px-4 py-2.5 text-left text-sm text-muted"><span className="size-2 shrink-0 rounded-full bg-brand" />Assistente ainda não disponível neste ambiente — as demais ferramentas funcionam normalmente.</div> : null}
               <div className="mt-10 grid gap-3 text-left sm:grid-cols-2">
                 {SUGGESTIONS.map((s, i) => (
-                  <button key={s} disabled={!available} onClick={() => send(s)} className="card card-hover group flex items-start gap-3 !rounded-2xl p-4 text-left text-sm leading-relaxed text-[#cfcfcf] hover:text-fg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none">
-                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-brand-hi">{[<Search key="a" size={14} />, <Calculator key="b" size={14} />, <MessagesSquare key="c" size={14} />, <Sparkles key="d" size={14} />][i]}</span>{s}
+                  <button key={s} disabled={!available} onClick={() => send(s)} className="card card-hover group flex items-start gap-3 !rounded-2xl p-4 text-left text-sm leading-relaxed text-soft hover:text-fg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none">
+                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-tint/[0.06] text-brand-hi">{[<Search key="a" size={14} />, <Calculator key="b" size={14} />, <MessagesSquare key="c" size={14} />, <Sparkles key="d" size={14} />][i]}</span>{s}
                   </button>
                 ))}
               </div>
@@ -170,7 +170,7 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
                 <div key={m.id} className="animate-fade-up">
                   <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-brand-hi"><Sparkles size={13} /> Assistente Worthwise</div>
                   {m.blocks.length ? <Blocks blocks={m.blocks} /> : null}
-                  {m.content ? <div className={cn("mt-3 whitespace-pre-wrap text-[15px] leading-relaxed", m.error ? "rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-[#ffb3b1]" : "text-[#e4e4e4]")}>{m.content}</div>
+                  {m.content ? <div className={cn("mt-3 whitespace-pre-wrap text-[15px] leading-relaxed", m.error ? "rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-danger" : "text-soft")}>{m.content}</div>
                     : <div className="mt-2 flex items-center gap-2.5 text-sm text-muted"><span className="flex gap-1">{[0, 1, 2].map((i) => <span key={i} className="size-1.5 animate-pulse rounded-full bg-brand" style={{ animationDelay: `${i * 160}ms` }} />)}</span>{status}</div>}
                   {m.content && !m.error ? <button onClick={() => saveAnalysis(m)} className="btn btn-ghost btn-sm -ml-2 mt-2"><FileText size={14} /> Salvar análise</button> : null}
                 </div>

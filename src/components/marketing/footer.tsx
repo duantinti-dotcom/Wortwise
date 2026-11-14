@@ -16,22 +16,22 @@ export function Footer() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">Inteligência comercial para quem vende online. Dados com fonte, cálculos transparentes e conclusões fundamentadas.</p>
-            <Link href="/cadastro" className="btn btn-primary btn-sm mt-6">Começar grátis <ArrowRight className="btn-arrow" size={14} /></Link>
+            <Link href="/cadastro" className="btn btn-contrast btn-sm mt-6">Começar grátis <ArrowRight className="btn-arrow" size={14} /></Link>
           </div>
           {COLS.map((c) => (
             <nav key={c.title} aria-label={c.title}>
               <div className="mono-label">{c.title}</div>
               <ul className="mt-4 space-y-3">
-                {c.links.map(([href, label]) => <li key={href}><Link href={href} className="text-[14.5px] text-[#cfcfcf] transition-colors hover:text-brand-hi">{label}</Link></li>)}
+                {c.links.map(([href, label]) => <li key={href}><Link href={href} className="text-[14.5px] text-soft transition-colors hover:text-brand-hi">{label}</Link></li>)}
               </ul>
             </nav>
           ))}
         </div>
         <div aria-hidden className="pointer-events-none select-none overflow-hidden px-4 pb-2 text-center font-semibold leading-[0.85] tracking-[-0.07em]"
-          style={{ fontSize: "clamp(64px, 16vw, 240px)", backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.01) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+          style={{ fontSize: "clamp(64px, 16vw, 240px)", backgroundImage: "linear-gradient(180deg, rgb(var(--tint) / 0.14), rgb(var(--tint) / 0.01) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
           Worthwise
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-6 py-5 text-xs text-faint md:px-12">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-tint/10 px-6 py-5 text-xs text-faint md:px-12">
           <span>© {new Date().getFullYear()} Worthwise. Todos os direitos reservados.</span>
           <span>Não somos afiliados aos marketplaces citados. Marcas pertencem aos seus titulares.</span>
         </div>

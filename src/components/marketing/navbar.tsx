@@ -1,9 +1,10 @@
 "use client";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, ChevronsRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { Dialog as D } from "radix-ui";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -28,17 +29,18 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-3 pt-3 md:pt-4">
       <nav aria-label="Principal"
-        className={cn("flex h-[58px] w-full items-center justify-between rounded-2xl border px-3 pl-4 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          scrolled ? "lg lg-refract max-w-[1000px] !rounded-[22px]" : "max-w-[1240px] border-transparent bg-transparent")}>
+        className={cn("flex h-[62px] w-full items-center justify-between rounded-full border px-2.5 pl-5 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          scrolled ? "glass max-w-[1060px]" : "max-w-[1280px] border-transparent bg-transparent")}>
         <Link href="/" aria-label="Worthwise — página inicial"><Logo /></Link>
         <ul className="hidden items-center gap-0.5 lg:flex">
           {LINKS.map((l) => (
-            <li key={l.href}><Link href={l.href} className="rounded-full px-3.5 py-2 text-[14px] text-muted transition-colors hover:bg-white/[0.06] hover:text-fg">{l.label}</Link></li>
+            <li key={l.href}><Link href={l.href} className="rounded-full px-3.5 py-2 text-[14.5px] font-medium text-soft transition-colors hover:bg-tint/[0.06] hover:text-fg">{l.label}</Link></li>
           ))}
         </ul>
         <div className="flex items-center gap-1.5">
-          <Link href="/entrar" className="btn btn-ghost hidden sm:inline-flex">Entrar</Link>
-          <Link href="/cadastro" className="btn btn-primary !rounded-xl max-sm:!h-9 max-sm:!px-3.5 max-sm:!text-[13px]">Começar grátis <ArrowRight size={15} className="btn-arrow hidden sm:block" /></Link>
+          <ThemeToggle size="sm" className="mr-1 hidden sm:inline-flex" />
+          <Link href="/entrar" className="btn btn-secondary hidden sm:inline-flex">Entrar</Link>
+          <Link href="/cadastro" className="btn btn-contrast max-sm:!h-9 max-sm:!px-4 max-sm:!text-[13px]">Começar grátis <ChevronsRight size={16} className="btn-arrow hidden sm:block" /></Link>
           <D.Root open={open} onOpenChange={setOpen}>
             <D.Trigger className="btn btn-ghost !px-2.5 lg:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>
             <D.Portal>
@@ -52,13 +54,14 @@ export function Navbar() {
                 <ul className="mt-2">
                   {LINKS.map((l, i) => (
                     <li key={l.href} className="animate-fade-up" style={{ animationDelay: `${i * 35}ms` }}>
-                      <Link href={l.href} onClick={() => setOpen(false)} className="flex h-14 items-center justify-between rounded-2xl px-4 text-[17px] font-medium text-fg active:bg-white/8">{l.label}<ArrowRight size={16} className="text-faint" /></Link>
+                      <Link href={l.href} onClick={() => setOpen(false)} className="flex h-14 items-center justify-between rounded-2xl px-4 text-[17px] font-medium text-fg hover:bg-tint/5 active:bg-tint/8">{l.label}<ArrowRight size={16} className="text-faint" /></Link>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-2 grid grid-cols-2 gap-2 border-t border-white/8 pt-3">
+                <div className="mt-2 flex items-center justify-between rounded-2xl px-4 py-3 text-[15px] text-soft">Tema<ThemeToggle /></div>
+                <div className="mt-2 grid grid-cols-2 gap-2 border-t border-tint/8 pt-3">
                   <Link href="/entrar" onClick={() => setOpen(false)} className="btn btn-secondary btn-lg">Entrar</Link>
-                  <Link href="/cadastro" onClick={() => setOpen(false)} className="btn btn-primary btn-lg">Começar grátis</Link>
+                  <Link href="/cadastro" onClick={() => setOpen(false)} className="btn btn-contrast btn-lg">Começar grátis</Link>
                 </div>
               </D.Content>
             </D.Portal>

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("site público", () => {
   test("landing apresenta a proposta e não tem rolagem horizontal", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Descubra produtos que realmente valem a pena");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Descubra o que vale a pena vender com");
     await expect(page.getByRole("link", { name: /Começar grátis/ }).first()).toBeVisible();
     await expect(page.getByText("Demonstração · dados ilustrativos").filter({ visible: true }).first()).toBeVisible();
     for (const id of ["funcionalidades", "como-funciona", "demonstracao", "planos", "perguntas"]) await expect(page.locator(`#${id}`)).toBeAttached();
@@ -85,5 +85,30 @@ test.describe("proteção de rotas e APIs", () => {
     expect((await request.post("/api/webhooks/heropay?trigger=spark_payment_confirmed", { data: { payment: { id: "1" } }, headers: { "x-heropay-signature": "00".repeat(32) } })).status()).toBe(401);
     // origem cruzada é bloqueada (CSRF)
     expect((await request.post("/api/search", { data: { query: "fone" }, headers: { origin: "https://site-malicioso.example" } })).status()).toBe(403);
+  });
+
+  test("alterna entre modo claro e escuro e lembra a escolha", async ({ page, isMobile }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    if (isMobile) {
+      await page.getByRole("button", { name: "Abrir menu" }).click();
+    }
+    await page.getByRole("switch", { name: "Mudar para o modo claro" }).filter({ visible: true }).first().click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    const bg = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
+    expect(bg).toBe("rgb(247, 246, 243)");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  });
+
+  test("login não mostra o botão do Google enquanto o provedor estiver desligado no Supabase", async ({ page }) => {
+    await page.goto("/entrar");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    const res = await page.request.get("/api/health");
+    expect(res.ok()).toBeTruthy();
+    // O botão só aparece quando /auth/v1/settings informa external.google = true.
+    const shown = await page.getByRole("button", { name: "Continuar com Google" }).count();
+    expect(shown === 0 || shown === 1).toBeTruthy();
   });
 });

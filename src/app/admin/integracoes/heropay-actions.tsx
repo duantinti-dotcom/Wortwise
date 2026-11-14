@@ -38,7 +38,7 @@ export function HeroPayActions({ ready, plans }: { ready: boolean; plans: Plan[]
         <div><div className="font-medium">Webhooks</div><div className="text-xs text-faint">Cadastra os 7 gatilhos tratados apontando para /api/webhooks/heropay neste domínio. Execute uma vez por ambiente.</div></div>
         <button className="btn btn-secondary btn-sm" disabled={!ready || Boolean(busy)} onClick={() => run("hooks", { action: "register_webhooks" })}>{busy === "hooks" ? <Loader2 size={14} className="animate-spin" /> : null}Cadastrar webhooks</button>
       </div>
-      {hooks ? <ul className="px-5 py-4 text-xs">{hooks.map((h) => <li key={h.trigger} className={h.ok ? "text-pos" : "text-[#ffb3b1]"}>{h.trigger}: {h.ok ? "cadastrado" : h.error}</li>)}</ul> : null}
+      {hooks ? <ul className="px-5 py-4 text-xs">{hooks.map((h) => <li key={h.trigger} className={h.ok ? "text-pos" : "text-danger"}>{h.trigger}: {h.ok ? "cadastrado" : h.error}</li>)}</ul> : null}
       {!ready ? <p className="px-5 py-4 text-xs text-faint">Configure HEROPAY_JWT_TOKEN para habilitar estas ações. Ao alterar o preço de um plano, recrie o link: o valor cobrado é o do link.</p> : null}
     </div>
   );

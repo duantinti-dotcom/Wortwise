@@ -108,7 +108,7 @@ export function Compare() {
                       <td className="tabular px-4 py-3">{q.taxes == null ? <span className="text-faint">Não informado</span> : <>{formatMoney(Number(q.taxes))}<div className="text-[11px] text-faint">{ORIGIN[q.cost_origins.taxes ?? "estimated"]}</div></>}</td>
                       <td className="px-4 py-3 text-muted">{q.lead_time_days != null ? `${q.lead_time_days} dias` : "—"}</td>
                       <td className="px-4 py-3"><div className={cn("tabular text-base font-semibold", q.id === best && "text-brand-hi")}>{formatMoney(cost.perUnit)}</div>
-                        {cost.missing.length ? <div className="text-[11px] text-[#ffb3b1]">parcial: falta {cost.missing.join(" e ")}</div> : q.id === best ? <div className="text-[11px] text-brand-hi">menor custo total</div> : null}</td>
+                        {cost.missing.length ? <div className="text-[11px] text-danger">parcial: falta {cost.missing.join(" e ")}</div> : q.id === best ? <div className="text-[11px] text-brand-hi">menor custo total</div> : null}</td>
                       <td className="px-2 py-3"><button onClick={() => remove(q.id)} className="btn btn-ghost btn-sm !px-2" aria-label="Excluir cotação"><Trash2 size={15} /></button></td>
                     </tr>
                   ))}

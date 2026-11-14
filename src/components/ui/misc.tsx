@@ -9,7 +9,7 @@ export function EmptyState({ icon: Icon, title, children, action }: { icon: Luci
       <div aria-hidden className="absolute -left-24 -top-24 size-72 rounded-full bg-brand/15 blur-3xl" />
       <div className="relative">
         <div className="relative w-fit">
-          <div aria-hidden className="absolute -inset-3 rounded-[22px] border border-white/[0.06]" />
+          <div aria-hidden className="absolute -inset-3 rounded-[22px] border border-tint/[0.06]" />
           <div className="relative flex size-14 items-center justify-center rounded-2xl border border-brand/40 bg-gradient-to-b from-brand/25 to-brand/5 text-brand-hi shadow-[0_0_34px_-8px_rgba(255,121,0,0.7)]"><Icon size={24} /></div>
         </div>
         <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em]">{title}</h3>
@@ -20,8 +20,8 @@ export function EmptyState({ icon: Icon, title, children, action }: { icon: Luci
       <div aria-hidden className="relative hidden pr-6 @2xl:block">
         <div className="space-y-3 [mask-image:linear-gradient(180deg,#000_40%,transparent)]">
           {[0.9, 0.7, 0.55].map((o, i) => (
-            <div key={i} className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4" style={{ opacity: o, transform: `translateX(${i * 12}px)` }}>
-              <span className="size-10 shrink-0 rounded-xl bg-gradient-to-br from-brand/30 to-white/5" />
+            <div key={i} className="flex items-center gap-4 rounded-2xl border border-tint/[0.08] bg-tint/[0.035] p-4" style={{ opacity: o, transform: `translateX(${i * 12}px)` }}>
+              <span className="size-10 shrink-0 rounded-xl bg-gradient-to-br from-brand/30 to-tint/5" />
               <span className="flex-1 space-y-2"><span className="skeleton block h-2.5 w-3/5 !rounded-full" /><span className="skeleton block h-2 w-2/5 !rounded-full opacity-70" /></span>
               <span className="skeleton block h-3 w-14 !rounded-full" />
             </div>
@@ -62,7 +62,7 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function ErrorNote({ children, onRetry }: { children: ReactNode; onRetry?: () => void }) {
   return (
-    <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-neg/30 bg-neg/[0.07] px-4 py-3.5 text-sm text-[#ffb3b1]">
+    <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-neg/30 bg-neg/[0.07] px-4 py-3.5 text-sm text-danger">
       <span>{children}</span>
       {onRetry ? <button onClick={onRetry} className="btn btn-secondary btn-sm">Tentar novamente</button> : null}
     </div>

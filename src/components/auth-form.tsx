@@ -39,7 +39,7 @@ declare global {
   interface Window { turnstile?: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; reset: (id?: string) => void } }
 }
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; google?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const rawNext = params.get("next");
@@ -142,12 +142,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
   return (
     <div className="animate-fade-up">
       {needsCaptcha ? <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" strategy="afterInteractive" onReady={mountTurnstile} /> : null}
-      <h1 className="display text-[36px]">{copy.title}</h1>
+      <h1 className="display text-[34px]">{copy.title}</h1>
       <p className="mt-2 text-muted">{copy.sub}</p>
 
-      {!configured ? <div role="alert" className="mt-6 rounded-xl border border-neg/30 bg-neg/8 px-4 py-3 text-sm text-[#ffb3b1]">A autenticação ainda não está configurada neste ambiente.</div> : null}
+      {!configured ? <div role="alert" className="mt-6 rounded-xl border border-neg/30 bg-neg/8 px-4 py-3 text-sm text-danger">A autenticação ainda não está configurada neste ambiente.</div> : null}
 
-      {mode === "login" || mode === "signup" ? (
+      {(mode === "login" || mode === "signup") && googleOn ? (
         <>
           <button type="button" onClick={google} disabled={Boolean(busy) || !configured} className="btn btn-secondary btn-lg mt-8 w-full">
             {busy === "google" ? <Loader2 size={18} className="animate-spin" /> : <GoogleIcon />} Continuar com Google
@@ -172,7 +172,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </label>
         ) : null}
         {needsCaptcha ? <div ref={tsRef} className="min-h-[65px]" /> : null}
-        {error ? <div role="alert" className="flex items-start gap-2 rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-sm text-[#ffb3b1]"><CircleAlert size={16} className="mt-0.5 shrink-0" />{error}</div> : null}
+        {error ? <div role="alert" className="flex items-start gap-2 rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-sm text-danger"><CircleAlert size={16} className="mt-0.5 shrink-0" />{error}</div> : null}
         <button type="submit" disabled={!hydrated || Boolean(busy) || !configured || (needsCaptcha && !captcha)} className="btn btn-primary btn-lg w-full">
           {busy === "form" ? <Loader2 size={18} className="animate-spin" /> : null}{copy.cta}
         </button>

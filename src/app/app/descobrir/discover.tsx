@@ -97,7 +97,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
         </div>
         <div className={cn("grid transition-[grid-template-rows,opacity] duration-300 ease-out", showFilters ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
           <div className="overflow-hidden">
-            <div className="grid gap-4 border-t border-white/8 p-3 pt-4 md:grid-cols-[1.6fr_1fr_1fr]">
+            <div className="grid gap-4 border-t border-tint/8 p-3 pt-4 md:grid-cols-[1.6fr_1fr_1fr]">
               <div>
                 <div className="label">Marketplaces</div>
                 <div className="flex flex-wrap gap-2">
@@ -175,25 +175,25 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
         {!loading && !result && !error ? (
           <div className="grid gap-5 lg:grid-cols-3">
             <div className="card !rounded-3xl p-6 lg:col-span-2">
-              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Sparkles size={14} className="text-brand-hi" /></span>Sugestões para começar</h2>
+              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Sparkles size={14} className="text-brand-hi" /></span>Sugestões para começar</h2>
               <p className="mt-2 text-sm text-muted">Clique para preencher a busca — a pesquisa só acontece quando você confirmar.</p>
               <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{SUGGESTIONS.map((s) => (
-                <button key={s} onClick={() => setQuery(s)} className="group flex items-center justify-between gap-2 rounded-xl border border-white/[0.07] bg-white/[0.02] px-3.5 py-3 text-left text-sm transition-all hover:border-brand/40 hover:bg-brand/[0.05]">
+                <button key={s} onClick={() => setQuery(s)} className="group flex items-center justify-between gap-2 rounded-xl border border-tint/[0.07] bg-tint/[0.02] px-3.5 py-3 text-left text-sm transition-all hover:border-brand/40 hover:bg-brand/[0.05]">
                   <span className="flex items-center gap-2.5"><Search size={14} className="text-faint group-hover:text-brand" />{s}</span><ArrowUpLeft size={14} className="text-faint opacity-0 transition-opacity group-hover:opacity-100" /></button>))}</div>
             </div>
             <div className="card !rounded-3xl p-6">
-              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Database size={14} className="text-brand-hi" /></span>Fontes de dados</h2>
+              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Database size={14} className="text-brand-hi" /></span>Fontes de dados</h2>
               <ul className="mt-4 space-y-2.5">
                 {sources.map((s) => (
                   <li key={s.id} className="flex items-center justify-between gap-3 text-sm" title={s.detail}>
-                    <span className="flex items-center gap-2.5"><span className={cn("size-2 rounded-full", s.state === "connected" ? "bg-pos animate-pulse-ring" : s.state === "pending_approval" ? "bg-white/25" : "bg-brand")} />{s.name}</span>
+                    <span className="flex items-center gap-2.5"><span className={cn("size-2 rounded-full", s.state === "connected" ? "bg-pos animate-pulse-ring" : s.state === "pending_approval" ? "bg-tint/25" : "bg-brand")} />{s.name}</span>
                     <span className="text-xs text-faint">{s.state === "connected" ? "conectada" : s.state === "pending_approval" ? "em credenciamento" : "não configurada"}</span>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="card !rounded-3xl p-6 lg:col-span-3">
-              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Clock size={14} className="text-brand-hi" /></span>Pesquisas recentes</h2>
+              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Clock size={14} className="text-brand-hi" /></span>Pesquisas recentes</h2>
               {recent.length ? (
                 <ul className="mt-3 divide-y divide-line">
                   {recent.map((r) => (

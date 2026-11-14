@@ -59,7 +59,7 @@ export function Monitoring() {
                     <div className="min-w-0 flex-1">
                       <Link href={`/app/produto/${w.source}/${w.external_id}`} className="block truncate text-sm font-medium hover:text-brand-hi">{w.title}</Link>
                       <div className="mt-1 text-xs text-muted">{rule(w)} · {SOURCE_LABELS[w.source] ?? w.source}</div>
-                      <div className="mt-1 text-xs text-faint">{w.last_error ? <span className="text-[#ffb3b1]">Última verificação falhou: {w.last_error}</span> : w.last_checked_at ? `Verificado ${relativeTime(w.last_checked_at)}` : "Aguardando a primeira verificação"}</div>
+                      <div className="mt-1 text-xs text-faint">{w.last_error ? <span className="text-danger">Última verificação falhou: {w.last_error}</span> : w.last_checked_at ? `Verificado ${relativeTime(w.last_checked_at)}` : "Aguardando a primeira verificação"}</div>
                     </div>
                     <span className="tabular text-sm font-semibold">{formatMoney(w.last_price, w.last_currency ?? "BRL")}</span>
                     <button onClick={() => toggle(w)} className="btn btn-secondary btn-sm" aria-pressed={w.active}>{w.active ? <><BellOff size={14} /> Pausar</> : <><Bell size={14} /> Reativar</>}</button>

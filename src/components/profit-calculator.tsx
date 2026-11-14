@@ -39,7 +39,7 @@ function NumField({ id, label, value, onChange, prefix, suffix, hint }: {
 
 function Section({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
   return (
-    <section className="border-t border-white/[0.07] px-5 py-6 first:border-t-0 md:px-7">
+    <section className="border-t border-tint/[0.07] px-5 py-6 first:border-t-0 md:px-7">
       <div className="mb-4 flex items-baseline justify-between gap-3"><h3 className="text-[15px] font-semibold tracking-tight">{title}</h3><span className="text-xs text-faint">{sub}</span></div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">{children}</div>
     </section>
@@ -69,12 +69,12 @@ function WRow({ label, value, start, width, tone, strong }: { label: string; val
   return (
     <div role="listitem" className="grid grid-cols-[minmax(0,118px)_1fr_auto] items-center gap-3 text-[12.5px]">
       <span className={cn("truncate", strong ? "font-medium text-fg" : "text-muted")}>{label}</span>
-      <span className="relative h-5 rounded-md bg-white/[0.03]">
+      <span className="relative h-5 rounded-md bg-tint/[0.03]">
         <span className={cn("absolute inset-y-0 rounded-md transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
           tone === "pos" && "bg-gradient-to-r from-pos/50 to-pos/80", tone === "neg" && "bg-neg/45", tone === "brand" && "bg-gradient-to-r from-brand to-brand-hi")}
           style={{ left: `${Math.min(start, 1) * 100}%`, width: `${Math.max(Math.min(width, 1 - Math.min(start, 1)), 0.004) * 100}%` }} />
       </span>
-      <span className={cn("tabular w-[92px] text-right", strong ? "font-semibold" : "", value < 0 && !strong ? "text-[#ff9a97]" : "text-fg")}>{formatMoney(value)}</span>
+      <span className={cn("tabular w-[92px] text-right", strong ? "font-semibold" : "", value < 0 && !strong ? "text-danger" : "text-fg")}>{formatMoney(value)}</span>
     </div>
   );
 }
@@ -109,7 +109,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
   return (
     <div className={cn("grid items-start gap-5", compact ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)]")}>
       <div className="card overflow-hidden !rounded-3xl">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-4 md:px-7">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-tint/[0.07] px-5 py-4 md:px-7">
           <div className="text-[15px] font-semibold tracking-tight">Seus números</div>
           {isExample ? <span className="badge badge-brand max-sm:order-3 max-sm:w-full max-sm:justify-center"><Sparkles size={12} />Exemplo — troque pelos seus valores</span> : null}
           <button className="btn btn-ghost btn-sm -mr-2" onClick={() => { setI({ ...DEFAULT_INPUTS, quantity: 1 }); setPreset(""); setIsExample(false); }}><RotateCcw size={14} /> Limpar</button>
@@ -151,16 +151,16 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
       </div>
 
       <div className="space-y-4 lg:sticky lg:top-24">
-        <div className={cn("edge-grad relative overflow-hidden rounded-3xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),#121212]" : "edge-brand bg-[linear-gradient(160deg,rgba(255,121,0,0.16),rgba(255,121,0,0.02)_55%),#121212]")}>
+        <div className={cn("edge-grad relative overflow-hidden rounded-3xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),var(--surface)]" : "edge-brand bg-[linear-gradient(160deg,rgba(255,121,0,0.16),rgba(255,121,0,0.02)_55%),var(--surface)]")}>
           <BorderBeam />
           <div aria-hidden className="aurora -right-16 -top-20 h-56 w-56 bg-brand/20" />
           <div className="relative">
             <div className="text-[13px] text-muted">{ready && r.profit < 0 ? "Prejuízo estimado do lote" : "Lucro estimado do lote"}</div>
-            <div className={cn("tabular mt-1 text-[44px] font-semibold leading-none tracking-[-0.04em] transition-colors md:text-5xl", !ready ? "text-faint" : r.profit >= 0 ? "text-fg" : "text-[#ff8a87]")}
+            <div className={cn("tabular mt-1 text-[44px] font-semibold leading-none tracking-[-0.04em] transition-colors md:text-5xl", !ready ? "text-faint" : r.profit >= 0 ? "text-fg" : "text-danger")}
               data-testid="profit-total">{ready ? <AnimatedNumber value={r.profit} format={(v) => formatMoney(v)} /> : "R$ —"}</div>
             <div className="mt-5 grid grid-cols-3 gap-2">
               {[["Por unidade", ready ? formatMoney(r.profitPerUnit) : "—", "profit-unit"], ["Margem", ready ? formatPercent(r.marginPct) : "—", "profit-margin"], ["Retorno", ready ? formatPercent(r.roiPct) : "—", "profit-roi"]].map(([k, v, t]) => (
-                <div key={k} className="rounded-xl border border-white/[0.08] bg-black/25 px-3 py-2.5"><div className="text-[11px] text-muted">{k}</div><div className="tabular mt-0.5 text-[15px] font-semibold" data-testid={t}>{v}</div></div>
+                <div key={k} className="rounded-xl border border-tint/[0.08] bg-black/25 px-3 py-2.5"><div className="text-[11px] text-muted">{k}</div><div className="tabular mt-0.5 text-[15px] font-semibold" data-testid={t}>{v}</div></div>
               ))}
             </div>
 
@@ -171,7 +171,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
                   onChange={(e) => set("salePrice")(Number(e.target.value))} className="relative z-10 w-full accent-[#ff7900]" disabled={!ready} />
                 <div className="pointer-events-none relative mt-1 h-11 text-[10.5px]">
                   {ready && r.minPrice != null && pos(r.minPrice) != null ? (
-                    <span className="absolute -translate-x-1/2 whitespace-nowrap text-center text-[#ff9a97]" style={{ left: `${pos(r.minPrice)}%` }}><span className="mx-auto block h-2 w-px bg-current" />mínimo {formatMoney(r.minPrice)}</span>) : null}
+                    <span className="absolute -translate-x-1/2 whitespace-nowrap text-center text-danger" style={{ left: `${pos(r.minPrice)}%` }}><span className="mx-auto block h-2 w-px bg-current" />mínimo {formatMoney(r.minPrice)}</span>) : null}
                   {ready && target != null && pos(target) != null ? (
                     <span className="absolute top-3.5 -translate-x-1/2 whitespace-nowrap text-center text-brand-hi" style={{ left: `${pos(target)}%` }}><span className="mx-auto block h-1 w-px bg-current" />{targetMargin}% · {formatMoney(target)}</span>) : null}
                 </div>
@@ -193,7 +193,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
             ))}
           </div>
           <div className="mt-5">
-            {!ready ? <p className="rounded-xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-muted">Informe o preço de aquisição e o preço de venda para ver o resultado.</p> : null}
+            {!ready ? <p className="rounded-xl border border-dashed border-tint/10 px-4 py-6 text-center text-sm text-muted">Informe o preço de aquisição e o preço de venda para ver o resultado.</p> : null}
             {ready && tab === "composicao" ? (
               <>
                 <Waterfall revenue={r.grossRevenue} items={r.breakdown} profit={r.profit} />
@@ -204,7 +204,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
             {ready && tab === "cenarios" ? (
               <div className="space-y-2.5">
                 {scenarios.map((s) => (
-                  <div key={s.id} className={cn("rounded-2xl border p-4", s.id === "base" ? "border-brand/40 bg-brand/[0.06]" : "border-white/[0.08] bg-white/[0.02]")}>
+                  <div key={s.id} className={cn("rounded-2xl border p-4", s.id === "base" ? "border-brand/40 bg-brand/[0.06]" : "border-tint/[0.08] bg-tint/[0.02]")}>
                     <div className="flex items-baseline justify-between"><span className="text-sm font-semibold">{s.name}</span>
                       <span className={cn("tabular text-lg font-semibold", s.result.profit >= 0 ? "text-pos" : "text-neg")}>{formatMoney(s.result.profit)}</span></div>
                     <div className="mt-1 flex justify-between text-xs text-muted"><span>Venda a {formatMoney(s.inputs.salePrice)}</span><span>Margem {formatPercent(s.result.marginPct)}</span></div>
@@ -218,7 +218,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
               <div className="space-y-2">
                 <p className="mb-3 text-xs leading-relaxed text-muted">Mesmo produto e mesmos custos; muda só a taxa do canal (valores de partida, editáveis).</p>
                 {[...channels].sort((a, b) => b.result.profit - a.result.profit).map((c) => (
-                  <div key={c.preset.id} className={cn("flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-sm", c.result.profit === best ? "border-brand/40 bg-brand/[0.06]" : "border-white/[0.07]")}>
+                  <div key={c.preset.id} className={cn("flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-sm", c.result.profit === best ? "border-brand/40 bg-brand/[0.06]" : "border-tint/[0.07]")}>
                     <span className="min-w-0 truncate">{c.preset.name}</span>
                     <span className="flex shrink-0 items-baseline gap-3"><span className="text-xs text-muted">{formatPercent(c.result.marginPct)}</span>
                       <span className={cn("tabular w-24 text-right font-semibold", c.result.profit >= 0 ? "text-fg" : "text-neg")}>{formatMoney(c.result.profit)}</span></span>
@@ -232,7 +232,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
                   ["Margem de contribuição", `${formatMoney(r.contributionPerUnit)} · ${formatPercent(r.contributionMarginPct)}`],
                   ["Ponto de equilíbrio", r.breakEvenUnits == null ? "Não atinge" : r.breakEvenUnits === 0 ? "Desde a 1ª venda" : `${r.breakEvenUnits} un.`],
                   ["Preço mínimo (lucro zero)", r.minPrice != null ? formatMoney(r.minPrice) : "—"], ["Unidades vendidas", `${r.unitsSold.toLocaleString("pt-BR")} de ${i.quantity}`]].map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between gap-4 border-b border-white/[0.05] pb-2.5 last:border-0"><dt className="text-muted">{k}</dt><dd className="tabular text-right font-medium">{v}</dd></div>
+                  <div key={k} className="flex items-baseline justify-between gap-4 border-b border-tint/[0.05] pb-2.5 last:border-0"><dt className="text-muted">{k}</dt><dd className="tabular text-right font-medium">{v}</dd></div>
                 ))}
               </dl>
             ) : null}

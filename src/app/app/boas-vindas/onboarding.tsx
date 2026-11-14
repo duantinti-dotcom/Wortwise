@@ -16,7 +16,7 @@ function Chips({ options, value, onToggle }: { options: string[]; value: string[
       {options.map((o) => {
         const on = value.includes(o);
         return <button key={o} type="button" aria-pressed={on} onClick={() => onToggle(o)}
-          className={cn("flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-sm transition-all duration-150 active:scale-[0.97]", on ? "border-brand bg-brand/12 text-fg" : "border-line-strong text-muted hover:border-white/25 hover:text-fg")}>
+          className={cn("flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-sm transition-all duration-150 active:scale-[0.97]", on ? "border-brand bg-brand/12 text-fg" : "border-line-strong text-muted hover:border-tint/25 hover:text-fg")}>
           {on ? <Check size={14} className="text-brand" /> : null}{o}</button>;
       })}
     </div>
@@ -53,7 +53,7 @@ export function Onboarding() {
           <div className="grid gap-3 sm:grid-cols-2">
             {([["starting", "Estou começando", "Quero descobrir o que vender"], ["selling", "Já vendo", "Quero ampliar e melhorar a margem"]] as const).map(([id, t, d]) => (
               <button key={id} type="button" aria-pressed={stage === id} onClick={() => setStage(id)}
-                className={cn("rounded-xl border p-4 text-left transition-all duration-150 active:scale-[0.98]", stage === id ? "border-brand bg-brand/10" : "border-line-strong hover:border-white/25")}>
+                className={cn("rounded-xl border p-4 text-left transition-all duration-150 active:scale-[0.98]", stage === id ? "border-brand bg-brand/10" : "border-line-strong hover:border-tint/25")}>
                 <span className="block text-sm font-medium">{t}</span><span className="mt-0.5 block text-sm text-muted">{d}</span></button>
             ))}
           </div></fieldset>

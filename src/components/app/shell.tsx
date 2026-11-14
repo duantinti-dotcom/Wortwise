@@ -2,10 +2,12 @@
 import { BarChart3, Bell, Bookmark, Calculator, FileText, Home, LogOut, Menu as MenuIcon, MessagesSquare, Scale, Search, Settings, ShieldCheck, Sparkles, Store, TrendingUp, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { motion } from "motion/react";
 import { Dialog as D } from "radix-ui";
 import { useEffect, useState, type ReactNode } from "react";
 import { Ambient } from "@/components/ambient";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { ToastProvider } from "@/components/ui/toast";
 import type { PlanInfo } from "@/lib/plans";
@@ -49,7 +51,7 @@ const GROUPS: { label: string; items: string[] }[] = [
   { label: "Conta", items: ["/app/configuracoes"] },
 ];
 
-function NavList({ onNavigate, unreadAlerts, admin }: { onNavigate?: () => void; unreadAlerts: number; admin: boolean }) {
+function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNavigate?: () => void; unreadAlerts: number; admin: boolean; layoutKey?: string }) {
   const path = usePathname();
   const active = (href: string) => (href === "/app" ? path === "/app" : path.startsWith(href));
   return (
@@ -63,12 +65,13 @@ function NavList({ onNavigate, unreadAlerts, admin }: { onNavigate?: () => void;
               return (
                 <li key={n.href}>
                   <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined}
-                    className={cn("group relative flex h-9 items-center gap-3 rounded-xl px-3 text-[13.5px] transition-all duration-200",
-                      on ? "bg-white/[0.12] font-medium text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_14px_-6px_rgba(0,0,0,0.6)]" : "text-muted hover:bg-white/[0.06] hover:text-fg")}>
-                    {on ? <span aria-hidden className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand shadow-[0_0_12px_rgba(255,121,0,0.9)]" /> : null}
+                    className={cn("group relative isolate flex h-9 items-center gap-3 rounded-full px-3 text-[13.5px] transition-colors duration-200",
+                      on ? "font-semibold text-fg" : "text-muted hover:bg-tint/[0.05] hover:text-fg")}>
+                    {on ? <motion.span layoutId={`nav-pill-${layoutKey}`} aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                      className="absolute inset-0 -z-10 rounded-full border border-tint/10 bg-tint/[0.08] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.35)]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
-                    {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-semibold text-black">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
+                    {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#1a0900]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
                   </Link>
                 </li>
               );
@@ -77,7 +80,7 @@ function NavList({ onNavigate, unreadAlerts, admin }: { onNavigate?: () => void;
         </div>
       ))}
       {admin ? (
-        <Link href="/admin" onClick={onNavigate} className="flex h-9 items-center gap-3 rounded-xl border border-dashed border-white/10 px-3 text-[13.5px] text-muted hover:border-white/20 hover:text-fg"><ShieldCheck size={16} className="text-faint" /> Administração</Link>
+        <Link href="/admin" onClick={onNavigate} className="flex h-9 items-center gap-3 rounded-xl border border-dashed border-tint/10 px-3 text-[13.5px] text-muted hover:border-tint/20 hover:text-fg"><ShieldCheck size={16} className="text-faint" /> Administração</Link>
       ) : null}
     </div>
   );
@@ -87,11 +90,11 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
   const { openUpgrade } = useUpgrade();
   const pct = search && search.limit > 0 ? Math.min(100, (search.used / search.limit) * 100) : 0;
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "edge-grad edge-brand bg-[linear-gradient(180deg,rgba(255,121,0,0.10),rgba(255,121,0,0.02))]" : "border-white/8 bg-white/[0.03]")}>
+    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "edge-grad edge-brand bg-[linear-gradient(180deg,rgba(255,121,0,0.10),rgba(255,121,0,0.02))]" : "border-tint/8 bg-tint/[0.03]")}>
       <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold"><Sparkles size={13} className="text-brand" />Plano {planName}</span>
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10"><div className={cn("h-full rounded-full transition-[width] duration-700", pct >= 100 ? "bg-neg" : "bg-gradient-to-r from-brand to-brand-hi")} style={{ width: `${Math.max(pct, 2)}%` }} /></div>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-tint/10"><div className={cn("h-full rounded-full transition-[width] duration-700", pct >= 100 ? "bg-neg" : "bg-gradient-to-r from-brand to-brand-hi")} style={{ width: `${Math.max(pct, 2)}%` }} /></div>
         <div className="mt-2 text-[11px] text-muted">pesquisas {search.period === "total" ? "gratuitas usadas" : "usadas neste mês"}</div>
       </>) : null}
       {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-primary btn-sm mt-3.5 w-full">Fazer upgrade</button> : null}
@@ -145,7 +148,7 @@ export function AppShell(props: ShellProps) {
           </aside>
 
           {/* Barra superior */}
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/[0.07] bg-black/30 px-4 backdrop-blur-2xl backdrop-saturate-150 lg:h-[72px] lg:border-0 lg:bg-transparent lg:px-10 lg:backdrop-blur-none">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-tint/[0.07] bg-ink/70 px-4 backdrop-blur-2xl backdrop-saturate-150 lg:h-[72px] lg:border-0 lg:bg-transparent lg:px-10 lg:backdrop-blur-none">
             <D.Root open={drawer} onOpenChange={setDrawer}>
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>
@@ -154,7 +157,7 @@ export function AppShell(props: ShellProps) {
                   <div className="flex h-14 items-center justify-between px-4"><D.Title asChild><Logo size={26} /></D.Title>
                     <D.Close className="btn btn-ghost !px-2.5" aria-label="Fechar menu"><X size={20} /></D.Close></div>
                   <D.Description className="sr-only">Navegação da aplicação</D.Description>
-                  <nav aria-label="Aplicação" className="min-h-0 flex-1 overflow-y-auto px-3"><NavList onNavigate={() => setDrawer(false)} unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
+                  <nav aria-label="Aplicação" className="min-h-0 flex-1 overflow-y-auto px-3"><NavList layoutKey="drawer" onNavigate={() => setDrawer(false)} unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
                   <div className="shrink-0 p-3 pb-[max(12px,env(safe-area-inset-bottom))]"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
                 </D.Content>
               </D.Portal>
@@ -163,34 +166,36 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="lg h-11 w-full !rounded-2xl pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-white/[0.14] focus:border-brand focus:bg-white/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)]" />
+                className="lg h-11 w-full pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)] !rounded-full" />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
+              <ThemeToggle size="sm" className="mr-1" />
               <Link href="/app/monitoramento" className="icon-btn relative" aria-label={`Alertas${props.unreadAlerts ? ` (${props.unreadAlerts} não lidos)` : ""}`}>
-                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1 top-1 size-2.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,121,0,0.9)] ring-2 ring-black" /> : null}
+                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1 top-1 size-2.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,121,0,0.9)] ring-2 ring-[var(--bg)]" /> : null}
               </Link>
               <Profile user={props.user} />
             </div>
           </header>
 
-          <main id="conteudo" key={path} className="relative animate-[page-in_0.32s_cubic-bezier(0.16,1,0.3,1)] px-4 pb-28 pt-7 lg:px-10 lg:pb-16 lg:pt-10">
+          <main id="conteudo" key={path} className="relative animate-[page-in_0.45s_cubic-bezier(0.16,1,0.3,1)] px-4 pb-28 pt-7 lg:px-10 lg:pb-16 lg:pt-10">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(45%_100%_at_70%_0%,rgba(255,121,0,0.06),transparent)]" />
             <div className="mx-auto max-w-[1240px]">{props.children}</div>
           </main>
 
           {/* Navegação inferior — mobile */}
-          <nav aria-label="Atalhos" className="lg glass-strong fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-2xl p-1.5 lg:hidden">
+          <nav aria-label="Atalhos" className="lg glass-strong fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-[22px] p-1.5 lg:hidden">
             {TABS.map((t) => {
               const on = t.href === "/app" ? path === "/app" : path.startsWith(t.href);
               return (
                 <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
-                  className={cn("flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:bg-white/8", on ? "text-fg" : "text-muted")}>
+                  className={cn("relative isolate flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:scale-95", on ? "font-semibold text-fg" : "text-muted")}>
+                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-xl bg-tint/[0.08]" /> : null}
                   <t.icon size={19} className={on ? "text-brand" : undefined} />{t.label.split(" ")[0]}
                 </Link>
               );
             })}
-            <button onClick={() => setDrawer(true)} className="flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] text-muted active:bg-white/8"><MenuIcon size={19} />Mais</button>
+            <button onClick={() => setDrawer(true)} className="flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] text-muted active:bg-tint/8"><MenuIcon size={19} />Mais</button>
           </nav>
         </div>
       </UpgradeProvider>

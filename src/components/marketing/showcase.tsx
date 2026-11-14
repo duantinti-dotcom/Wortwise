@@ -23,7 +23,7 @@ export function Showcase({ items }: { items: ShowcaseItem[] }) {
           const on = i === active;
           return (
             <button key={it.id} role="tab" aria-selected={on} aria-controls="showcase-panel" onClick={() => setActive(i)}
-              className={cn("group relative shrink-0 overflow-hidden rounded-2xl px-4 py-2.5 text-left transition-all duration-500 lg:shrink lg:px-5 lg:py-4", on ? "lg glass-strong" : "border border-white/10 hover:bg-white/[0.04] lg:border-transparent")}>
+              className={cn("group relative shrink-0 overflow-hidden rounded-2xl px-4 py-2.5 text-left transition-all duration-500 lg:shrink lg:px-5 lg:py-4", on ? "lg glass-strong" : "border border-tint/10 hover:bg-tint/[0.04] lg:border-transparent")}>
               <div className={cn("whitespace-nowrap text-sm font-semibold tracking-tight transition-colors lg:whitespace-normal lg:text-xl", on ? "text-fg" : "text-muted group-hover:text-fg")}>{it.title}</div>
               <div className={cn("hidden transition-[grid-template-rows,opacity] duration-500 lg:grid", on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
                 <p className="overflow-hidden pt-1.5 text-[14.5px] leading-relaxed text-muted">{it.text}</p>

@@ -42,11 +42,11 @@ export function UpgradeProvider({ children, plans, currentPlan }: { children: Re
           description="Você será levado ao checkout seguro da HeroPay (Pix, cartão ou boleto). O plano é liberado assim que o pagamento for confirmado.">
           <div className="grid gap-4 sm:grid-cols-2">
             {paid.map((p) => (
-              <div key={p.id} className={cn("flex flex-col rounded-2xl border p-5", p.id === "pro" ? "border-brand/50 bg-brand/6" : "border-line-strong bg-white/3")}>
+              <div key={p.id} className={cn("flex flex-col rounded-2xl border p-5", p.id === "pro" ? "border-brand/50 bg-brand/6" : "border-line-strong bg-tint/3")}>
                 <div className="flex items-center gap-2 text-base font-semibold">{p.id === "pro" ? <Sparkles size={16} className="text-brand" /> : null}{p.name}</div>
                 <div className="mt-2 flex items-baseline gap-1"><span className="text-xs text-muted">R$</span>
                   <span className="tabular text-3xl font-semibold tracking-tight">{(p.price_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span><span className="text-xs text-muted">/mês</span></div>
-                <ul className="mt-4 flex-1 space-y-2 text-sm text-[#d0d0d0]">{p.features.slice(0, 5).map((f) => <li key={f} className="flex gap-2"><Check size={15} className="mt-0.5 shrink-0 text-brand" />{f}</li>)}</ul>
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-soft">{p.features.slice(0, 5).map((f) => <li key={f} className="flex gap-2"><Check size={15} className="mt-0.5 shrink-0 text-brand" />{f}</li>)}</ul>
                 <button className={cn("btn mt-5", p.id === "pro" ? "btn-primary" : "btn-secondary")} disabled={Boolean(busy) || currentPlan === p.id} onClick={() => subscribe(p.id)}>
                   {busy === p.id ? <Loader2 size={16} className="animate-spin" /> : null}{currentPlan === p.id ? "Seu plano atual" : `Assinar ${p.name}`}
                 </button>

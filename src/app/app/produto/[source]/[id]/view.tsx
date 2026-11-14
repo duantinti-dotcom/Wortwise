@@ -251,7 +251,7 @@ export function ProductView({ source, id }: { source: string; id: string }) {
       <Section id="riscos" title="Riscos e limitações">
         <ul className="space-y-2.5">
           {risks.map((r) => (
-            <li key={r.text} className={cn("flex items-start gap-3 rounded-xl border px-4 py-3 text-sm leading-relaxed", r.level === "warn" ? "border-brand/30 bg-brand/5 text-[#ffd9b3]" : "border-line text-muted")}>
+            <li key={r.text} className={cn("flex items-start gap-3 rounded-xl border px-4 py-3 text-sm leading-relaxed", r.level === "warn" ? "border-brand/30 bg-brand/5 text-soft" : "border-line text-muted")}>
               <AlertTriangle size={16} className={cn("mt-0.5 shrink-0", r.level === "warn" ? "text-brand" : "text-faint")} />{r.text}</li>
           ))}
         </ul>

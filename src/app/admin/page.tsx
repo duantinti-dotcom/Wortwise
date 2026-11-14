@@ -10,7 +10,7 @@ export default async function AdminHome() {
   const supabase = await supabaseServer();
   const { data, error } = await supabase.rpc("admin_overview");
   const o = data as Overview | null;
-  if (error || !o) return <p role="alert" className="card p-5 text-sm text-[#ffb3b1]">Não foi possível carregar a visão geral.</p>;
+  if (error || !o) return <p role="alert" className="card p-5 text-sm text-danger">Não foi possível carregar a visão geral.</p>;
   const connected = sourcesOverview().filter((s) => s.state === "connected").length;
   return (
     <>
