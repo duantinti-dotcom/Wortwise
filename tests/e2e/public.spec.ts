@@ -28,6 +28,8 @@ test.describe("site público", () => {
 
   test("calculadora de lucro calcula corretamente", async ({ page }) => {
     await page.goto("/calculadora-de-lucro");
+    await expect(page.getByText("Exemplo — troque pelos seus valores")).toBeVisible();
+    await page.getByRole("button", { name: "Limpar" }).click();
     await page.getByLabel("Preço de aquisição (un.)").fill("20");
     await page.getByLabel("Quantidade").fill("100");
     await page.getByLabel("Preço de venda (un.)").fill("60");
@@ -39,6 +41,8 @@ test.describe("site público", () => {
     await expect(page.getByTestId("profit-margin")).toContainText("51,3%");
     await page.getByRole("tab", { name: "Cenários" }).click();
     await expect(page.getByText("Conservador")).toBeVisible();
+    await page.getByRole("tab", { name: "Composição" }).click();
+    await expect(page.getByRole("list", { name: "Da receita ao lucro" })).toContainText("Receita bruta");
   });
 
   test("páginas de transparência, blog e SEO técnico", async ({ page, request }) => {

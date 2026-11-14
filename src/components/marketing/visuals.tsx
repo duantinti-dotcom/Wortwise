@@ -129,7 +129,7 @@ export function HeroPreview() {
     <div className="relative mx-auto w-full max-w-[1120px]">
       <div aria-hidden className="aurora -top-24 left-1/2 h-72 w-[70%] -translate-x-1/2 bg-brand/25" />
       <div className="animate-tilt-in relative [transform-origin:50%_0%]">
-        <div className="ring-grad overflow-hidden rounded-[22px] border bg-[#0c0c0c] shadow-[0_60px_140px_-40px_rgba(0,0,0,1),0_0_80px_-30px_rgba(255,121,0,0.35)]">
+        <div className="edge-grad overflow-hidden rounded-[22px] border bg-[#0c0c0c] shadow-[0_60px_140px_-40px_rgba(0,0,0,1),0_0_80px_-30px_rgba(255,121,0,0.35)]">
           <div aria-hidden className="beam absolute inset-x-0 top-0 z-10 h-px opacity-70" />
           <div className="flex items-center gap-2 border-b border-white/8 bg-white/[0.03] px-4 py-3">
             <span className="flex gap-1.5">{["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="size-2.5 rounded-full opacity-70" style={{ background: c }} />)}</span>

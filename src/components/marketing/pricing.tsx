@@ -25,7 +25,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
       {plans.map((p) => {
         const featured = p.id === "pro";
         return (
-          <Spot key={p.id} className={cn("card relative flex flex-col !rounded-3xl p-8", featured && "ring-grad ring-brand !bg-[linear-gradient(180deg,rgba(255,121,0,0.11),rgba(255,121,0,0.02)_45%),#101010] lg:-my-4 lg:py-12 shadow-[0_40px_90px_-40px_rgba(255,121,0,0.45)]")}>
+          <Spot key={p.id} className={cn("card relative flex flex-col !rounded-3xl p-8", featured && "edge-grad edge-brand !bg-[linear-gradient(180deg,rgba(255,121,0,0.11),rgba(255,121,0,0.02)_45%),#101010] lg:-my-4 lg:py-12 shadow-[0_40px_90px_-40px_rgba(255,121,0,0.45)]")}>
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>
               {featured ? <span className="rounded-full bg-brand px-3 py-1 text-xs font-semibold text-black">Mais escolhido</span> : null}

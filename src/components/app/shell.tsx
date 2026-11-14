@@ -86,7 +86,7 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
   const { openUpgrade } = useUpgrade();
   const pct = search && search.limit > 0 ? Math.min(100, (search.used / search.limit) * 100) : 0;
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "ring-grad ring-brand bg-[linear-gradient(180deg,rgba(255,121,0,0.10),rgba(255,121,0,0.02))]" : "border-white/8 bg-white/[0.03]")}>
+    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "edge-grad edge-brand bg-[linear-gradient(180deg,rgba(255,121,0,0.10),rgba(255,121,0,0.02))]" : "border-white/8 bg-white/[0.03]")}>
       <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold"><Sparkles size={13} className="text-brand" />Plano {planName}</span>
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>

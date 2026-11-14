@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <PageShell eyebrow="Ferramenta gratuita" title="Calculadora de lucro para quem vende online" lead="Descubra quanto sobra depois de todas as despesas — e qual é o menor preço em que a venda ainda vale a pena.">
-      <ProfitCalculator initial={{ quantity: 50 }} />
+      <ProfitCalculator />
       <section className="prose-ww mx-auto mt-20 max-w-3xl">
         <h2>Como a conta é feita</h2>
         <p>A receita considera apenas as unidades efetivamente vendidas: do lote comprado saem as perdas e, das vendas, as devoluções. Sobre cada venda incidem comissão do marketplace, taxa de pagamento, impostos e publicidade (percentuais do preço), além de tarifa fixa, frete e embalagem. O lucro é a receita menos todos os custos, inclusive o frete de compra e as despesas fixas do lote.</p>

@@ -105,7 +105,7 @@ export default function HomePage() {
       </section>
 
       {/* ───────── Bento de funcionalidades ───────── */}
-      <section id="funcionalidades" className="relative scroll-mt-24 py-28 md:py-36">
+      <section id="funcionalidades" className="relative scroll-mt-24 py-24 md:py-28">
         <div className="container-page">
           <Head eyebrow="Funcionalidades" title={<>Tudo para decidir o que vender.<br className="hidden md:block" /> Em um só lugar.</>}
             text="Ferramentas conectadas entre si: da primeira pesquisa à simulação de lucro, sem trocar de aba nem de planilha." />
@@ -136,22 +136,22 @@ export default function HomePage() {
       </section>
 
       {/* ───────── Como funciona ───────── */}
-      <section id="como-funciona" className="relative scroll-mt-24 border-t border-white/[0.06] py-28 md:py-36">
-        <div aria-hidden className="aurora left-1/2 top-1/3 h-72 w-[50%] -translate-x-1/2 bg-brand/10" />
+      <section id="como-funciona" className="relative scroll-mt-24 border-t border-white/[0.06] py-24 md:py-28">
         <div className="container-page relative">
-          <Head eyebrow="Como funciona" title="Da dúvida à decisão em quatro passos" />
-          <ol className="relative mt-16 grid gap-5 md:grid-cols-4">
-            <div aria-hidden className="glow-line absolute left-[12%] right-[12%] top-[38px] hidden md:block" />
+          <div className="grid items-end gap-6 md:grid-cols-[1fr_auto]">
+            <Head center={false} eyebrow="Como funciona" title="Da dúvida à decisão em quatro passos" />
+            <Reveal><Link href="/cadastro" className="btn btn-secondary">Começar agora <ArrowRight size={15} /></Link></Reveal>
+          </div>
+          <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
-              <Reveal key={s.title} delay={i * 0.08}>
-                <li className="relative flex flex-col items-center px-2 text-center">
-                  <span className="relative flex size-[76px] items-center justify-center rounded-2xl border border-white/10 bg-[#121212] shadow-[0_0_0_8px_#090909,0_20px_40px_-20px_rgba(0,0,0,1)]">
-                    <s.icon size={26} className="text-brand-hi" />
-                    <span className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-brand font-mono text-[11px] font-bold text-black">{i + 1}</span>
-                  </span>
-                  <h3 className="mt-6 text-lg font-semibold tracking-tight">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">{s.text}</p>
-                </li>
+              <Reveal key={s.title} delay={i * 0.07} className="h-full">
+                <Spot as="li" className="card card-hover relative flex h-full flex-col overflow-hidden !rounded-3xl p-6">
+                  <span aria-hidden className="pointer-events-none absolute -right-2 -top-6 select-none font-semibold leading-none tracking-[-0.06em] text-white/[0.04] [font-size:120px]">{i + 1}</span>
+                  <span className="relative flex size-11 items-center justify-center rounded-xl border border-brand/30 bg-gradient-to-b from-brand/25 to-brand/5 text-brand-hi"><s.icon size={20} /></span>
+                  <span className="relative mt-8 font-mono text-xs text-brand-hi">Passo {i + 1}</span>
+                  <h3 className="relative mt-1.5 text-xl font-semibold tracking-tight">{s.title}</h3>
+                  <p className="relative mt-2 text-[14.5px] leading-relaxed text-muted">{s.text}</p>
+                </Spot>
               </Reveal>
             ))}
           </ol>
@@ -159,17 +159,17 @@ export default function HomePage() {
       </section>
 
       {/* ───────── Demonstração real ───────── */}
-      <section id="demonstracao" className="relative scroll-mt-24 py-28 md:py-36">
+      <section id="demonstracao" className="relative scroll-mt-24 py-24 md:py-28">
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(70%_50%_at_50%_0%,rgba(255,121,0,0.07),transparent)]" />
         <div className="container-page">
           <Head eyebrow="Experimente agora" title="A calculadora de lucro, funcionando de verdade"
             text="Sem cadastro: informe seus números e veja margem, ponto de equilíbrio, preço mínimo e cenários. Na plataforma você salva e compara simulações." />
-          <Reveal className="mt-14"><div className="ring-grad rounded-[28px] border bg-white/[0.015] p-3 md:p-5"><ProfitCalculator compact initial={{ costPrice: 20, salePrice: 59.9, quantity: 50, marketplaceFeePct: 12, saleShipping: 5, taxPct: 6 }} /></div></Reveal>
+          <Reveal className="mt-14"><ProfitCalculator compact /></Reveal>
         </div>
       </section>
 
       {/* ───────── Planos ───────── */}
-      <section id="planos" className="relative scroll-mt-24 border-t border-white/[0.06] py-28 md:py-36">
+      <section id="planos" className="relative scroll-mt-24 border-t border-white/[0.06] py-24 md:py-28">
         <div className="container-page">
           <Head eyebrow="Planos" title="Comece grátis. Assine quando fizer sentido." text="Limites claros em todos os planos. Cancele quando quiser; o acesso vale até o fim do período pago." />
           <Reveal className="mt-16"><Pricing /></Reveal>
@@ -178,7 +178,7 @@ export default function HomePage() {
       </section>
 
       {/* ───────── FAQ ───────── */}
-      <section id="perguntas" className="scroll-mt-24 border-t border-white/[0.06] py-28 md:py-36">
+      <section id="perguntas" className="scroll-mt-24 border-t border-white/[0.06] py-24 md:py-28">
         <div className="container-page grid gap-14 lg:grid-cols-[0.85fr_1.15fr]">
           <Reveal>
             <div className="eyebrow text-brand-hi">Perguntas frequentes</div>
@@ -193,7 +193,7 @@ export default function HomePage() {
       <section className="pb-28 md:pb-36">
         <div className="container-page">
           <Reveal>
-            <div className="ring-brand ring-grad relative overflow-hidden rounded-[32px] border bg-[#0d0d0d] px-6 py-20 text-center md:py-28">
+            <div className="edge-brand edge-grad relative overflow-hidden rounded-[32px] border bg-[#0d0d0d] px-6 py-20 text-center md:py-28">
               <div aria-hidden className="grid-bg absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_60%_70%_at_50%_100%,#000,transparent)]" />
               <div aria-hidden className="absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(50%_70%_at_50%_110%,rgba(255,121,0,0.32),transparent_70%)]" />
               <Sparkles size={26} className="relative mx-auto text-brand" />
