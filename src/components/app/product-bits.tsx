@@ -15,9 +15,13 @@ export interface ProductRef { source: string; externalId: string; title: string;
 
 export function ProductImage({ src, alt, className }: { src: string | null; alt: string; className?: string }) {
   const [failed, setFailed] = useState(false);
-  if (!src || failed) return <div className={cn("flex items-center justify-center bg-surface-2 text-faint", className)} aria-label="Imagem não disponível"><ImageOff size={22} /></div>;
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed(true)} className={cn("bg-white object-contain", className)} />;
+  if (!src || failed) return <div className={cn("flex flex-col items-center justify-center gap-2 bg-[linear-gradient(160deg,#1c1c1c,#111)] text-faint", className)} aria-label="Imagem não disponível"><ImageOff size={22} /><span className="text-[11px]">Imagem não disponível</span></div>;
+  return (
+    <div className={cn("flex items-center justify-center bg-[radial-gradient(circle_at_50%_40%,#ffffff,#ececec)] p-4", className)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed(true)} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+    </div>
+  );
 }
 
 export function FavoriteButton({ product, initial, onChange, className }: { product: ProductRef; initial: boolean; onChange?: (v: boolean) => void; className?: string }) {
@@ -55,16 +59,16 @@ export function FavoriteButton({ product, initial, onChange, className }: { prod
 export function ProductCard({ p, favorite, onFavorite }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void }) {
   const discount = p.originalPrice && p.price && p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
   return (
-    <Link href={`/app/produto/${p.source}/${p.externalId}`} className="card card-hover group relative flex flex-col overflow-hidden">
-      <div className="relative">
-        <ProductImage src={p.imageUrl} alt={p.title} className="aspect-[4/3] w-full" />
+    <Link href={`/app/produto/${p.source}/${p.externalId}`} className="card card-hover group relative flex flex-col overflow-hidden !rounded-2xl">
+      <div className="relative m-2 overflow-hidden rounded-xl">
+        <ProductImage src={p.imageUrl} alt={p.title} className="aspect-[4/3] w-full transition-transform duration-500 group-hover:scale-[1.03]" />
         <FavoriteButton key={String(favorite)} product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5" />
         <span className="badge absolute bottom-2.5 left-2.5 !border-black/10 !bg-ink/85 !text-fg backdrop-blur">{SOURCE_LABELS[p.source] ?? p.source}</span>
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="line-clamp-2 text-sm font-medium leading-snug">{p.title}</h3>
+      <div className="flex flex-1 flex-col px-4 pb-4 pt-2">
+        <h3 className="line-clamp-2 text-[14px] font-medium leading-snug group-hover:text-brand-hi">{p.title}</h3>
         <div className="mt-3 flex items-baseline gap-2">
-          <span className={cn("tabular text-lg font-semibold tracking-tight", p.price == null && "text-sm font-normal text-faint")}>{formatMoney(p.price, p.currency ?? "BRL")}</span>
+          <span className={cn("tabular text-xl font-semibold tracking-tight", p.price == null && "text-sm font-normal text-faint")}>{formatMoney(p.price, p.currency ?? "BRL")}</span>
           {discount ? <span className="badge badge-pos !h-5 !px-1.5 !text-[11px]">−{discount}%</span> : null}
         </div>
         <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">

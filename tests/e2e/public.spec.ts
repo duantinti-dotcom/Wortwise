@@ -5,7 +5,7 @@ test.describe("site público", () => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Descubra produtos que realmente valem a pena");
     await expect(page.getByRole("link", { name: /Começar grátis/ }).first()).toBeVisible();
-    await expect(page.getByText("Demonstração · dados ilustrativos").first()).toBeVisible();
+    await expect(page.getByText("Demonstração · dados ilustrativos").filter({ visible: true }).first()).toBeVisible();
     for (const id of ["funcionalidades", "como-funciona", "demonstracao", "planos", "perguntas"]) await expect(page.locator(`#${id}`)).toBeAttached();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(1);

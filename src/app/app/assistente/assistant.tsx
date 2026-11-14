@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUp, FileText, MessagesSquare, Plus, Sparkles } from "lucide-react";
+import { ArrowUp, Calculator, FileText, MessagesSquare, Plus, Search, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -147,14 +147,20 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
         <div className="flex-1">
           {!messages.length ? (
             <div className="mx-auto max-w-2xl pt-6 text-center md:pt-14">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 text-brand-hi"><Sparkles size={24} /></div>
-              <h1 className="mt-5 text-2xl font-semibold tracking-tight md:text-3xl">Assistente Worthwise</h1>
+              <div className="relative mx-auto w-fit">
+                <div aria-hidden className="aurora -inset-8 bg-brand/30" />
+                <div className="relative flex size-16 items-center justify-center rounded-[20px] border border-brand/40 bg-gradient-to-b from-brand/30 to-brand/5 text-brand-hi shadow-[0_0_40px_-8px_rgba(255,121,0,0.7)]"><Sparkles size={28} /></div>
+              </div>
+              <h1 className="text-grad mt-7 text-3xl font-semibold tracking-[-0.035em] md:text-[40px]">Assistente Worthwise</h1>
               <p className="mt-2 text-muted">Um analista comercial que consulta os dados da plataforma, faz as contas e cita as fontes. Ele não inventa preços, vendas nem fornecedores.</p>
-              {!available ? <div role="status" className="mt-6 rounded-xl border border-line-strong bg-surface-2 px-4 py-3 text-sm text-muted">O assistente ainda não está disponível neste ambiente. As demais ferramentas continuam funcionando normalmente.</div> : (
-                <div className="mt-8 grid gap-2.5 text-left sm:grid-cols-2">
-                  {SUGGESTIONS.map((s) => <button key={s} onClick={() => send(s)} className="card card-hover p-4 text-sm leading-relaxed text-muted hover:text-fg">{s}</button>)}
-                </div>
-              )}
+              {!available ? <div role="status" className="mx-auto mt-6 flex w-fit items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-left text-sm text-muted"><span className="size-2 shrink-0 rounded-full bg-brand" />Assistente ainda não disponível neste ambiente — as demais ferramentas funcionam normalmente.</div> : null}
+              <div className="mt-10 grid gap-3 text-left sm:grid-cols-2">
+                {SUGGESTIONS.map((s, i) => (
+                  <button key={s} disabled={!available} onClick={() => send(s)} className="card card-hover group flex items-start gap-3 !rounded-2xl p-4 text-left text-sm leading-relaxed text-[#cfcfcf] hover:text-fg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none">
+                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-brand-hi">{[<Search key="a" size={14} />, <Calculator key="b" size={14} />, <MessagesSquare key="c" size={14} />, <Sparkles key="d" size={14} />][i]}</span>{s}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="mx-auto max-w-3xl space-y-6 pb-6">

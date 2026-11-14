@@ -3,7 +3,7 @@ import { BarChart3, Bell, Bookmark, Calculator, FileText, Home, LogOut, Menu as 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Dialog as D } from "radix-ui";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Logo } from "@/components/logo";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { ToastProvider } from "@/components/ui/toast";
@@ -39,28 +39,46 @@ export interface ShellProps {
   children: ReactNode;
 }
 
+const GROUPS: { label: string; items: string[] }[] = [
+  { label: "", items: ["/app"] },
+  { label: "Pesquisa", items: ["/app/descobrir", "/app/oportunidades", "/app/mercado"] },
+  { label: "Fornecedores", items: ["/app/fornecedores", "/app/comparar"] },
+  { label: "Ferramentas", items: ["/app/calculadora", "/app/monitoramento", "/app/assistente"] },
+  { label: "Biblioteca", items: ["/app/favoritos", "/app/relatorios"] },
+  { label: "Conta", items: ["/app/configuracoes"] },
+];
+
 function NavList({ onNavigate, unreadAlerts, admin }: { onNavigate?: () => void; unreadAlerts: number; admin: boolean }) {
   const path = usePathname();
   const active = (href: string) => (href === "/app" ? path === "/app" : path.startsWith(href));
   return (
-    <ul className="space-y-0.5">
-      {NAV.map((n) => (
-        <li key={n.href}>
-          <Link href={n.href} onClick={onNavigate} aria-current={active(n.href) ? "page" : undefined}
-            className={cn("group flex h-9 items-center gap-3 rounded-lg px-2.5 text-[13.5px] transition-colors duration-150",
-              active(n.href) ? "bg-white/8 font-medium text-fg" : "text-muted hover:bg-white/4 hover:text-fg")}>
-            <n.icon size={16} className={cn("shrink-0 transition-colors", active(n.href) ? "text-brand" : "text-faint group-hover:text-muted")} />
-            <span className="truncate">{n.label}</span>
-            {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-semibold text-black">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
-          </Link>
-        </li>
+    <div className="space-y-5">
+      {GROUPS.map((g) => (
+        <div key={g.label || "home"}>
+          {g.label ? <div className="mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-faint">{g.label}</div> : null}
+          <ul className="space-y-0.5">
+            {NAV.filter((n) => g.items.includes(n.href)).map((n) => {
+              const on = active(n.href);
+              return (
+                <li key={n.href}>
+                  <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined}
+                    className={cn("group relative flex h-9 items-center gap-3 rounded-xl px-3 text-[13.5px] transition-all duration-200",
+                      on ? "bg-gradient-to-r from-white/[0.09] to-white/[0.03] font-medium text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" : "text-muted hover:bg-white/[0.04] hover:text-fg")}>
+                    {on ? <span aria-hidden className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand shadow-[0_0_12px_rgba(255,121,0,0.9)]" /> : null}
+                    <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
+                    <span className="truncate">{n.label}</span>
+                    {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-semibold text-black">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       ))}
       {admin ? (
-        <li className="!mt-3 border-t border-line pt-3">
-          <Link href="/admin" onClick={onNavigate} className="flex h-9 items-center gap-3 rounded-lg px-2.5 text-[13.5px] text-muted hover:bg-white/4 hover:text-fg"><ShieldCheck size={16} className="text-faint" /> Administração</Link>
-        </li>
+        <Link href="/admin" onClick={onNavigate} className="flex h-9 items-center gap-3 rounded-xl border border-dashed border-white/10 px-3 text-[13.5px] text-muted hover:border-white/20 hover:text-fg"><ShieldCheck size={16} className="text-faint" /> Administração</Link>
       ) : null}
-    </ul>
+    </div>
   );
 }
 
@@ -68,14 +86,14 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
   const { openUpgrade } = useUpgrade();
   const pct = search && search.limit > 0 ? Math.min(100, (search.used / search.limit) * 100) : 0;
   return (
-    <div className="rounded-xl border border-line bg-surface-2/60 p-3.5">
-      <div className="flex items-center justify-between text-xs"><span className="font-medium">Plano {planName}</span>
+    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "ring-grad ring-brand bg-[linear-gradient(180deg,rgba(255,121,0,0.10),rgba(255,121,0,0.02))]" : "border-white/8 bg-white/[0.03]")}>
+      <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold"><Sparkles size={13} className="text-brand" />Plano {planName}</span>
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>
-        <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/8"><div className={cn("h-full rounded-full transition-[width] duration-500", pct >= 100 ? "bg-neg" : "bg-brand")} style={{ width: `${pct}%` }} /></div>
-        <div className="mt-2 text-[11px] text-faint">pesquisas {search.period === "total" ? "gratuitas usadas" : "usadas neste mês"}</div>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10"><div className={cn("h-full rounded-full transition-[width] duration-700", pct >= 100 ? "bg-neg" : "bg-gradient-to-r from-brand to-brand-hi")} style={{ width: `${Math.max(pct, 2)}%` }} /></div>
+        <div className="mt-2 text-[11px] text-muted">pesquisas {search.period === "total" ? "gratuitas usadas" : "usadas neste mês"}</div>
       </>) : null}
-      {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-primary btn-sm mt-3 w-full"><Sparkles size={13} /> Fazer upgrade</button> : null}
+      {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-primary btn-sm mt-3.5 w-full">Fazer upgrade</button> : null}
     </div>
   );
 }
@@ -102,19 +120,31 @@ function Profile({ user }: { user: ShellProps["user"] }) {
 export function AppShell(props: ShellProps) {
   const [drawer, setDrawer] = useState(false);
   const path = usePathname();
+  // Atalho "/" foca a busca global (como em ferramentas profissionais).
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (e.key !== "/" || t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName)) return;
+      e.preventDefault();
+      document.getElementById("ww-global-search")?.focus();
+    };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, []);
   return (
     <ToastProvider>
       <UpgradeProvider plans={props.plans} currentPlan={props.plan}>
         <div className="min-h-dvh lg:pl-[248px]">
           {/* Sidebar — desktop */}
-          <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-line bg-surface lg:flex">
-            <Link href="/app" className="flex h-16 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
-            <nav aria-label="Aplicação" className="flex-1 overflow-y-auto px-3 pb-4"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
+          <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-white/[0.06] bg-[linear-gradient(180deg,#111_0%,#0c0c0c_100%)] lg:flex">
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(80%_100%_at_0%_0%,rgba(255,121,0,0.08),transparent)]" />
+            <Link href="/app" className="relative flex h-16 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
+            <nav aria-label="Aplicação" className="relative flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
             <div className="p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
           </aside>
 
           {/* Barra superior */}
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-ink/85 px-4 backdrop-blur-md lg:h-16 lg:px-8">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/[0.06] bg-ink/70 px-4 backdrop-blur-xl backdrop-saturate-150 lg:h-16 lg:px-8">
             <D.Root open={drawer} onOpenChange={setDrawer}>
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>
@@ -131,8 +161,9 @@ export function AppShell(props: ShellProps) {
             <Link href="/app" className="lg:hidden" aria-label="Worthwise — início"><Logo size={24} /></Link>
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
-              <input name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="h-10 w-full rounded-xl border border-line bg-surface-2/70 pl-10 pr-3 text-sm outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-faint focus:border-brand focus:bg-surface-2 focus:shadow-[0_0_0_3px_rgba(255,121,0,0.16)]" />
+              <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
+                className="h-10 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-white/[0.14] focus:border-brand focus:bg-white/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)]" />
+              <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
               <Link href="/app/monitoramento" className="btn btn-ghost relative !px-2.5" aria-label={`Alertas${props.unreadAlerts ? ` (${props.unreadAlerts} não lidos)` : ""}`}>
@@ -142,7 +173,8 @@ export function AppShell(props: ShellProps) {
             </div>
           </header>
 
-          <main id="conteudo" key={path} className="animate-[page-in_0.28s_cubic-bezier(0.16,1,0.3,1)] px-4 pb-28 pt-6 lg:px-8 lg:pb-16 lg:pt-8">
+          <main id="conteudo" key={path} className="relative animate-[page-in_0.32s_cubic-bezier(0.16,1,0.3,1)] px-4 pb-28 pt-7 lg:px-10 lg:pb-16 lg:pt-10">
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(45%_100%_at_70%_0%,rgba(255,121,0,0.06),transparent)]" />
             <div className="mx-auto max-w-[1240px]">{props.children}</div>
           </main>
 

@@ -14,8 +14,8 @@ export function ScoreRing({ value, size = 92, label }: { value: number | null; s
           strokeDasharray={c} strokeDashoffset={c * (1 - pct)} style={{ transition: "stroke-dashoffset 0.9s cubic-bezier(0.16,1,0.3,1), stroke 0.3s" }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="tabular text-2xl font-semibold leading-none tracking-tight">{value ?? "—"}</span>
-        <span className="mt-1 text-[10px] uppercase tracking-wider text-faint">{label ?? "de 100"}</span>
+        <span className={cn("tabular font-semibold leading-none tracking-tight", size < 80 ? "text-lg" : size > 110 ? "text-4xl" : "text-2xl")}>{value ?? "—"}</span>
+        {size >= 80 ? <span className="mt-1 text-[10px] uppercase tracking-wider text-faint">{label ?? "de 100"}</span> : null}
       </div>
     </div>
   );

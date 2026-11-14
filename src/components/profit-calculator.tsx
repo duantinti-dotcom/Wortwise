@@ -35,10 +35,14 @@ function NumField({ label, value, onChange, prefix, suffix, hint, step = "0.01" 
   );
 }
 
-function Group({ title, children }: { title: string; children: ReactNode }) {
+function Group({ title, step, hint, children }: { title: string; step: number; hint?: string; children: ReactNode }) {
   return (
-    <fieldset className="card p-5">
-      <legend className="float-left mb-4 w-full text-sm font-semibold">{title}</legend>
+    <fieldset className="card !rounded-2xl p-5 md:p-6">
+      <legend className="float-left mb-5 flex w-full items-center gap-3">
+        <span className="flex size-7 items-center justify-center rounded-lg border border-brand/30 bg-brand/10 font-mono text-xs font-semibold text-brand-hi">{step}</span>
+        <span className="text-[15px] font-semibold tracking-tight">{title}</span>
+        {hint ? <span className="ml-auto text-xs font-normal text-faint">{hint}</span> : null}
+      </legend>
       <div className="clear-both grid grid-cols-2 gap-x-4 gap-y-4">{children}</div>
     </fieldset>
   );
@@ -71,19 +75,19 @@ export function ProfitCalculator({ initial, onSave, saving, compact }: {
   return (
     <div className={cn("grid gap-5", compact ? "lg:grid-cols-[1fr_1fr]" : "lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]")}>
       <div className="space-y-5">
-        <Group title="Compra">
+        <Group step={1} title="Compra" hint="custos de aquisição">
           <NumField label="Preço de aquisição (un.)" prefix="R$" value={i.costPrice} onChange={set("costPrice")} />
           <NumField label="Quantidade" value={i.quantity} onChange={set("quantity")} step="1" suffix="un." />
           <NumField label="Frete de compra (total)" prefix="R$" value={i.purchaseFreight} onChange={set("purchaseFreight")} />
           <NumField label="Outros custos (total)" prefix="R$" value={i.otherCosts} onChange={set("otherCosts")} />
         </Group>
-        <Group title="Venda">
+        <Group step={2} title="Venda" hint="por unidade vendida">
           <NumField label="Preço de venda (un.)" prefix="R$" value={i.salePrice} onChange={set("salePrice")} />
           <NumField label="Frete de venda (un.)" prefix="R$" value={i.saleShipping} onChange={set("saleShipping")} hint="Pago por você" />
           <NumField label="Embalagem (un.)" prefix="R$" value={i.packaging} onChange={set("packaging")} />
           <NumField label="Publicidade" suffix="%" value={i.adsPct} onChange={set("adsPct")} hint="% do preço de venda" />
         </Group>
-        <Group title="Taxas e impostos">
+        <Group step={3} title="Taxas e impostos" hint="percentuais">
           <label className="col-span-2 block">
             <span className="label">Canal de venda (preenche as taxas)</span>
             <select className="input" value={preset} onChange={(e) => {
@@ -136,7 +140,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact }: {
                 {[
                   ["Receita bruta", formatMoney(r.grossRevenue)], ["Custo total", formatMoney(r.totalCost)],
                   ["Margem de contribuição", ready ? `${formatMoney(r.contributionPerUnit)} · ${formatPercent(r.contributionMarginPct)}` : "—"],
-                  ["Ponto de equilíbrio", r.breakEvenUnits == null ? (ready ? "Não atinge" : "—") : `${r.breakEvenUnits} un.`],
+                  ["Ponto de equilíbrio", r.breakEvenUnits == null ? (ready ? "Não atinge" : "—") : r.breakEvenUnits === 0 ? "Desde a 1ª venda" : `${r.breakEvenUnits} un.`],
                   ["Preço mínimo (lucro zero)", ready && r.minPrice != null ? formatMoney(r.minPrice) : "—"],
                 ].map(([k, v]) => (
                   <div key={k} className="flex items-baseline justify-between gap-4"><dt className="text-muted">{k}</dt><dd className="tabular text-right font-medium">{v}</dd></div>

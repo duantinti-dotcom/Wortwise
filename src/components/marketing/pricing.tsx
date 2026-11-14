@@ -1,12 +1,13 @@
 "use client";
-import { Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Spot } from "@/components/ui/spot";
 import { DEFAULT_PLANS, type PlanInfo } from "@/lib/plans";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-const price = (cents: number) => (cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+const [int, dec] = [(c: number) => Math.floor(c / 100).toLocaleString("pt-BR"), (c: number) => String(c % 100).padStart(2, "0")];
 
 /** Planos: renderiza os valores padrão e atualiza com os preços vigentes do banco (editáveis no admin). */
 export function Pricing({ initial }: { initial?: PlanInfo[] }) {
@@ -20,26 +21,34 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
   }, [initial]);
 
   return (
-    <div className="grid gap-5 lg:grid-cols-3">
+    <div className="grid items-stretch gap-5 lg:grid-cols-3">
       {plans.map((p) => {
         const featured = p.id === "pro";
         return (
-          <div key={p.id} className={cn("card relative flex flex-col p-7", featured && "!border-brand/50 bg-[linear-gradient(180deg,rgba(255,121,0,0.07),transparent_40%)]")}>
-            {featured ? <span className="badge badge-brand absolute right-6 top-6">Mais escolhido para começar</span> : null}
-            <h3 className="text-lg font-semibold">{p.name}</h3>
-            <p className="mt-1 text-sm text-muted">{p.description}</p>
-            <div className="mt-6 flex items-baseline gap-1.5">
-              <span className="text-sm text-muted">R$</span>
-              <span className="tabular text-5xl font-semibold tracking-[-0.04em]">{price(p.price_cents)}</span>
-              {p.price_cents > 0 ? <span className="text-sm text-muted">/mês</span> : null}
+          <Spot key={p.id} className={cn("card relative flex flex-col !rounded-3xl p-8", featured && "ring-grad ring-brand !bg-[linear-gradient(180deg,rgba(255,121,0,0.11),rgba(255,121,0,0.02)_45%),#101010] lg:-my-4 lg:py-12 shadow-[0_40px_90px_-40px_rgba(255,121,0,0.45)]")}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>
+              {featured ? <span className="rounded-full bg-brand px-3 py-1 text-xs font-semibold text-black">Mais escolhido</span> : null}
             </div>
-            <Link href={p.price_cents > 0 ? `/cadastro?plano=${p.id}` : "/cadastro"} className={cn("btn btn-lg mt-7", featured ? "btn-primary" : "btn-secondary")}>
-              {p.price_cents > 0 ? `Assinar ${p.name}` : "Começar grátis"}
+            <p className="mt-2 text-sm text-muted">{p.description}</p>
+            <div className="mt-8 flex items-end gap-2">
+              <div className="flex items-start">
+                <span className="mr-1 mt-1.5 text-base text-muted">R$</span>
+                <span className="tabular text-6xl font-semibold leading-none tracking-[-0.05em]">{int(p.price_cents)}</span>
+                <span className="tabular mt-1 text-2xl font-semibold tracking-tight">,{dec(p.price_cents)}</span>
+              </div>
+              <span className="pb-1.5 text-sm text-muted">{p.price_cents > 0 ? "por mês" : "para sempre"}</span>
+            </div>
+            <Link href={p.price_cents > 0 ? `/cadastro?plano=${p.id}` : "/cadastro"} className={cn("btn btn-lg mt-8 w-full", featured ? "btn-primary" : "btn-secondary")}>
+              {p.price_cents > 0 ? `Assinar ${p.name}` : "Começar grátis"} <ArrowRight size={16} />
             </Link>
-            <ul className="mt-7 space-y-3 text-sm">
-              {p.features.map((f) => <li key={f} className="flex gap-2.5 text-[#d0d0d0]"><Check size={16} className="mt-0.5 shrink-0 text-brand" />{f}</li>)}
+            <div className="hairline my-8" />
+            <ul className="space-y-3.5 text-[14.5px]">
+              {p.features.map((f) => (
+                <li key={f} className="flex gap-3 text-[#d6d6d6]"><span className={cn("mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full", featured ? "bg-brand text-black" : "bg-white/10 text-fg")}><Check size={12} strokeWidth={3} /></span>{f}</li>
+              ))}
             </ul>
-          </div>
+          </Spot>
         );
       })}
     </div>

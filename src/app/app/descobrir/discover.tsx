@@ -1,5 +1,5 @@
 "use client";
-import { CircleAlert, Clock, Lock, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpLeft, CircleAlert, Clock, Database, Lock, Search, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ProductCard, ProductCardSkeleton } from "@/components/app/product-bits";
@@ -82,12 +82,12 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     <>
       <PageHeader title="Descobrir produtos" description="Pesquise em fontes autorizadas. Cada resultado mostra a origem e o momento da coleta; campos que a fonte não informa aparecem como “não disponível”." />
 
-      <form onSubmit={(e) => { e.preventDefault(); void run(query); }} className="glass sticky top-[68px] z-10 rounded-2xl p-2 lg:top-20" role="search">
+      <form onSubmit={(e) => { e.preventDefault(); void run(query); }} className="glass sticky top-[68px] z-10 rounded-2xl p-2 shadow-[0_24px_60px_-30px_rgba(0,0,0,1),0_0_0_1px_rgba(255,121,0,0.08)] lg:top-20" role="search">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
+            <Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} aria-label="Termo de pesquisa" placeholder="O que você quer vender? Ex.: fone bluetooth" enterKeyHint="search"
-              className="h-12 w-full rounded-xl bg-transparent pl-11 pr-3 text-base outline-none placeholder:text-faint" />
+              className="h-12 w-full rounded-xl bg-transparent pl-12 pr-3 text-base outline-none placeholder:text-faint" />
           </div>
           <button type="button" onClick={() => setShowFilters((v) => !v)} aria-expanded={showFilters} className={cn("btn btn-secondary relative !h-12 !px-3.5", showFilters && "!border-brand/60")} aria-label="Filtros">
             <SlidersHorizontal size={17} /><span className="hidden sm:inline">Filtros</span>
@@ -173,14 +173,27 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
         ) : null}
 
         {!loading && !result && !error ? (
-          <div className="grid gap-5 lg:grid-cols-2">
-            <div className="card p-6">
-              <h2 className="text-sm font-semibold">Sugestões para começar</h2>
-              <p className="mt-1 text-sm text-muted">Clique para preencher a busca — a pesquisa só é feita quando você confirmar.</p>
-              <div className="mt-4 flex flex-wrap gap-2">{SUGGESTIONS.map((s) => <button key={s} onClick={() => setQuery(s)} className="badge !h-8 cursor-pointer !px-3 hover:!border-white/30 hover:!text-fg">{s}</button>)}</div>
+          <div className="grid gap-5 lg:grid-cols-3">
+            <div className="card !rounded-3xl p-6 lg:col-span-2">
+              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Sparkles size={14} className="text-brand-hi" /></span>Sugestões para começar</h2>
+              <p className="mt-2 text-sm text-muted">Clique para preencher a busca — a pesquisa só acontece quando você confirmar.</p>
+              <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{SUGGESTIONS.map((s) => (
+                <button key={s} onClick={() => setQuery(s)} className="group flex items-center justify-between gap-2 rounded-xl border border-white/[0.07] bg-white/[0.02] px-3.5 py-3 text-left text-sm transition-all hover:border-brand/40 hover:bg-brand/[0.05]">
+                  <span className="flex items-center gap-2.5"><Search size={14} className="text-faint group-hover:text-brand" />{s}</span><ArrowUpLeft size={14} className="text-faint opacity-0 transition-opacity group-hover:opacity-100" /></button>))}</div>
             </div>
-            <div className="card p-6">
-              <h2 className="text-sm font-semibold">Pesquisas recentes</h2>
+            <div className="card !rounded-3xl p-6">
+              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Database size={14} className="text-brand-hi" /></span>Fontes de dados</h2>
+              <ul className="mt-4 space-y-2.5">
+                {sources.map((s) => (
+                  <li key={s.id} className="flex items-center justify-between gap-3 text-sm" title={s.detail}>
+                    <span className="flex items-center gap-2.5"><span className={cn("size-2 rounded-full", s.state === "connected" ? "bg-pos animate-pulse-ring" : s.state === "pending_approval" ? "bg-white/25" : "bg-brand")} />{s.name}</span>
+                    <span className="text-xs text-faint">{s.state === "connected" ? "conectada" : s.state === "pending_approval" ? "em credenciamento" : "não configurada"}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="card !rounded-3xl p-6 lg:col-span-3">
+              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Clock size={14} className="text-brand-hi" /></span>Pesquisas recentes</h2>
               {recent.length ? (
                 <ul className="mt-3 divide-y divide-line">
                   {recent.map((r) => (
