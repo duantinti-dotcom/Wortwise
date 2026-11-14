@@ -1,7 +1,7 @@
 "use client";
 import { Info, RotateCcw, Save } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildScenarios, calculateProfit, CHANNEL_PRESETS, compareChannels, DEFAULT_INPUTS, priceForTargetMargin, profitCurve, type ProfitInputs } from "@/lib/profit/calc";
 import { cn, formatMoney, formatPercent } from "@/lib/utils";
 
@@ -54,6 +54,9 @@ export function ProfitCalculator({ initial, onSave, saving, compact }: {
   const [tab, setTab] = useState<Tab>("resultado");
   const [preset, setPreset] = useState("");
   const set = <K extends keyof ProfitInputs>(k: K) => (v: number) => setI((p) => ({ ...p, [k]: v }));
+
+  // Publica os valores atuais para quem quiser reagir (ex.: Score na página do produto).
+  useEffect(() => { window.dispatchEvent(new CustomEvent("ww:simulation", { detail: i })); }, [i]);
 
   const r = useMemo(() => calculateProfit(i), [i]);
   const curve = useMemo(() => profitCurve(i), [i]);

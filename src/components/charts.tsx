@@ -101,3 +101,23 @@ export function CompareBars({ data, height, positiveNegative }: { data: { name: 
     </ResponsiveContainer>
   );
 }
+
+/** Barras verticais de contagem (distribuição de preços). */
+export function CountBars({ data, height = 220 }: { data: { name: string; value: number }[]; height?: number }) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+        <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+        <XAxis dataKey="name" tick={AXIS} tickLine={false} axisLine={false} interval={0} />
+        <YAxis tick={AXIS} tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+        <Tooltip cursor={{ fill: "rgba(255,255,255,0.04)" }}
+          content={({ active, payload }) => {
+            const p = payload?.[0]?.payload as { name: string; value: number } | undefined;
+            if (!active || !p) return null;
+            return <TipBox title={p.name} rows={[{ label: "Anúncios", value: String(p.value) }]} />;
+          }} />
+        <Bar dataKey="value" fill="#ff7900" radius={[5, 5, 0, 0]} animationDuration={600} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
