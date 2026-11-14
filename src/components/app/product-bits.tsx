@@ -2,7 +2,7 @@
 import { Bell, Bookmark, ExternalLink, ImageOff, Loader2, Star, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 import type { ProductResult } from "@/lib/connectors/types";
@@ -24,7 +24,6 @@ export function FavoriteButton({ product, initial, onChange, className }: { prod
   const [on, setOn] = useState(initial);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
-  useEffect(() => setOn(initial), [initial]);
   async function toggle(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -59,7 +58,7 @@ export function ProductCard({ p, favorite, onFavorite }: { p: ProductResult; fav
     <Link href={`/app/produto/${p.source}/${p.externalId}`} className="card card-hover group relative flex flex-col overflow-hidden">
       <div className="relative">
         <ProductImage src={p.imageUrl} alt={p.title} className="aspect-[4/3] w-full" />
-        <FavoriteButton product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5" />
+        <FavoriteButton key={String(favorite)} product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5" />
         <span className="badge absolute bottom-2.5 left-2.5 !border-black/10 !bg-ink/85 !text-fg backdrop-blur">{SOURCE_LABELS[p.source] ?? p.source}</span>
       </div>
       <div className="flex flex-1 flex-col p-4">

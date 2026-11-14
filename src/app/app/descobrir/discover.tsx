@@ -64,6 +64,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     if (!key || ran.current === key) return;
     ran.current = key;
     if (s) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- carregamento disparado pela URL
       setLoading(true);
       api<{ query: string; results: ProductResult[]; locked: number; sources: SourceReport[]; remaining: number | null; plan: string; created_at: string }>(`/api/search/${s}`).then((r) => {
         setLoading(false);

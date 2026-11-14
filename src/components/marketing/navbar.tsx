@@ -20,6 +20,7 @@ export function Navbar() {
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 12);
     on();
+    document.documentElement.dataset.navReady = "1";
     window.addEventListener("scroll", on, { passive: true });
     return () => window.removeEventListener("scroll", on);
   }, []);

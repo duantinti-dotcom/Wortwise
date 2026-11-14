@@ -10,6 +10,7 @@ export function useLoad<T>(loader: () => Promise<T>, deps: unknown[] = []) {
   useEffect(() => {
     let alive = true;
     const timeout = setTimeout(() => { if (alive) setState((s) => (s.loading ? { data: null, error: "A operação demorou demais. Verifique sua conexão.", loading: false } : s)); }, 20000);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reinicia o estado ao recarregar
     setState((s) => ({ ...s, loading: true, error: null }));
     ref.current().then(
       (data) => { if (alive) setState({ data, error: null, loading: false }); },

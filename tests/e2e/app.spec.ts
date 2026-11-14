@@ -10,6 +10,7 @@ test.skip(!EMAIL || !PASSWORD, "Defina E2E_EMAIL e E2E_PASSWORD (usuário de tes
 
 async function login(page: Page) {
   await page.goto("/entrar");
+  await page.locator("form[data-hydrated]").waitFor();
   await page.getByLabel("E-mail").fill(EMAIL!);
   await page.getByLabel("Senha").fill(PASSWORD!);
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
@@ -22,6 +23,7 @@ test("login com senha incorreta mostra erro claro", async ({ browser }) => {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await page.goto("/entrar");
+  await page.locator("form[data-hydrated]").waitFor();
   await page.getByLabel("E-mail").fill(EMAIL!);
   await page.getByLabel("Senha").fill("senha-errada-123");
   await page.getByRole("button", { name: "Entrar", exact: true }).click();

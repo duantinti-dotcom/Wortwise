@@ -80,6 +80,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
       return;
     }
     await supabase.auth.signOut();
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- recarga completa intencional: limpa todo o estado após excluir a conta
     window.location.href = "/";
   }
 

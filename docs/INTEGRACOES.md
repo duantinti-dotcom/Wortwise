@@ -1,0 +1,74 @@
+# Diagnóstico das integrações
+
+Situação em 13/11/2026. "Verificado" significa que foi exercitado de ponta a ponta neste projeto; o restante foi implementado a partir da documentação oficial e precisa de credenciais para ser confirmado.
+
+## Resumo
+
+| Integração | Estado | O que falta |
+| --- | --- | --- |
+| Supabase (banco + login por e-mail) | **Conectada e verificada** | Google OAuth, SMTP e Turnstile no painel |
+| BrasilAPI (CNPJ) | **Conectada e verificada** | — |
+| Mercado Livre | Implementada, **não verificada ao vivo** | Client ID e Client Secret do aplicativo |
+| HeroPay | Implementada; webhook verificado localmente | Token do sandbox, segredo do webhook, ciclo real |
+| Assistente (Workers AI) | Implementado, **não verificado ao vivo** | Deploy com o binding `AI` (ou `AI_BASE_URL`) |
+| Shopee, Amazon, TikTok Shop, SHEIN | Estado real exposto; sem dados | Credenciamento em cada plataforma |
+
+## Mercado Livre
+
+- **Fonte**: API oficial (`api.mercadolibre.com`), autenticada com as credenciais do aplicativo (OAuth `client_credentials`). Sem scraping.
+- **Constatação de hoje**: sem token, todos os recursos testados (`/sites/MLB/search`, `/products/search`, `/trends/MLB`, `/sites/MLB/categories`, `/sites/MLB/listing_prices`) respondem **403**. O portal de documentação também bloqueou leitura automatizada, então os contratos abaixo vêm do conhecimento da API pública e **devem ser confirmados com a primeira chamada autenticada**.
+- **Implementado** (`src/lib/connectors/mercadolivre.ts`):
+  - Busca de anúncios (`/sites/MLB/search`). Se o aplicativo não tiver acesso (401/403), o conector passa automaticamente para a busca no catálogo (`/products/search`) e obtém o preço da oferta vencedora em `/products/{id}`.
+  - Detalhe de ficha de catálogo e ofertas concorrentes (`/products/{id}`, `/products/{id}/items`), detalhe de anúncio (`/items/{id}`), avaliações (`/reviews/item/{id}`).
+  - Tarifas oficiais de venda (`/sites/MLB/listing_prices`) e posição no ranking de mais vendidos da categoria (`/highlights/MLB/category/{id}`).
+  - Timeout de 8 s, validação de formato com Zod, registro de cada chamada (Admin → Logs), respeito a 429.
+- **Não disponível pela API para terceiros**: unidades vendidas e faturamento de anúncios de outros vendedores; histórico de preços. O Worthwise não exibe nem estima esses números.
+- **Limites e custo**: API gratuita; os limites dependem do aplicativo e não são publicados em valor fixo. O monitoramento agrupa verificações por produto para reduzir chamadas.
+- **Atenção aos termos**: leia os Termos e Condições de Desenvolvedores antes do lançamento, em especial as regras sobre armazenamento e exibição de dados a terceiros.
+
+## Shopee, Amazon, TikTok Shop e SHEIN
+
+Nenhuma oferece busca pública de catálogo sem aprovação. Os conectores existem para exibir o estado real ("Aguardando credenciamento") e **nunca retornam produtos**.
+
+| Plataforma | Caminho oficial | Exigência | O que permitiria |
+| --- | --- | --- | --- |
+| Shopee | Open Platform / API de afiliados | Cadastro como parceiro ou afiliado aprovado | Dados de lojas que autorizarem; ofertas de afiliado |
+| Amazon | Product Advertising API 5.0 | Conta de Associado aprovada, com vendas qualificadas | Busca, preços e ofertas |
+| TikTok Shop | Partner API | Aplicativo aprovado e autorização de cada loja | Dados das lojas autorizadas |
+| SHEIN | Open Platform | Vendedor ou parceiro aprovado | Dados de vendedores parceiros |
+
+APIs de gestão de loja **não** dão acesso a vendas ou produtos de concorrentes. Para ampliar a cobertura sem credenciamento, a alternativa legítima é contratar um provedor de dados com licença comercial; a interface `Connector` (`src/lib/connectors/types.ts`) já acomoda isso.
+
+## HeroPay
+
+Lido em `heropay.ai/developers`, `/webhooks`, `/subscriptions` e `/faq` (o site `docs.heropay.tech` é renderizado no navegador e não pôde ser lido integralmente).
+
+- **Bases**: `https://api.heropay.tech` (produção) e `https://api.beta.heropay.tech` (sandbox). Headers: `Authorization: Bearer <JWT>` e `Accept: application/vnd.herospark.com; version=1`.
+- **Assinatura**: `POST /payment_links` com `period: "monthly"` devolve o checkout em `data.offer.url` (Pix Automático, cartão ou boleto). Valores em centavos, mínimo de R$ 5,00.
+- **Identificação do pagador**: o Worthwise cria um token por tentativa (`checkout_intents`) e o envia em `?src=`; a HeroPay o devolve em `cart.src` em todos os webhooks. Reserva: assinatura já conhecida e, por último, e-mail confirmado do comprador.
+- **Webhooks**: 9 gatilhos; tratamos 7. Assinatura HMAC SHA-256 do corpo bruto em `X-HeroPay-Signature` (aceita hexadecimal ou base64). O payload não traz ID de evento nem o nome do gatilho, por isso cada webhook é cadastrado com `?trigger=<gatilho>` na URL e a deduplicação usa gatilho + pagamento + assinatura + status.
+- **Cancelamento**: `POST /recurring_payment/cancel` — imediato e irreversível no provedor; o acesso no Worthwise segue até o fim do período pago.
+- **Limitações confirmadas da v1**: sem trial, sem validação de cartão sem cobrança, sem troca de plano com pró-rata. Por isso as três pesquisas gratuitas não exigem cartão, e a troca de plano é "cancelar e assinar o novo". A opção "exigir meio de pagamento" aparece desabilitada no painel.
+- **A confirmar no sandbox** (a HeroPay recomenda validar com payloads reais):
+  1. se `subscription.id` do webhook é o `recurring_payment_id` aceito pelo cancelamento;
+  2. o formato de `payment.value`, das datas e dos status;
+  3. a codificação da assinatura na sua conta e onde obter o segredo do webhook;
+  4. se o parâmetro `src` na URL do checkout substitui o `src` do link.
+- **Custos publicados**: cartão 3,49% por transação aprovada; Pix e boleto R$ 0 em caráter promocional (até 500 por mês, sujeito a mudança); sem mensalidade.
+
+## Assistente de IA
+
+- **Provedores** (`src/lib/ai/provider.ts`): Workers AI pelo binding `AI` (padrão) ou qualquer API compatível com OpenAI (`AI_PROVIDER=openai-compatible`, `AI_BASE_URL`, `AI_API_KEY`), o que inclui um Ollama hospedado à parte. Nenhum servidor Ollama roda dentro do Worker.
+- **Modelo padrão**: `@cf/meta/llama-3.3-70b-instruct-fp8-fast` (configurável em `AI_MODEL`). Confira no catálogo da Cloudflare os modelos com *function calling* e os preços vigentes antes de definir o de produção.
+- **Fundamentação**: o modelo só obtém números por ferramentas do servidor (pesquisa, detalhe, cálculo de lucro, histórico, tarifas, cotações). Saídas de ferramentas entram no contexto truncadas e rotuladas como dados, não como instruções.
+- **Controles**: cota por plano consumida no banco, limite de requisições por minuto, teto de tokens, de histórico e de rodadas de ferramentas (Admin → Configurações), timeout de 45 s.
+- **Sem IA configurada**: a tela informa a indisponibilidade e o restante da plataforma funciona.
+- **Não verificado ao vivo**: o formato exato de `tool_calls` do Workers AI varia entre modelos; valide a primeira conversa após o deploy.
+
+## BrasilAPI (CNPJ)
+
+Consulta pública e gratuita de CNPJ (`brasilapi.com.br/api/cnpj/v1/{cnpj}`), usada para a "Verificação documental realizada". Verificado de ponta a ponta. Sem contrato de disponibilidade: se cair, a verificação informa a indisponibilidade e nada é alterado.
+
+## Worthwise Lens (pesquisa por imagem)
+
+Planejado para uma etapa posterior; depende de uma fonte que aceite busca por imagem com licença comercial. Não aparece na interface.

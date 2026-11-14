@@ -56,6 +56,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const tsLoaded = useRef(false);
   const needsCaptcha = Boolean(publicEnv.turnstileSiteKey) && mode !== "reset";
   const configured = Boolean(publicEnv.supabaseUrl);
+  // Marca a hidratação: antes dela o botão fica desabilitado, para o formulário nunca ser enviado sem o JavaScript.
+  const [hydrated, setHydrated] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- sinaliza a hidratação uma única vez
+  useEffect(() => setHydrated(true), []);
 
   const mountTurnstile = () => {
     if (!needsCaptcha || tsLoaded.current || !tsRef.current || !window.turnstile) return;
@@ -152,7 +156,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </>
       ) : <div className="mt-8" />}
 
-      <form onSubmit={submit} className="space-y-4" noValidate={false}>
+      <form onSubmit={submit} method="post" className="space-y-4" data-hydrated={hydrated || undefined}>
         {mode === "signup" ? (
           <label className="block"><span className="label">Nome</span>
             <input className="input" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="Como podemos te chamar?" /></label>
@@ -169,7 +173,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         ) : null}
         {needsCaptcha ? <div ref={tsRef} className="min-h-[65px]" /> : null}
         {error ? <div role="alert" className="flex items-start gap-2 rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-sm text-[#ffb3b1]"><CircleAlert size={16} className="mt-0.5 shrink-0" />{error}</div> : null}
-        <button type="submit" disabled={Boolean(busy) || !configured || (needsCaptcha && !captcha)} className="btn btn-primary btn-lg w-full">
+        <button type="submit" disabled={!hydrated || Boolean(busy) || !configured || (needsCaptcha && !captcha)} className="btn btn-primary btn-lg w-full">
           {busy === "form" ? <Loader2 size={18} className="animate-spin" /> : null}{copy.cta}
         </button>
       </form>

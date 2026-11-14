@@ -18,6 +18,7 @@ export default async function Page() {
   const [{ data: sources }, { data: plans }, { data: usage }] = await Promise.all([
     supabase.from("data_sources").select("id, status, status_detail, last_ok_at, last_error_at"),
     supabase.from("plans").select("id, name, price_cents, provider_link_id, provider_checkout_url").gt("price_cents", 0).order("sort_order"),
+    // eslint-disable-next-line react-hooks/purity -- Server Component: executa uma vez por requisição
     supabase.from("api_usage_logs").select("source, ok").gte("created_at", new Date(Date.now() - 86400000).toISOString()).limit(5000),
   ]);
   const db = new Map((sources ?? []).map((s) => [s.id as string, s]));

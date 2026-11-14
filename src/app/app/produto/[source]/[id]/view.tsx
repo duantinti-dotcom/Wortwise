@@ -56,10 +56,11 @@ export function ProductView({ source, id }: { source: string; id: string }) {
 
   const p = data?.product;
   const offerPrices = useMemo(() => (p?.offers ?? []).map((o) => o.price).filter((v): v is number => v != null).sort((a, b) => a - b), [p]);
+  const [now] = useState(() => Date.now());
   const history = useMemo(() => {
-    const since = Date.now() - range * 86400000;
+    const since = now - range * 86400000;
     return (data?.history ?? []).filter((h) => new Date(h.date).getTime() >= since);
-  }, [data, range]);
+  }, [data, range, now]);
   const simResult = useMemo(() => (sim && sim.costPrice > 0 && sim.salePrice > 0 ? calculateProfit(sim) : null), [sim]);
   const score = useMemo(() => computeScore({
     marginPct: simResult?.marginPct ?? null, price: p?.price ?? null, comparablePrices: offerPrices,
@@ -128,7 +129,7 @@ export function ProductView({ source, id }: { source: string; id: string }) {
         <Link href="/app/descobrir" className="btn btn-ghost btn-sm -ml-2 mb-4"><ArrowLeft size={15} /> Voltar para a pesquisa</Link>
         <section id="visao-geral" className="grid gap-6 lg:grid-cols-[380px_1fr]">
           <div className="card relative overflow-hidden"><ProductImage src={p.images[0] ?? p.imageUrl} alt={p.title} className="aspect-square w-full" />
-            <FavoriteButton product={ref} initial={fav} onChange={setFav} className="absolute right-3 top-3" /></div>
+            <FavoriteButton key={String(fav)} product={ref} initial={fav} onChange={setFav} className="absolute right-3 top-3" /></div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2"><span className="badge badge-brand">{SOURCE_LABELS[p.source] ?? p.source}</span>
               <span className="badge">{p.kind === "catalog_product" ? "Ficha de catálogo" : "Anúncio"}</span>

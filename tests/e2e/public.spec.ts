@@ -13,6 +13,7 @@ test.describe("site público", () => {
 
   test("menu de navegação funciona no tamanho da tela", async ({ page, isMobile }) => {
     await page.goto("/");
+    await page.locator("html[data-nav-ready]").waitFor({ state: "attached" });
     if (isMobile) {
       await page.getByRole("button", { name: "Abrir menu" }).click();
       await expect(page.getByRole("dialog")).toBeVisible();

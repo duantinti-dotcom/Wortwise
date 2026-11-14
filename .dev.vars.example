@@ -1,0 +1,8 @@
+# Segredos para `npm run preview` (workerd local). Copie para .dev.vars — nunca commite.
+NEXTJS_ENV=production
+WW_SERVER_SECRET=
+CRON_SECRET=
+HEROPAY_JWT_TOKEN=
+HEROPAY_WEBHOOK_SECRET=
+MELI_CLIENT_ID=
+MELI_CLIENT_SECRET=

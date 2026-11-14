@@ -5,6 +5,15 @@ import { cn, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Logs" };
 
+function Table({ head, rows }: { head: string[]; rows: (string | React.ReactNode)[][] }) {
+  return (
+    <div className="card overflow-x-auto"><table className="w-full min-w-[560px] text-sm">
+      <thead><tr className="border-b border-line text-left text-xs text-faint">{head.map((h) => <th key={h} className="px-4 py-2.5 font-normal">{h}</th>)}</tr></thead>
+      <tbody className="divide-y divide-line">{rows.length ? rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} className="px-4 py-2.5 text-muted">{c}</td>)}</tr>) : <tr><td colSpan={head.length} className="px-4 py-6 text-center text-muted">Sem registros.</td></tr>}</tbody>
+    </table></div>
+  );
+}
+
 export default async function Page() {
   const supabase = await supabaseServer();
   const [api, hooks, audit] = await Promise.all([
@@ -12,12 +21,6 @@ export default async function Page() {
     supabase.from("webhook_events").select("id, trigger, outcome, error, received_at").order("received_at", { ascending: false }).limit(40),
     supabase.from("admin_audit_logs").select("id, action, target, details, created_at").order("created_at", { ascending: false }).limit(40),
   ]);
-  const Table = ({ head, rows }: { head: string[]; rows: (string | React.ReactNode)[][] }) => (
-    <div className="card overflow-x-auto"><table className="w-full min-w-[560px] text-sm">
-      <thead><tr className="border-b border-line text-left text-xs text-faint">{head.map((h) => <th key={h} className="px-4 py-2.5 font-normal">{h}</th>)}</tr></thead>
-      <tbody className="divide-y divide-line">{rows.length ? rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} className="px-4 py-2.5 text-muted">{c}</td>)}</tr>) : <tr><td colSpan={head.length} className="px-4 py-6 text-center text-muted">Sem registros.</td></tr>}</tbody>
-    </table></div>
-  );
   return (
     <>
       <PageHeader title="Logs" description="Registros técnicos (30 dias de retenção), eventos de webhook e auditoria de ações administrativas. Nenhum token ou dado financeiro sensível é gravado." />
