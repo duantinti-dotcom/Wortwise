@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/toast";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-const MARKETPLACES = ["Mercado Livre", "Shopee", "Amazon", "TikTok Shop", "SHEIN", "Loja própria"];
+const MARKETPLACES = ["Mercado Livre", "Shopee", "Amazon", "TikTok Shop", "Loja própria"];
 const CATEGORIES = ["Eletrônicos", "Casa e decoração", "Moda", "Beleza", "Esportes", "Pet", "Brinquedos", "Ferramentas", "Papelaria", "Automotivo"];
 const BUDGETS = ["Até R$ 500", "R$ 500 a R$ 2.000", "R$ 2.000 a R$ 10.000", "Acima de R$ 10.000"];
 

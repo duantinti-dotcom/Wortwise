@@ -1,4 +1,4 @@
-export type SourceId = "mercadolivre" | "shopee" | "amazon" | "tiktokshop" | "shein";
+export type SourceId = "mercadolivre" | "shopee" | "amazon" | "tiktokshop";
 
 export type SourceState = "connected" | "not_configured" | "pending_approval" | "error";
 
@@ -28,6 +28,10 @@ export interface ProductResult {
   attributes: { name: string; value: string }[];
   collectedAt: string;
   sourceUpdatedAt: string | null;
+  /** Posição no ranking de vendas da própria fonte (ex.: Amazon), quando informada. */
+  salesRank?: { rank: number; category: string | null } | null;
+  /** Selo de entrega rápida da fonte (ex.: Prime). */
+  fastDelivery?: boolean | null;
 }
 
 /** Produto do ranking oficial de mais vendidos de uma categoria (posição informada pela fonte). */
@@ -73,6 +77,13 @@ export interface SearchParams {
   categoryId?: string;
   limit: number;
   offset: number;
+  /** Filtros que a fonte consegue aplicar na origem (os demais são aplicados pelo Worthwise depois). */
+  priceMin?: number | null;
+  priceMax?: number | null;
+  minRating?: number | null;
+  freeShipping?: boolean;
+  condition?: "new" | "used" | null;
+  sort?: "relevance" | "price_asc" | "price_desc" | "rating" | "discount" | "reviews";
 }
 
 export interface ApiCallLog {

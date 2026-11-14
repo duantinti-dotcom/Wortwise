@@ -11,7 +11,8 @@ Situação em 13/11/2026. "Verificado" significa que foi exercitado de ponta a p
 | Mercado Livre | Implementada, **não verificada ao vivo** | Client ID e Client Secret do aplicativo |
 | HeroPay | Implementada; webhook verificado localmente | Token do sandbox, segredo do webhook, ciclo real |
 | Assistente (Workers AI) | Implementado, **não verificado ao vivo** | Deploy com o binding `AI` (ou `AI_BASE_URL`) |
-| Shopee, Amazon, TikTok Shop, SHEIN | Estado real exposto; sem dados | Credenciamento em cada plataforma |
+| Amazon | Conector pronto (Product Advertising API 5.0) | Credenciais de Associado |
+| Shopee, TikTok Shop | Estado real exposto; sem dados | Credenciamento em cada plataforma |
 
 ## Mercado Livre
 
@@ -26,18 +27,33 @@ Situação em 13/11/2026. "Verificado" significa que foi exercitado de ponta a p
 - **Limites e custo**: API gratuita; os limites dependem do aplicativo e não são publicados em valor fixo. O monitoramento agrupa verificações por produto para reduzir chamadas.
 - **Atenção aos termos**: leia os Termos e Condições de Desenvolvedores antes do lançamento, em especial as regras sobre armazenamento e exibição de dados a terceiros.
 
-## Shopee, Amazon, TikTok Shop e SHEIN
+## Amazon (Product Advertising API 5.0)
+
+- Conector: `src/lib/connectors/amazon.ts`. A assinatura AWS Signature V4 fica em `sigv4.ts` e foi conferida contra o botocore.
+- Segredos no Cloudflare:
+  - `AMAZON_PAAPI_ACCESS_KEY`;
+  - `AMAZON_PAAPI_SECRET_KEY`;
+  - `AMAZON_PARTNER_TAG` (ex.: `minhaloja-20`).
+- Opcionais: `AMAZON_PAAPI_HOST` (padrão `webservices.amazon.com.br`) e `AMAZON_MARKETPLACE` (padrão `www.amazon.com.br`).
+- **SearchItems** (busca): filtros na origem (preço, avaliação mínima, frete grátis, condição, ordenação). Traz até 2 páginas de 10 itens, 1 requisição por segundo.
+- **GetItems** (detalhe): todas as fotos (principal e variações), tópicos de descrição, marca, EAN, preço, preço de referência (desconto), frete grátis/Prime, avaliações e posição no ranking de vendas (`WebsiteSalesRank`).
+- O link do produto (`DetailPageURL`) já vem com a tag de Associado.
+- Se a API recusar os recursos `Offers.*`, o conector passa a usar `OffersV2.*` automaticamente.
+- Conta sem acesso liberado (a Amazon exige vendas qualificadas no programa) aparece como "em credenciamento". Nenhum dado é inventado.
+- A PA-API não fornece a descrição longa da página, só os tópicos (Features).
+
+## Shopee e TikTok Shop
 
 Nenhuma oferece busca pública de catálogo sem aprovação. Os conectores existem para exibir o estado real ("Aguardando credenciamento") e **nunca retornam produtos**.
 
 | Plataforma | Caminho oficial | Exigência | O que permitiria |
 | --- | --- | --- | --- |
-| Shopee | Open Platform / API de afiliados | Cadastro como parceiro ou afiliado aprovado | Dados de lojas que autorizarem; ofertas de afiliado |
-| Amazon | Product Advertising API 5.0 | Conta de Associado aprovada, com vendas qualificadas | Busca, preços e ofertas |
-| TikTok Shop | Partner API | Aplicativo aprovado e autorização de cada loja | Dados das lojas autorizadas |
-| SHEIN | Open Platform | Vendedor ou parceiro aprovado | Dados de vendedores parceiros |
+| Shopee | API de afiliados | Conta de afiliado aprovada e acesso à API | Ofertas com foto, preço, link e vendas |
+| TikTok Shop | Partner API / afiliados | Aplicativo aprovado. A API de loja só acessa a loja que autorizou | Produtos de afiliado, se aprovado |
 
-APIs de gestão de loja **não** dão acesso a vendas ou produtos de concorrentes. Para ampliar a cobertura sem credenciamento, a alternativa legítima é contratar um provedor de dados com licença comercial; a interface `Connector` (`src/lib/connectors/types.ts`) já acomoda isso.
+A SHEIN foi removida do produto.
+
+APIs de gestão de loja **não** dão acesso a vendas ou produtos de concorrentes.
 
 ## HeroPay
 

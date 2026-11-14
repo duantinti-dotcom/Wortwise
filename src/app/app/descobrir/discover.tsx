@@ -1,5 +1,8 @@
 "use client";
 import { ArrowUpLeft, CircleAlert, Clock, Database, Lock, Search, SlidersHorizontal, Sparkles, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { activeCount, applyFilters, type SearchFilters, type SortKey } from "@/lib/search/filters";
+import { ActiveChips, RefinePanel, SORTS } from "./refine";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ProductCard, ProductCardSkeleton } from "@/components/app/product-bits";
@@ -8,12 +11,11 @@ import { EmptyState, PageHeader } from "@/components/ui/misc";
 import type { ProductResult } from "@/lib/connectors/types";
 import { api } from "@/lib/hooks";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { cn, relativeTime } from "@/lib/utils";
+import { cn, formatMoney, relativeTime } from "@/lib/utils";
 
 interface SourceInfo { id: string; name: string; state: string; detail: string }
 interface SourceReport { source: string; name: string; status: string; count: number; message: string | null }
 interface Result { status: "ok" | "empty"; results?: ProductResult[]; lockedCount?: number; sources: SourceReport[]; remaining: number | null; cached?: boolean; charged?: boolean; plan: string; collectedAt?: string }
-type Sort = "relevance" | "price_asc" | "price_desc" | "rating";
 
 const SUGGESTIONS = ["fone bluetooth", "garrafa térmica", "organizador de gavetas", "luminária de mesa", "capa para celular", "mochila notebook"];
 
@@ -23,12 +25,10 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
   const { openUpgrade } = useUpgrade();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [selected, setSelected] = useState<string[]>([]);
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
-  const [freeShipping, setFreeShipping] = useState(false);
-  const [minRating, setMinRating] = useState("");
-  const [sort, setSort] = useState<Sort>("relevance");
-  const [showFilters, setShowFilters] = useState(false);
+  const [refine, setRefineState] = useState<SearchFilters>({ sort: "relevance" });
+  const setRefine = useCallback((patch: Partial<SearchFilters>) => setRefineState((f) => ({ ...f, ...patch })), []);
+  const resetRefine = useCallback(() => setRefineState((f) => ({ sort: f.sort })), []);
+  const [sheet, setSheet] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<{ code: string; message: string; sources?: SourceReport[] } | null>(null);
@@ -46,15 +46,14 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     if (term.length < 2) { setError({ code: "invalid_input", message: "Digite pelo menos 2 caracteres." }); return; }
     setLoading(true);
     setError(null);
-    const num = (v: string) => (v.trim() === "" ? null : Number(v.replace(",", ".")));
-    const r = await api<Result>("/api/search", { method: "POST", json: { query: term, filters: {
-      sources: selected.length ? selected : undefined, priceMin: num(priceMin), priceMax: num(priceMax), freeShipping, minRating: num(minRating), sort } } });
+    // Só a escolha de fontes vai para o servidor; o refinamento é feito na tela, sem custo.
+    const r = await api<Result>("/api/search", { method: "POST", json: { query: term, filters: { sources: selected.length ? selected : undefined } } });
     setLoading(false);
     if (r.ok) { setResult(r.data); router.refresh(); return; }
     setResult(null);
     if (r.error.code === "quota_exceeded") openUpgrade(r.error.message);
     setError({ code: r.error.code, message: r.error.message, sources: r.error.sources as SourceReport[] | undefined });
-  }, [selected, priceMin, priceMax, freeShipping, minRating, sort, openUpgrade, router]);
+  }, [selected, openUpgrade, router]);
 
   // Abertura por URL: ?q= executa a pesquisa (repetir a mesma pesquisa não consome crédito); ?s= reabre uma salva.
   useEffect(() => {
@@ -76,57 +75,42 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
   }, [params, run]);
 
   const items = useMemo(() => result?.results ?? [], [result]);
-  const activeFilters = [priceMin, priceMax, minRating].filter(Boolean).length + (freeShipping ? 1 : 0) + selected.length;
+  const filtered = useMemo(() => applyFilters(items, refine), [items, refine]);
+  const nActive = activeCount(refine);
+  const counts = useMemo(() => items.reduce<Record<string, number>>((m, p) => { m[p.source] = (m[p.source] ?? 0) + 1; return m; }, {}), [items]);
+  const sourcesInResults = Object.keys(counts);
+  const stats = useMemo(() => {
+    const ps = filtered.map((p) => p.price).filter((v): v is number => v != null).sort((a, b) => a - b);
+    return ps.length ? { min: ps[0]!, max: ps.at(-1)!, median: ps[Math.floor(ps.length / 2)]! } : null;
+  }, [filtered]);
 
   return (
     <>
       <PageHeader title="Descobrir produtos" description="Pesquise em fontes autorizadas. Cada resultado mostra a origem e o momento da coleta; campos que a fonte não informa aparecem como “não disponível”." />
 
-      <form onSubmit={(e) => { e.preventDefault(); void run(query); }} className="glass sticky top-[68px] z-10 rounded-2xl p-2 shadow-[0_24px_60px_-30px_rgba(0,0,0,1),0_0_0_1px_rgba(255,121,0,0.08)] lg:top-20" role="search">
+      <form onSubmit={(e) => { e.preventDefault(); void run(query); }} className="glass relative z-10 rounded-[22px] p-2" role="search">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} aria-label="Termo de pesquisa" placeholder="O que você quer vender? Ex.: fone bluetooth" enterKeyHint="search"
               className="h-12 w-full rounded-xl bg-transparent pl-12 pr-3 text-base outline-none placeholder:text-faint" />
           </div>
-          <button type="button" onClick={() => setShowFilters((v) => !v)} aria-expanded={showFilters} className={cn("btn btn-secondary relative !h-12 !px-3.5", showFilters && "!border-brand/60")} aria-label="Filtros">
-            <SlidersHorizontal size={17} /><span className="hidden sm:inline">Filtros</span>
-            {activeFilters ? <span className="flex size-5 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-black">{activeFilters}</span> : null}
-          </button>
           <button type="submit" disabled={loading} aria-label="Pesquisar" className="btn btn-primary !h-12 !px-4 sm:!px-5"><Search size={17} className="sm:hidden" /><span className="hidden sm:inline">{loading ? "Pesquisando…" : "Pesquisar"}</span></button>
         </div>
-        <div className={cn("grid transition-[grid-template-rows,opacity] duration-300 ease-out", showFilters ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
-          <div className="overflow-hidden">
-            <div className="grid gap-4 border-t border-tint/8 p-3 pt-4 md:grid-cols-[1.6fr_1fr_1fr]">
-              <div>
-                <div className="label">Marketplaces</div>
-                <div className="flex flex-wrap gap-2">
-                  {sources.map((s) => {
-                    const on = selected.includes(s.id);
-                    const ready = s.state === "connected";
-                    return (
-                      <button key={s.id} type="button" title={s.detail} aria-pressed={on} onClick={() => setSelected((x) => (on ? x.filter((i) => i !== s.id) : [...x, s.id]))}
-                        className={cn("badge !h-8 cursor-pointer !px-3 transition-colors", on && "badge-brand", !ready && "opacity-70")}>
-                        <span className={cn("size-1.5 rounded-full", ready ? "bg-pos" : s.state === "pending_approval" ? "bg-faint" : "bg-brand")} />{s.name}
-                        {!ready ? <span className="text-faint">· {s.state === "pending_approval" ? "em credenciamento" : "não configurado"}</span> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <label><span className="label">Preço mín.</span><input className="input tabular" inputMode="decimal" value={priceMin} onChange={(e) => setPriceMin(e.target.value.replace(/[^\d.,]/g, ""))} placeholder="R$" /></label>
-                <label><span className="label">Preço máx.</span><input className="input tabular" inputMode="decimal" value={priceMax} onChange={(e) => setPriceMax(e.target.value.replace(/[^\d.,]/g, ""))} placeholder="R$" /></label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <label><span className="label">Avaliação mín.</span>
-                  <select className="input" value={minRating} onChange={(e) => setMinRating(e.target.value)}><option value="">Qualquer</option><option value="4">4,0+</option><option value="4.5">4,5+</option></select></label>
-                <label><span className="label">Ordenar</span>
-                  <select className="input" value={sort} onChange={(e) => setSort(e.target.value as Sort)}><option value="relevance">Relevância da fonte</option><option value="price_asc">Menor preço</option><option value="price_desc">Maior preço</option><option value="rating">Avaliação</option></select></label>
-                <label className="col-span-2 flex cursor-pointer items-center gap-2.5 text-sm text-muted"><input type="checkbox" checked={freeShipping} onChange={(e) => setFreeShipping(e.target.checked)} className="size-4 accent-[#ff7900]" /> Somente com frete grátis</label>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-tint/8 px-2 pb-1 pt-2.5">
+          <span className="mr-1 text-[12px] text-faint">Pesquisar em</span>
+          {sources.map((src) => {
+            const on = selected.length === 0 ? src.state === "connected" : selected.includes(src.id);
+            const ready = src.state === "connected";
+            return (
+              <button key={src.id} type="button" title={src.detail} aria-pressed={on} disabled={!ready}
+                onClick={() => setSelected((x) => { const base = x.length ? x : sources.filter((q) => q.state === "connected").map((q) => q.id); const next = base.includes(src.id) ? base.filter((i) => i !== src.id) : [...base, src.id]; return next; })}
+                className={cn("chip !h-8 !px-3 !text-[12.5px] disabled:cursor-not-allowed disabled:opacity-55", on && ready && "!bg-fg !text-ink")}>
+                <span className={cn("size-1.5 rounded-full", ready ? "bg-pos" : "bg-faint")} />{src.name}
+                {!ready ? <span className="text-faint">· {src.state === "pending_approval" ? "em credenciamento" : "aguardando credenciais"}</span> : null}
+              </button>
+            );
+          })}
         </div>
       </form>
 
@@ -151,24 +135,65 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
           <>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-muted">
-                {result.status === "empty" ? "Nenhum produto encontrado." : <><span className="font-medium text-fg">{items.length}</span> resultado{items.length === 1 ? "" : "s"}{result.cached ? " · pesquisa salva (sem custo)" : result.charged ? " · 1 pesquisa utilizada" : ""}</>}
+                {result.status === "empty" ? "Nenhum produto encontrado." : <><span className="font-medium text-fg">{filtered.length}</span>{filtered.length !== items.length ? <> de {items.length}</> : null} resultado{items.length === 1 ? "" : "s"}{result.cached ? " · pesquisa salva (sem custo)" : result.charged ? " · 1 pesquisa utilizada" : ""}</>}
                 {result.remaining != null ? <> · {result.remaining} pesquisa{result.remaining === 1 ? "" : "s"} restante{result.remaining === 1 ? "" : "s"}</> : null}
               </p>
               <SourceList sources={result.sources} compact />
             </div>
             {result.status === "empty" || (items.length === 0 && !result.lockedCount) ? (
-              <EmptyState icon={Search} title="Nenhum resultado para esta pesquisa">Tente termos mais gerais ou remova filtros. Pesquisas sem resultado não consomem crédito.</EmptyState>
+              <EmptyState icon={Search} title="Nenhum resultado para esta pesquisa">Tente termos mais gerais. Pesquisas sem resultado não consomem crédito.</EmptyState>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {items.map((p) => <ProductCard key={`${p.source}:${p.externalId}`} p={p} favorite={favs.has(`${p.source}:${p.externalId}`)} />)}
+              <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+                <aside className="hidden lg:block" aria-label="Filtros">
+                  <div className="card sticky top-[88px] max-h-[calc(100dvh-104px)] overflow-y-auto p-5" data-lenis-prevent>
+                    <div className="mb-4 flex items-center justify-between"><span className="flex items-center gap-2 text-sm font-semibold"><SlidersHorizontal size={15} className="text-brand" />Filtros</span>
+                      {nActive ? <button type="button" onClick={resetRefine} className="text-xs text-brand-hi hover:underline">Limpar ({nActive})</button> : null}</div>
+                    <RefinePanel f={refine} set={setRefine} counts={counts} sourcesInResults={sourcesInResults} />
+                  </div>
+                </aside>
+                <div className="min-w-0">
+                  <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <button type="button" onClick={() => setSheet(true)} className="btn btn-secondary btn-sm lg:hidden"><SlidersHorizontal size={14} /> Filtros{nActive ? <span className="flex size-5 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-[#160800]">{nActive}</span> : null}</button>
+                    <label className="ml-auto flex items-center gap-2 text-sm text-muted"><span className="hidden sm:inline">Ordenar por</span>
+                      <select className="input !h-9 !w-auto !rounded-full !py-0 !pl-3.5 text-sm" value={refine.sort ?? "relevance"} onChange={(e) => setRefine({ sort: e.target.value as SortKey })} aria-label="Ordenar por">
+                        {SORTS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                      </select></label>
+                  </div>
+                  <ActiveChips f={refine} set={setRefine} reset={resetRefine} />
+                  {stats ? (
+                    <div className="mb-4 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line text-center">
+                      {[["Menor preço", stats.min], ["Mediana", stats.median], ["Maior preço", stats.max]].map(([l, v]) => (
+                        <div key={l as string} className="bg-surface px-3 py-2.5"><div className="font-mono text-[10.5px] uppercase tracking-wider text-faint">{l}</div><div className="tabular mt-0.5 text-[15px] font-semibold">{formatMoney(v as number)}</div></div>
+                      ))}
+                    </div>
+                  ) : null}
+                  {filtered.length ? (
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 2xl:grid-cols-4">
+                      {filtered.map((p) => <ProductCard key={`${p.source}:${p.externalId}`} p={p} favorite={favs.has(`${p.source}:${p.externalId}`)} />)}
+                    </div>
+                  ) : (
+                    <EmptyState icon={SlidersHorizontal} title="Nenhum produto com esses filtros" action={<button className="btn btn-secondary" onClick={resetRefine}>Limpar filtros</button>}>
+                      Os filtros são aplicados sobre os {items.length} resultados desta pesquisa, sem consumir crédito.
+                    </EmptyState>
+                  )}
+                </div>
               </div>
             )}
             {result.lockedCount ? (
-              <div className="card mt-5 flex flex-wrap items-center justify-between gap-4 border-brand/30 bg-brand/5 p-5">
+              <div className="card mt-5 flex flex-wrap items-center justify-between gap-4 p-5">
                 <div className="flex items-center gap-3"><Lock size={18} className="text-brand" /><p className="text-sm"><span className="font-medium">+{result.lockedCount} resultados</span> desta pesquisa estão disponíveis nos planos pagos.</p></div>
                 <button className="btn btn-primary btn-sm" onClick={() => openUpgrade("Veja todos os resultados das suas pesquisas")}>Desbloquear</button>
               </div>
             ) : null}
+            <Dialog open={sheet} onOpenChange={setSheet}>
+              <DialogContent title="Filtros" description={`${filtered.length} de ${items.length} resultados`}>
+                <RefinePanel f={refine} set={setRefine} counts={counts} sourcesInResults={sourcesInResults} />
+                <div className="sticky -bottom-[max(24px,env(safe-area-inset-bottom))] -mx-6 mt-4 grid grid-cols-2 gap-2 border-t border-line bg-surface/90 px-6 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
+                  <button type="button" className="btn btn-secondary" onClick={resetRefine}>Limpar</button>
+                  <button type="button" className="btn btn-primary" onClick={() => setSheet(false)}>Ver {filtered.length}</button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </>
         ) : null}
 

@@ -61,5 +61,4 @@ export const SOURCE_LABELS: Record<string, string> = {
   shopee: "Shopee",
   amazon: "Amazon",
   tiktokshop: "TikTok Shop",
-  shein: "SHEIN",
 };

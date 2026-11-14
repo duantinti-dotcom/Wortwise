@@ -1,3 +1,4 @@
+import { amazon } from "./amazon";
 import { mercadoLivre } from "./mercadolivre";
 import { ConnectorError, type Connector, type SourceId, type SourceState } from "./types";
 
@@ -20,12 +21,9 @@ export const CONNECTORS: Record<SourceId, Connector> = {
   mercadolivre: mercadoLivre,
   shopee: pending("shopee", "Shopee",
     "A Shopee Open Platform libera dados apenas para parceiros credenciados e lojas que autorizam o aplicativo; a API de afiliados exige conta aprovada."),
-  amazon: pending("amazon", "Amazon",
-    "A Product Advertising API 5.0 exige conta de Associado Amazon aprovada, com vendas qualificadas para manter o acesso."),
+  amazon,
   tiktokshop: pending("tiktokshop", "TikTok Shop",
-    "A TikTok Shop Partner API exige aplicativo aprovado e autorização individual de cada loja; não há busca pública de catálogo."),
-  shein: pending("shein", "SHEIN",
-    "A SHEIN Open Platform é restrita a vendedores e parceiros aprovados; não existe API pública de catálogo."),
+    "A API do TikTok Shop só dá acesso à loja que autorizou o aplicativo; a busca de produtos de outras lojas depende de aplicativo de afiliado aprovado pelo TikTok."),
 };
 
 export const SOURCE_IDS = Object.keys(CONNECTORS) as SourceId[];

@@ -195,8 +195,6 @@ export const CHANNEL_PRESETS: ChannelPreset[] = [
     officialUrl: "" },
   { id: "tiktokshop", name: "TikTok Shop", marketplaceFeePct: 6, marketplaceFixedFee: 0, paymentFeePct: 0,
     officialUrl: "" },
-  { id: "shein", name: "SHEIN", marketplaceFeePct: 16, marketplaceFixedFee: 0, paymentFeePct: 0,
-    officialUrl: "" },
   { id: "loja-propria", name: "Loja própria", marketplaceFeePct: 0, marketplaceFixedFee: 0, paymentFeePct: 3.49,
     officialUrl: "" },
 ];

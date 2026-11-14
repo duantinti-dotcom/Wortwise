@@ -41,6 +41,9 @@ npx wrangler secret put HEROPAY_JWT_TOKEN
 npx wrangler secret put HEROPAY_WEBHOOK_SECRET
 npx wrangler secret put MELI_CLIENT_ID
 npx wrangler secret put MELI_CLIENT_SECRET
+npx wrangler secret put AMAZON_PAAPI_ACCESS_KEY
+npx wrangler secret put AMAZON_PAAPI_SECRET_KEY
+npx wrangler secret put AMAZON_PARTNER_TAG
 npm run deploy
 ```
 

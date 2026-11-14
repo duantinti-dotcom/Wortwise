@@ -128,8 +128,8 @@ export function ProductView({ source, id }: { source: string; id: string }) {
       <div>
         <Link href="/app/descobrir" className="btn btn-ghost btn-sm -ml-2 mb-4"><ArrowLeft size={15} /> Voltar para a pesquisa</Link>
         <section id="visao-geral" className="grid gap-6 lg:grid-cols-[380px_1fr]">
-          <div className="card relative overflow-hidden"><ProductImage src={p.images[0] ?? p.imageUrl} alt={p.title} className="aspect-square w-full" />
-            <FavoriteButton key={String(fav)} product={ref} initial={fav} onChange={setFav} className="absolute right-3 top-3" /></div>
+          <Gallery images={p.images.length ? p.images : p.imageUrl ? [p.imageUrl] : []} title={p.title}
+            overlay={<FavoriteButton key={String(fav)} product={ref} initial={fav} onChange={setFav} className="absolute right-3 top-3 z-10" />} />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2"><span className="badge badge-brand">{SOURCE_LABELS[p.source] ?? p.source}</span>
               <span className="badge">{p.kind === "catalog_product" ? "Ficha de catálogo" : "Anúncio"}</span>
@@ -143,7 +143,13 @@ export function ProductView({ source, id }: { source: string; id: string }) {
               <span className="flex items-center gap-1.5"><Star size={14} className={p.rating != null ? "fill-brand text-brand" : "text-faint"} />{p.rating != null ? `${p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} · ${formatNumber(p.reviewsCount)} avaliações` : "Avaliação não disponível"}</span>
               <span className={cn("flex items-center gap-1.5", p.freeShipping && "text-pos")}><Truck size={14} />{p.freeShipping == null ? "Frete não informado" : p.freeShipping ? "Frete grátis" : "Frete pago"}</span>
               <span>{p.available == null ? "Disponibilidade não informada" : p.available ? "Disponível" : "Sem oferta ativa"}</span>
+              {p.fastDelivery ? <span className="badge !border-[#00a8e1]/40 !bg-[#00a8e1]/10 !text-[#00a8e1]">Prime</span> : null}
             </div>
+            {p.salesRank ? (
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-[13px] text-brand-hi">
+                <span className="tabular font-mono font-semibold">#{formatNumber(p.salesRank.rank)}</span> no ranking de vendas da {SOURCE_LABELS[p.source] ?? p.source}{p.salesRank.category ? ` em ${p.salesRank.category}` : ""}
+              </div>
+            ) : null}
             <div className="mt-5 flex flex-wrap gap-2">
               <button className="btn btn-primary" onClick={() => setWatchOpen(true)}><Bell size={15} /> Monitorar preço</button>
               <button className="btn btn-secondary" onClick={saveReport}><FileText size={15} /> Salvar relatório</button>
@@ -155,10 +161,38 @@ export function ProductView({ source, id }: { source: string; id: string }) {
                 <div key={k}><dt className="text-xs text-faint">{k}</dt><dd className={cn("mt-0.5 truncate", !v && "text-faint")}>{v ?? "Não disponível"}</dd></div>
               ))}
             </dl>
-            {p.features.length ? <ul className="mt-5 list-disc space-y-1 pl-5 text-sm text-muted">{p.features.slice(0, 5).map((f) => <li key={f}>{f}</li>)}</ul> : null}
+            {p.features.length ? <ul className="mt-5 list-disc space-y-1 pl-5 text-sm text-muted">{p.features.slice(0, 3).map((f) => <li key={f}>{f}</li>)}</ul> : null}
+            {p.features.length > 3 || p.description || p.attributes.length ? <a href="#descricao" className="mt-2 inline-block text-sm text-brand-hi hover:underline">Ver descrição completa</a> : null}
           </div>
         </section>
       </div>
+
+      {p.features.length || p.description || p.attributes.length ? (
+        <Section id="descricao" title="Descrição e ficha técnica" hint={`Texto fornecido pela ${SOURCE_LABELS[p.source] ?? p.source}`}>
+          <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+            <div className="card p-6">
+              {p.description ? <p className="whitespace-pre-line text-[15px] leading-relaxed text-soft">{p.description}</p> : null}
+              {p.features.length ? (
+                <ul className={cn("space-y-2.5 text-[15px] leading-relaxed text-soft", p.description && "mt-5")}>
+                  {p.features.map((f) => <li key={f} className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-brand" />{f}</li>)}
+                </ul>
+              ) : null}
+              {!p.description && !p.features.length ? <p className="text-sm text-faint">A fonte não forneceu descrição para este produto.</p> : null}
+            </div>
+            {p.attributes.length ? (
+              <div className="card overflow-hidden">
+                <dl className="divide-y divide-line text-sm">
+                  {p.attributes.map((a) => (
+                    <div key={a.name + a.value} className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-3 px-5 py-2.5">
+                      <dt className="text-muted">{a.name}</dt><dd className="break-words">{a.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ) : null}
+          </div>
+        </Section>
+      ) : null}
 
       <Section id="conclusao" title="Conclusão" hint="Avaliação explicável — não é promessa de resultado">
         <div className="card grid gap-6 p-6 md:grid-cols-[auto_1fr_auto] md:items-center">
@@ -180,7 +214,7 @@ export function ProductView({ source, id }: { source: string; id: string }) {
           <Stat label="Ofertas concorrentes" value={formatNumber(p.offersTotal ?? (p.offers.length || null))} hint="na mesma ficha de catálogo" />
           <Stat label="Menor preço observado" value={formatMoney(offerPrices[0] ?? null)} />
           <Stat label="Maior preço observado" value={formatMoney(offerPrices.at(-1) ?? null)} />
-          <Stat label="Mais vendidos da categoria" value={data.bestsellerRank != null ? `${data.bestsellerRank}º lugar` : "Não listado"} hint="ranking oficial da fonte" />
+          <Stat label={p.salesRank ? "Ranking de vendas" : "Mais vendidos da categoria"} value={p.salesRank ? `#${formatNumber(p.salesRank.rank)}` : data.bestsellerRank != null ? `${data.bestsellerRank}º lugar` : "Não listado"} hint={p.salesRank?.category ? `em ${p.salesRank.category}` : "ranking oficial da fonte"} />
         </div>
         <div className="card mt-4 p-5">
           <div className="mb-1 text-sm font-medium">Indicadores de demanda</div>
@@ -270,4 +304,28 @@ function SimWatcher({ onChange }: { onChange: (i: ProfitInputs) => void }) {
     return () => window.removeEventListener("ww:simulation", on);
   }, [onChange]);
   return null;
+}
+
+/** Galeria: foto principal grande + miniaturas (todas as fotos que a fonte fornece). */
+function Gallery({ images, title, overlay }: { images: string[]; title: string; overlay?: React.ReactNode }) {
+  const [i, setI] = useState(0);
+  const cur = images[Math.min(i, images.length - 1)] ?? null;
+  return (
+    <div className="min-w-0">
+      <div className="card relative overflow-hidden"><ProductImage key={cur ?? "none"} src={cur} alt={title} className="aspect-square w-full animate-[overlay-in_0.3s_ease-out]" />{overlay}</div>
+      {images.length > 1 ? (
+        <ul className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Fotos do produto">
+          {images.slice(0, 12).map((src, k) => (
+            <li key={src} className="shrink-0">
+              <button type="button" onClick={() => setI(k)} aria-label={`Foto ${k + 1}`} aria-current={k === i}
+                className={cn("flex size-16 items-center justify-center overflow-hidden rounded-xl border bg-white p-1.5 transition-all", k === i ? "border-brand ring-2 ring-brand/30" : "border-line hover:border-tint/30")}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" loading="lazy" referrerPolicy="no-referrer" className="max-h-full max-w-full object-contain" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
 }

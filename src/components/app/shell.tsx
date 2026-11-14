@@ -150,7 +150,7 @@ export function AppShell(props: ShellProps) {
           </aside>
 
           {/* Barra superior */}
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-tint/[0.07] bg-ink/70 px-4 backdrop-blur-2xl backdrop-saturate-150 lg:h-[72px] lg:border-0 lg:bg-transparent lg:px-10 lg:backdrop-blur-none">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-tint/[0.07] bg-ink/70 px-4 backdrop-blur-2xl backdrop-saturate-150 lg:h-[72px] lg:border-0 lg:bg-transparent lg:bg-gradient-to-b lg:from-ink lg:via-ink/85 lg:to-transparent lg:px-10 lg:backdrop-blur-none">
             <D.Root open={drawer} onOpenChange={setDrawer}>
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>

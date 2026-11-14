@@ -6,7 +6,7 @@ import { cn, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Fontes de dados",
-  description: "Estado atual das integrações do Worthwise com Mercado Livre, Shopee, Amazon, TikTok Shop e SHEIN, e o que cada fonte permite consultar.",
+  description: "Estado atual das integrações do Worthwise com Mercado Livre, Amazon, Shopee e TikTok Shop, e o que cada fonte permite consultar.",
   alternates: { canonical: "/fontes-de-dados" },
 };
 export const dynamic = "force-dynamic";
@@ -19,7 +19,6 @@ const DETAILS: Record<string, { gives: string; lacks: string }> = {
   shopee: { gives: "Após o credenciamento: dados das lojas que autorizarem o aplicativo e ofertas do programa de afiliados.", lacks: "Não há API pública de busca de catálogo para terceiros sem aprovação." },
   amazon: { gives: "Após aprovação como Associado: busca de produtos, preços e ofertas pela Product Advertising API.", lacks: "Volume de vendas; o acesso depende de manter vendas qualificadas no programa." },
   tiktokshop: { gives: "Após aprovação do aplicativo: dados das lojas que concederem autorização.", lacks: "Busca pública de catálogo e dados de vendedores que não autorizaram o aplicativo." },
-  shein: { gives: "Após aprovação na Open Platform: dados de vendedores parceiros.", lacks: "Não existe API pública de catálogo." },
   brasilapi: { gives: "Situação cadastral, razão social, atividade e município de um CNPJ (dados públicos da Receita Federal).", lacks: "Não avalia reputação, qualidade ou capacidade de entrega." },
   assistant: { gives: "Respostas em linguagem natural fundamentadas nas ferramentas da plataforma.", lacks: "Não possui dados próprios de preços ou vendas." },
 };

@@ -17,7 +17,7 @@ export function DialogContent({ title, description, children, className, wide }:
       <D.Overlay className="fixed inset-0 z-50 bg-black/60 data-[state=open]:animate-overlay-in data-[state=closed]:animate-overlay-out" />
       <D.Content
         className={cn(
-          "glass fixed z-50 flex max-h-[88dvh] flex-col overflow-hidden outline-none",
+          "glass glass-strong fixed z-50 flex max-h-[88dvh] flex-col overflow-hidden outline-none",
           "inset-x-0 bottom-0 rounded-t-3xl data-[state=open]:animate-sheet-in data-[state=closed]:animate-sheet-out",
           "sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[calc(100vw-40px)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl",
           "sm:data-[state=open]:animate-modal-in sm:data-[state=closed]:animate-modal-out",

@@ -73,11 +73,13 @@ export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResul
             rank === 1 ? "bg-brand text-[#160800]" : "bg-[#0f0f11] text-white")}>#{rank}</span>
         ) : discount ? <span className="absolute left-2.5 top-2.5 z-10 rounded-md bg-pos px-1.5 py-0.5 text-[11.5px] font-semibold text-white">−{discount}%</span> : null}
         <FavoriteButton key={String(favorite)} product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5 z-10" />
+        {p.fastDelivery ? <span className="absolute bottom-2.5 right-2.5 z-10 rounded-md bg-[#00a8e1] px-1.5 py-0.5 text-[11px] font-semibold text-white">Prime</span> : null}
         {p.freeShipping ? <span className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-1 rounded-md bg-[#00a650] px-1.5 py-0.5 text-[11px] font-semibold text-white"><Truck size={12} /> Frete grátis</span> : null}
       </div>
       <div className="flex flex-1 flex-col px-4 pb-4 pt-2">
         <div className="flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-wider text-faint">
           {rank != null ? <span>Mais vendido · {source}</span> : <span>{source}</span>}
+          {p.salesRank ? <span className="ml-auto normal-case tracking-normal text-brand-hi" title={p.salesRank.category ? `Ranking de vendas em ${p.salesRank.category}` : "Ranking de vendas"}>#{p.salesRank.rank.toLocaleString("pt-BR")} em vendas</span> : null}
         </div>
         <h3 className="mt-1.5 line-clamp-2 text-[14px] font-medium leading-snug">
           <Link href={`/app/produto/${p.source}/${p.externalId}`} className="outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-brand-hi">{p.title}</Link>
