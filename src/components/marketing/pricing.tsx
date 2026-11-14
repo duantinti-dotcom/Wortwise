@@ -42,7 +42,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
               <span className="pb-1.5 text-sm text-muted">{p.price_cents > 0 ? "por mês" : "para sempre"}</span>
             </div>
             <Link href={p.price_cents > 0 ? `/cadastro?plano=${p.id}` : "/cadastro"} className={cn("btn btn-lg mt-8 w-full", featured ? "btn-primary" : "btn-secondary")}>
-              {p.price_cents > 0 ? `Assinar ${p.name}` : "Começar grátis"} <ArrowRight size={16} />
+              {p.price_cents > 0 ? `Assinar ${p.name}` : "Começar grátis"} <ArrowRight className="btn-arrow" size={16} />
             </Link>
             <div className="hairline my-8" />
             <ul className="space-y-3.5 text-[14.5px]">

@@ -381,3 +381,77 @@
 
 /* Itens de grade podem encolher: evita que uma tabela ou texto longo alargue a página no celular. */
 @layer base { .grid > * { min-width: 0; } }
+
+/* ═════════════ v6 · sistema de botões ═════════════ */
+@layer components {
+  .btn {
+    height: 42px; padding: 0 18px; border-radius: 14px; gap: 8px; font-size: 14.5px; font-weight: 550; letter-spacing: -0.01em;
+    transition: transform .18s var(--ease-out), box-shadow .25s var(--ease-out), background-color .2s, border-color .2s, color .2s, filter .2s;
+  }
+  .btn:active:not(:disabled) { transform: translateY(0) scale(0.97); transition-duration: .08s; }
+  .btn-sm { height: 34px; padding: 0 13px; font-size: 13px; border-radius: 11px; gap: 6px; }
+  .btn-lg { height: 50px; padding: 0 24px; font-size: 15.5px; border-radius: 16px; }
+
+  /* Principal: laranja com volume, contorno nítido e brilho contido */
+  .btn-primary {
+    color: #1a0a00; font-weight: 600; border: 0; text-shadow: 0 1px 0 rgb(255 255 255 / 0.25);
+    background: linear-gradient(180deg, #ffa04d 0%, #ff8114 48%, #ff7300 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.5),
+      inset 0 -1px 0 rgb(120 40 0 / 0.25),
+      0 0 0 1px rgb(214 92 0 / 0.95),
+      0 1px 2px rgb(0 0 0 / 0.35),
+      0 10px 26px -12px rgb(255 121 0 / 0.9);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px); filter: brightness(1.05) saturate(1.05);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55), inset 0 -1px 0 rgb(120 40 0 / 0.25), 0 0 0 1px rgb(230 100 0), 0 2px 4px rgb(0 0 0 / 0.35), 0 18px 40px -14px rgb(255 121 0 / 1);
+    background: linear-gradient(180deg, #ffa95c 0%, #ff8a24 48%, #ff7a08 100%);
+  }
+  .btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 1px rgb(214 92 0), 0 0 0 4px rgb(255 121 0 / 0.35); }
+
+  /* Vidro: secundário */
+  .btn-secondary, .btn-glass {
+    color: #f4f4f4; border: 1px solid rgb(255 255 255 / 0.13);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.10), rgb(255 255 255 / 0.04));
+    -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 20px -12px rgb(0 0 0 / 0.7);
+  }
+  .btn-secondary:hover:not(:disabled), .btn-glass:hover:not(:disabled) {
+    transform: translateY(-1px); border-color: rgb(255 255 255 / 0.24);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.15), rgb(255 255 255 / 0.06));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.24), 0 2px 4px rgb(0 0 0 / 0.3), 0 14px 28px -14px rgb(0 0 0 / 0.8);
+  }
+  .btn-ghost { color: #bdbdbd; background: transparent; border: 1px solid transparent; }
+  .btn-ghost:hover:not(:disabled) { color: var(--color-fg); background: rgb(255 255 255 / 0.07); border-color: rgb(255 255 255 / 0.08); }
+  .btn-danger { color: #ffb4b1; border: 1px solid rgb(242 95 92 / 0.35); background: linear-gradient(180deg, rgb(242 95 92 / 0.18), rgb(242 95 92 / 0.08)); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08); }
+  .btn-danger:hover:not(:disabled) { background: linear-gradient(180deg, rgb(242 95 92 / 0.26), rgb(242 95 92 / 0.12)); border-color: rgb(242 95 92 / 0.55); }
+  .btn:disabled { opacity: .45; filter: saturate(.6); }
+
+  /* Seta em cápsula: avança no hover */
+  .btn .btn-arrow { box-sizing: content-box; width: 14px; height: 14px; padding: 4px; margin-right: -6px; border-radius: 9999px; transition: transform .25s var(--ease-out), background-color .2s; }
+  .btn-primary .btn-arrow { background: rgb(26 10 0 / 0.14); }
+  .btn-secondary .btn-arrow, .btn-glass .btn-arrow { background: rgb(255 255 255 / 0.1); }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
+  .btn-lg .btn-arrow { width: 16px; height: 16px; padding: 5px; margin-right: -8px; }
+
+  /* Botões redondos de ícone (sino, perfil) */
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 9999px; color: #e6e6e6;
+    border: 1px solid rgb(255 255 255 / 0.12); background: linear-gradient(180deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.03));
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16);
+    transition: transform .18s var(--ease-out), background-color .2s, border-color .2s;
+  }
+  .icon-btn:hover { border-color: rgb(255 255 255 / 0.24); background: linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.05)); }
+  .icon-btn:active { transform: scale(0.94); }
+
+  /* Controle deslizante */
+  input[type="range"] { height: 6px; background: linear-gradient(90deg, rgb(255 121 0 / 0.55), rgb(255 255 255 / 0.12)); border-radius: 99px; }
+  input[type="range"]::-webkit-slider-thumb { width: 22px; height: 22px; border: 0; background: radial-gradient(circle at 50% 40%, #fff 0 28%, #ff8a1f 30% 100%); box-shadow: 0 0 0 4px rgb(255 121 0 / 0.25), 0 4px 12px rgb(0 0 0 / 0.5); transition: box-shadow .2s; }
+  input[type="range"]:active::-webkit-slider-thumb { box-shadow: 0 0 0 8px rgb(255 121 0 / 0.25), 0 4px 12px rgb(0 0 0 / 0.5); cursor: grabbing; }
+
+  /* Chips de sugestão e etiquetas clicáveis */
+  .chip { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 9999px; font-size: 13.5px; color: #dcdcdc;
+    border: 1px solid rgb(255 255 255 / 0.12); background: rgb(255 255 255 / 0.05); transition: all .2s var(--ease-out); }
+  .chip:hover { color: #fff; border-color: rgb(255 154 61 / 0.55); background: rgb(255 121 0 / 0.1); transform: translateY(-1px); }
+}

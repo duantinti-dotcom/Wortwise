@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 
@@ -9,24 +10,31 @@ const COLS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-line">
-      <div className="container-page grid gap-10 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-        <div>
-          <Logo />
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">Inteligência comercial para quem vende online. Dados com fonte, cálculos transparentes e conclusões fundamentadas.</p>
+    <footer className="relative px-3 pb-3">
+      <div className="lg relative mx-auto max-w-[1240px] overflow-hidden rounded-[32px]">
+        <div className="grid gap-10 px-6 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)] md:px-12 md:py-14">
+          <div>
+            <Logo />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">Inteligência comercial para quem vende online. Dados com fonte, cálculos transparentes e conclusões fundamentadas.</p>
+            <Link href="/cadastro" className="btn btn-primary btn-sm mt-6">Começar grátis <ArrowRight className="btn-arrow" size={14} /></Link>
+          </div>
+          {COLS.map((c) => (
+            <nav key={c.title} aria-label={c.title}>
+              <div className="mono-label">{c.title}</div>
+              <ul className="mt-4 space-y-3">
+                {c.links.map(([href, label]) => <li key={href}><Link href={href} className="text-[14.5px] text-[#cfcfcf] transition-colors hover:text-brand-hi">{label}</Link></li>)}
+              </ul>
+            </nav>
+          ))}
         </div>
-        {COLS.map((c) => (
-          <nav key={c.title} aria-label={c.title}>
-            <div className="text-sm font-medium">{c.title}</div>
-            <ul className="mt-4 space-y-2.5">
-              {c.links.map(([href, label]) => <li key={href}><Link href={href} className="text-sm text-muted transition-colors hover:text-fg">{label}</Link></li>)}
-            </ul>
-          </nav>
-        ))}
-      </div>
-      <div className="container-page flex flex-wrap items-center justify-between gap-3 border-t border-line py-6 text-xs text-faint">
-        <span>© {new Date().getFullYear()} Worthwise. Todos os direitos reservados.</span>
-        <span>Worthwise não é afiliado aos marketplaces citados. Marcas pertencem aos seus titulares.</span>
+        <div aria-hidden className="pointer-events-none select-none overflow-hidden px-4 pb-2 text-center font-semibold leading-[0.85] tracking-[-0.07em]"
+          style={{ fontSize: "clamp(64px, 16vw, 240px)", backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.01) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+          Worthwise
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-6 py-5 text-xs text-faint md:px-12">
+          <span>© {new Date().getFullYear()} Worthwise. Todos os direitos reservados.</span>
+          <span>Não somos afiliados aos marketplaces citados. Marcas pertencem aos seus titulares.</span>
+        </div>
       </div>
     </footer>
   );

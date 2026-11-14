@@ -60,7 +60,7 @@ export default function HomePage() {
             Encontre oportunidades, compare fornecedores, acompanhe preços e descubra quanto você pode lucrar — tudo em um só lugar.
           </p>
           <div className="animate-fade-up mt-10 flex flex-wrap justify-center gap-3 [animation-delay:650ms]">
-            <Link href="/cadastro" className="btn btn-primary btn-lg !h-14 !rounded-2xl !px-8 !text-base">Começar grátis <ArrowRight size={18} /></Link>
+            <Link href="/cadastro" className="btn btn-primary btn-lg !h-14 !rounded-2xl !px-8 !text-base">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
             <Link href="#demonstracao" className="btn btn-glass btn-lg !h-14 !rounded-2xl !px-8 !text-base">Ver demonstração</Link>
           </div>
           <ul className="animate-fade-up mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted [animation-delay:750ms]">
@@ -103,7 +103,7 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mb-14 flex flex-wrap items-end justify-between gap-6">
             <Title className="max-w-2xl">Da dúvida à decisão, <span className="accent">em quatro passos.</span></Title>
-            <Link href="/cadastro" className="btn btn-glass btn-lg !rounded-2xl">Começar agora <ArrowRight size={16} /></Link>
+            <Link href="/cadastro" className="btn btn-glass btn-lg !rounded-2xl">Começar agora <ArrowRight className="btn-arrow" size={16} /></Link>
           </Reveal>
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
@@ -163,7 +163,7 @@ export default function HomePage() {
               <h2 className="display relative mx-auto max-w-4xl text-[44px] md:text-[76px]">Sua próxima compra merece <span className="accent">dados melhores.</span></h2>
               <p className="relative mx-auto mt-6 max-w-xl text-lg text-[#cfcfcf]">Crie sua conta e faça três pesquisas completas por nossa conta.</p>
               <div className="relative mt-10 flex flex-wrap justify-center gap-3">
-                <Link href="/cadastro" className="btn btn-primary btn-lg !h-14 !rounded-2xl !px-8 !text-base">Começar grátis <ArrowRight size={18} /></Link>
+                <Link href="/cadastro" className="btn btn-primary btn-lg !h-14 !rounded-2xl !px-8 !text-base">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
                 <Link href="/precos" className="btn btn-glass btn-lg !h-14 !rounded-2xl !px-8 !text-base">Ver planos</Link>
               </div>
             </div>

@@ -62,7 +62,7 @@ export function Onboarding() {
         <fieldset><legend className="mb-3 text-sm font-medium">Qual faixa de investimento pretende usar?</legend><Chips options={BUDGETS} value={budget ? [budget] : []} onToggle={(o) => setBudget((b) => (b === o ? null : o))} /></fieldset>
       </div>
       <div className="mt-10 flex flex-wrap items-center gap-3">
-        <button className="btn btn-primary btn-lg" disabled={busy} onClick={() => finish(false)}>{busy ? <Loader2 size={17} className="animate-spin" /> : null}Concluir <ArrowRight size={17} /></button>
+        <button className="btn btn-primary btn-lg" disabled={busy} onClick={() => finish(false)}>{busy ? <Loader2 size={17} className="animate-spin" /> : null}Concluir <ArrowRight className="btn-arrow" size={17} /></button>
         <button className="btn btn-ghost btn-lg" disabled={busy} onClick={() => finish(true)}>Pular por enquanto</button>
       </div>
     </div>

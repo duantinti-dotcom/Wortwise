@@ -11,7 +11,7 @@ export function QuestionMarquee({ items, reverse }: { items: string[]; reverse?:
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
       <ul className={cn("flex w-max gap-3 animate-marquee", reverse && "[animation-direction:reverse]")} style={{ animationPlayState: paused ? "paused" : "running" }}>
         {[...items, ...items].map((q, i) => (
-          <li key={i} aria-hidden={i >= items.length} className="flex shrink-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2.5 text-sm text-[#d8d8d8] backdrop-blur">
+          <li key={i} aria-hidden={i >= items.length} className="chip shrink-0 !h-11 !px-5">
             <Sparkles size={14} className="text-brand" />{q}
           </li>
         ))}

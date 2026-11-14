@@ -54,7 +54,7 @@ export default async function Dashboard() {
               <Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand" />
               <input id="dash-q" name="q" required minLength={2} maxLength={120} placeholder="Ex.: fone bluetooth para revender" className="h-[52px] w-full rounded-xl bg-transparent pl-12 pr-3 text-base outline-none placeholder:text-faint" />
             </div>
-            <button className="btn btn-primary btn-lg !h-[52px] !px-6">Pesquisar <ArrowRight size={17} /></button>
+            <button className="btn btn-primary btn-lg !h-[52px] !px-6">Pesquisar <ArrowRight className="btn-arrow" size={17} /></button>
           </form>
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted">
             {searchQuota ? <span className="mr-1">{searchQuota.remaining} pesquisa{searchQuota.remaining === 1 ? "" : "s"} disponíve{searchQuota.remaining === 1 ? "l" : "is"} {PERIOD_LABELS[searchQuota.period]}</span> : null}
@@ -151,7 +151,7 @@ function Panel({ title, href, icon: Icon, empty, children }: { title: string; hr
   return (
     <section className="card !rounded-3xl p-6">
       <div className="flex items-center justify-between"><h2 className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"><span className="flex size-7 items-center justify-center rounded-lg bg-white/[0.06]"><Icon size={14} className="text-brand-hi" /></span>{title}</h2>
-        <Link href={href} className="flex items-center gap-1 text-xs text-muted hover:text-fg">Ver tudo <ArrowRight size={12} /></Link></div>
+        <Link href={href} className="flex items-center gap-1 text-xs text-muted hover:text-fg">Ver tudo <ArrowRight className="btn-arrow" size={12} /></Link></div>
       {items.length ? <ul className="mt-3 divide-y divide-white/[0.06]">{items}</ul> : <p className="mt-5 rounded-xl border border-dashed border-white/[0.08] px-4 py-5 text-center text-sm text-muted">{empty}</p>}
     </section>
   );

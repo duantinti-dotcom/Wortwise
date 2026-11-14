@@ -104,7 +104,7 @@ function Profile({ user }: { user: ShellProps["user"] }) {
   const initial = (user.name ?? user.email).trim().charAt(0).toUpperCase();
   return (
     <Menu>
-      <MenuTrigger className="flex size-9 items-center justify-center overflow-hidden rounded-full border border-line-strong bg-surface-3 text-sm font-medium outline-none transition-transform active:scale-95" aria-label="Menu do perfil">
+      <MenuTrigger className="icon-btn overflow-hidden bg-gradient-to-br from-brand/40 to-[#ff4d6d]/30 text-sm font-semibold outline-none" aria-label="Menu do perfil">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {user.avatarUrl ? <img src={user.avatarUrl} alt="" className="size-full object-cover" referrerPolicy="no-referrer" /> : initial}
       </MenuTrigger>
@@ -167,8 +167,8 @@ export function AppShell(props: ShellProps) {
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
-              <Link href="/app/monitoramento" className="btn btn-ghost relative !px-2.5" aria-label={`Alertas${props.unreadAlerts ? ` (${props.unreadAlerts} não lidos)` : ""}`}>
-                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-brand ring-2 ring-ink" /> : null}
+              <Link href="/app/monitoramento" className="icon-btn relative" aria-label={`Alertas${props.unreadAlerts ? ` (${props.unreadAlerts} não lidos)` : ""}`}>
+                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1 top-1 size-2.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,121,0,0.9)] ring-2 ring-black" /> : null}
               </Link>
               <Profile user={props.user} />
             </div>
