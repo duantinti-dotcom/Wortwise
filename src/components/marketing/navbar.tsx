@@ -29,7 +29,7 @@ export function Navbar() {
     <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-3 pt-3 md:pt-4">
       <nav aria-label="Principal"
         className={cn("flex h-[58px] w-full items-center justify-between rounded-2xl border px-3 pl-4 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          scrolled ? "glass max-w-[1060px]" : "max-w-[1240px] border-transparent bg-transparent")}>
+          scrolled ? "lg lg-refract max-w-[1000px] !rounded-[22px]" : "max-w-[1240px] border-transparent bg-transparent")}>
         <Link href="/" aria-label="Worthwise — página inicial"><Logo /></Link>
         <ul className="hidden items-center gap-0.5 lg:flex">
           {LINKS.map((l) => (
@@ -43,7 +43,7 @@ export function Navbar() {
             <D.Trigger className="btn btn-ghost !px-2.5 lg:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>
             <D.Portal>
               <D.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm data-[state=open]:animate-overlay-in data-[state=closed]:animate-overlay-out" />
-              <D.Content className="glass fixed inset-x-3 top-3 z-50 origin-top rounded-3xl p-3 outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out">
+              <D.Content className="lg glass-strong fixed inset-x-3 top-3 z-50 origin-top rounded-3xl p-3 outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out">
                 <div className="flex items-center justify-between pl-2">
                   <D.Title asChild><Logo /></D.Title>
                   <D.Close className="btn btn-ghost !px-2.5" aria-label="Fechar menu"><X size={20} /></D.Close>

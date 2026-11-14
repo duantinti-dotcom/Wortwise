@@ -5,7 +5,7 @@ import { FAQ_ITEMS } from "@/lib/faq";
 
 export function Faq() {
   return (
-    <A.Root type="single" collapsible className="divide-y divide-line border-y border-line">
+    <A.Root type="single" collapsible className="divide-y divide-white/10">
       {FAQ_ITEMS.map((item, i) => (
         <A.Item key={item.q} value={`i${i}`}>
           <A.Header>

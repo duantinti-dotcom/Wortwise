@@ -1,4 +1,4 @@
-import { ArrowDownRight, BadgeCheck, BarChart3, Bell, Bookmark, Calculator, Check, Headphones, Home, Lamp, MessagesSquare, Scale, Search, Sparkles, Star, Store, TrendingDown, Watch } from "lucide-react";
+import { ArrowDownRight, BadgeCheck, BarChart3, Bell, Bookmark, Calculator, Headphones, Home, Lamp, MessagesSquare, Scale, Search, Sparkles, Star, Store, TrendingDown, Watch } from "lucide-react";
 import type { ReactNode } from "react";
 import { ScoreRing } from "@/components/score-ring";
 import { cn } from "@/lib/utils";
@@ -123,26 +123,23 @@ export function VisualAssistant() {
 
 const SIDE = [[Home, "Início", true], [Search, "Descobrir"], [Store, "Fornecedores"], [Scale, "Comparar"], [BarChart3, "Mercado"], [Calculator, "Calculadora"], [Bell, "Monitoramento"], [MessagesSquare, "Assistente"], [Bookmark, "Favoritos"]] as const;
 
-/** Composição do hero: a plataforma em uma janela, com cartões flutuantes. Demonstração ilustrativa. */
-export function HeroPreview() {
+/** Composição do hero: a plataforma numa janela de vidro, com cartões flutuantes. Demonstração ilustrativa. */
+export function HeroPreview({ widget }: { widget?: ReactNode }) {
   return (
     <div className="relative mx-auto w-full max-w-[1120px]">
-      <div aria-hidden className="aurora -top-24 left-1/2 h-72 w-[70%] -translate-x-1/2 bg-brand/25" />
       <div className="animate-tilt-in relative [transform-origin:50%_0%]">
-        <div className="edge-grad overflow-hidden rounded-[22px] border bg-[#0c0c0c] shadow-[0_60px_140px_-40px_rgba(0,0,0,1),0_0_80px_-30px_rgba(255,121,0,0.35)]">
-          <div aria-hidden className="beam absolute inset-x-0 top-0 z-10 h-px opacity-70" />
-          <div className="flex items-center gap-2 border-b border-white/8 bg-white/[0.03] px-4 py-3">
-            <span className="flex gap-1.5">{["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="size-2.5 rounded-full opacity-70" style={{ background: c }} />)}</span>
-            <span className="mx-auto flex h-7 w-[46%] items-center justify-center gap-2 truncate rounded-lg border border-white/8 bg-black/40 px-3 text-[11px] text-faint"><span className="truncate">app.worthwise<span className="hidden sm:inline"> · análise de produto</span></span></span>
+        <div className="lg glass-strong overflow-hidden rounded-[26px] shadow-[0_80px_160px_-50px_rgba(0,0,0,1)]">
+          <div aria-hidden className="beam absolute inset-x-10 top-0 z-10 h-px opacity-80" />
+          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+            <span className="flex gap-1.5">{["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="size-2.5 rounded-full opacity-80" style={{ background: c }} />)}</span>
+            <span className="mx-auto flex h-7 w-[46%] items-center justify-center rounded-lg border border-white/10 bg-black/30 px-3 text-[11px] text-muted"><span className="truncate">app.worthwise<span className="hidden sm:inline"> · análise de produto</span></span></span>
             <DemoTag className="hidden md:inline-flex" />
           </div>
           <div className="grid md:grid-cols-[184px_1fr]">
-            <aside className="hidden border-r border-white/8 bg-white/[0.02] p-3 md:block">
+            <aside className="hidden border-r border-white/10 p-3 md:block">
               {SIDE.map(([Icon, label, on]) => (
-                <div key={label} className={cn("flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[12.5px]", on ? "bg-white/10 text-fg" : "text-muted")}><Icon size={14} className={on ? "text-brand" : "text-faint"} />{label}</div>
+                <div key={label} className={cn("flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[12.5px]", on ? "bg-white/12 text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]" : "text-muted")}><Icon size={14} className={on ? "text-brand" : "text-faint"} />{label}</div>
               ))}
-              <div className="mt-4 rounded-lg border border-white/8 bg-white/[0.03] p-2.5"><div className="flex justify-between text-[11px]"><span>Plano Pro</span><span className="text-muted">128/300</span></div>
-                <div className="mt-2 h-1 rounded-full bg-white/10"><div className="h-full w-[43%] rounded-full bg-brand" /></div></div>
             </aside>
             <div className="p-4 md:p-5">
               <div className="flex flex-wrap items-center gap-3">
@@ -152,32 +149,27 @@ export function HeroPreview() {
                 <span className="btn btn-primary btn-sm pointer-events-none"><Bell size={13} /> Monitorar</span>
               </div>
               <div className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-                <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4"><VisualChart id="hero" />
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-xs">{[["Menor", "R$ 52,00"], ["Mediana", "R$ 62,70"], ["Maior", "R$ 89,90"]].map(([l, v]) => <div key={l} className="rounded-lg bg-white/[0.04] px-2.5 py-2"><div className="text-faint">{l}</div><div className="tabular mt-0.5 font-medium">{v}</div></div>)}</div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"><VisualChart id="hero" />
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-xs">{[["Menor", "R$ 52,00"], ["Mediana", "R$ 62,70"], ["Maior", "R$ 89,90"]].map(([l, v]) => <div key={l} className="rounded-lg bg-white/[0.05] px-2.5 py-2"><div className="text-faint">{l}</div><div className="tabular mt-0.5 font-medium">{v}</div></div>)}</div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                     <div className="flex items-center gap-4"><ScoreRing value={82} size={78} /><div><div className="text-sm font-semibold">Worthwise Score</div><div className="mt-0.5 text-xs text-muted">Grau de confiança: <span className="text-fg">moderado</span></div></div></div>
                     <div className="mt-4 space-y-2">{[["Margem estimada", 76], ["Evidências de demanda", 68], ["Preço competitivo", 84]].map(([l, w]) => (
-                      <div key={l} className="flex items-center gap-2.5 text-[11px]"><span className="w-32 shrink-0 text-muted">{l}</span><span className="h-1 flex-1 rounded-full bg-white/8"><span className="block h-full rounded-full bg-brand" style={{ width: `${w}%` }} /></span></div>))}</div>
+                      <div key={l} className="flex items-center gap-2.5 text-[11px]"><span className="w-32 shrink-0 text-muted">{l}</span><span className="h-1 flex-1 rounded-full bg-white/10"><span className="block h-full rounded-full bg-gradient-to-r from-brand to-[#ff4d6d]" style={{ width: `${w}%` }} /></span></div>))}</div>
                   </div>
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4"><div className="text-xs text-muted">Lucro por unidade</div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"><div className="text-xs text-muted">Lucro por unidade</div>
                     <div className="mt-1 flex items-baseline gap-2"><span className="tabular text-2xl font-semibold tracking-tight text-pos">R$ 13,70</span><span className="text-xs text-muted">margem 22,8%</span></div></div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        {/* cartões flutuantes em vidro */}
-        <div className="glass animate-float absolute -right-3 top-[46%] hidden w-60 rounded-2xl p-3.5 lg:block xl:-right-10">
-          <div className="flex items-center gap-2.5"><span className="flex size-8 items-center justify-center rounded-lg bg-pos/15 text-pos"><ArrowDownRight size={15} /></span>
+        <div className="glass animate-float absolute -right-4 -top-9 hidden w-60 rounded-2xl p-3.5 lg:block xl:-right-12">
+          <div className="flex items-center gap-2.5"><span className="flex size-8 items-center justify-center rounded-lg bg-pos/20 text-pos"><ArrowDownRight size={15} /></span>
             <div><div className="text-xs font-medium">Preço abaixo do alvo</div><div className="text-[11px] text-muted">R$ 58,90 → R$ 53,40</div></div></div>
         </div>
-        <div className="glass animate-float-slow absolute -left-3 bottom-16 hidden w-64 rounded-2xl p-3.5 lg:block xl:-left-12">
-          <div className="flex items-center gap-2 text-xs font-medium"><BadgeCheck size={15} className="text-pos" /> Fornecedor A · CNPJ ativo</div>
-          <div className="mt-2 flex items-baseline justify-between"><span className="text-[11px] text-muted">Custo final por unidade</span><span className="tabular text-sm font-semibold">R$ 13,00</span></div>
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-brand-hi"><Check size={12} /> menor custo total entre 3 cotações</div>
-        </div>
+        {widget ? <div className="absolute -bottom-28 -left-4 hidden lg:block xl:-left-14">{widget}</div> : null}
       </div>
       <div className="mt-5 flex justify-center md:hidden"><DemoTag /></div>
     </div>

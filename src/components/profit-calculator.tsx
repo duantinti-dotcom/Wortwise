@@ -3,15 +3,13 @@ import { Info, RotateCcw, Save, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildScenarios, calculateProfit, CHANNEL_PRESETS, compareChannels, DEFAULT_INPUTS, priceForTargetMargin, profitCurve, type ProfitInputs } from "@/lib/profit/calc";
+import { EXAMPLE } from "@/lib/profit/example";
 import { cn, formatMoney, formatPercent } from "@/lib/utils";
 
 const ProfitCurveChart = dynamic(() => import("./charts").then((m) => m.ProfitCurveChart), { ssr: false, loading: () => <div className="skeleton h-[200px] w-full" /> });
 
 /** Valores de exemplo exibidos ao abrir (identificados na interface até o usuário editar). */
-export const EXAMPLE_INPUTS: ProfitInputs = {
-  ...DEFAULT_INPUTS, costPrice: 32, salePrice: 79.9, quantity: 100, purchaseFreight: 250, saleShipping: 6, taxPct: 6,
-  marketplaceFeePct: 12, adsPct: 5, packaging: 1.5, returnsPct: 3,
-};
+export const EXAMPLE_INPUTS: ProfitInputs = EXAMPLE;
 
 function NumField({ id, label, value, onChange, prefix, suffix, hint }: {
   id: string; label: string; value: number; onChange: (v: number) => void; prefix?: string; suffix?: string; hint?: string;

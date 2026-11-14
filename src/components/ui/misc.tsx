@@ -23,7 +23,7 @@ export function PageHeader({ title, description, action, eyebrow }: { title: str
     <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
       <div className="min-w-0">
         {eyebrow ? <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-hi">{eyebrow}</div> : null}
-        <h1 className="text-grad text-[28px] font-semibold tracking-[-0.035em] md:text-[34px]">{title}</h1>
+        <h1 className="display text-[34px] md:text-[44px]">{title}</h1>
         {description ? <p className="mt-2 max-w-2xl text-[14.5px] leading-relaxed text-muted">{description}</p> : null}
       </div>
       {action}

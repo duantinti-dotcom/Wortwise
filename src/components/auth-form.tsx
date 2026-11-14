@@ -142,7 +142,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   return (
     <div className="animate-fade-up">
       {needsCaptcha ? <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" strategy="afterInteractive" onReady={mountTurnstile} /> : null}
-      <h1 className="text-grad text-[32px] font-semibold tracking-[-0.04em]">{copy.title}</h1>
+      <h1 className="display text-[36px]">{copy.title}</h1>
       <p className="mt-2 text-muted">{copy.sub}</p>
 
       {!configured ? <div role="alert" className="mt-6 rounded-xl border border-neg/30 bg-neg/8 px-4 py-3 text-sm text-[#ffb3b1]">A autenticação ainda não está configurada neste ambiente.</div> : null}

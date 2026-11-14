@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Dialog as D } from "radix-ui";
 import { useEffect, useState, type ReactNode } from "react";
+import { Ambient } from "@/components/ambient";
 import { Logo } from "@/components/logo";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { ToastProvider } from "@/components/ui/toast";
@@ -52,7 +53,7 @@ function NavList({ onNavigate, unreadAlerts, admin }: { onNavigate?: () => void;
   const path = usePathname();
   const active = (href: string) => (href === "/app" ? path === "/app" : path.startsWith(href));
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {GROUPS.map((g) => (
         <div key={g.label || "home"}>
           {g.label ? <div className="mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-faint">{g.label}</div> : null}
@@ -63,7 +64,7 @@ function NavList({ onNavigate, unreadAlerts, admin }: { onNavigate?: () => void;
                 <li key={n.href}>
                   <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined}
                     className={cn("group relative flex h-9 items-center gap-3 rounded-xl px-3 text-[13.5px] transition-all duration-200",
-                      on ? "bg-gradient-to-r from-white/[0.09] to-white/[0.03] font-medium text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" : "text-muted hover:bg-white/[0.04] hover:text-fg")}>
+                      on ? "bg-white/[0.12] font-medium text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_14px_-6px_rgba(0,0,0,0.6)]" : "text-muted hover:bg-white/[0.06] hover:text-fg")}>
                     {on ? <span aria-hidden className="absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand shadow-[0_0_12px_rgba(255,121,0,0.9)]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
@@ -134,22 +135,22 @@ export function AppShell(props: ShellProps) {
   return (
     <ToastProvider>
       <UpgradeProvider plans={props.plans} currentPlan={props.plan}>
-        <div className="min-h-dvh lg:pl-[248px]">
+        <div className="min-h-dvh lg:pl-[276px]">
+          <Ambient variant="calm" />
           {/* Sidebar — desktop */}
-          <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-white/[0.06] bg-[linear-gradient(180deg,#111_0%,#0c0c0c_100%)] lg:flex">
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(80%_100%_at_0%_0%,rgba(255,121,0,0.08),transparent)]" />
+          <aside className="lg glass-strong fixed bottom-3 left-3 top-3 z-30 hidden w-[252px] flex-col overflow-hidden rounded-[26px] lg:flex">
             <Link href="/app" className="relative flex h-16 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
             <nav aria-label="Aplicação" className="relative flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
             <div className="p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
           </aside>
 
           {/* Barra superior */}
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/[0.06] bg-ink/70 px-4 backdrop-blur-xl backdrop-saturate-150 lg:h-16 lg:px-8">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/[0.07] bg-black/30 px-4 backdrop-blur-2xl backdrop-saturate-150 lg:h-[72px] lg:border-0 lg:bg-transparent lg:px-10 lg:backdrop-blur-none">
             <D.Root open={drawer} onOpenChange={setDrawer}>
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>
                 <D.Overlay className="fixed inset-0 z-50 bg-black/60 data-[state=open]:animate-overlay-in data-[state=closed]:animate-overlay-out" />
-                <D.Content className="glass fixed inset-y-0 left-0 z-50 flex w-[86vw] max-w-[320px] flex-col rounded-r-2xl outline-none data-[state=open]:animate-[drawer-in_0.3s_cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:animate-[drawer-out_0.2s_ease-in]">
+                <D.Content className="lg glass-strong fixed inset-y-2 left-2 z-50 flex w-[86vw] max-w-[320px] flex-col rounded-[24px] outline-none data-[state=open]:animate-[drawer-in_0.3s_cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:animate-[drawer-out_0.2s_ease-in]">
                   <div className="flex h-14 items-center justify-between px-4"><D.Title asChild><Logo size={26} /></D.Title>
                     <D.Close className="btn btn-ghost !px-2.5" aria-label="Fechar menu"><X size={20} /></D.Close></div>
                   <D.Description className="sr-only">Navegação da aplicação</D.Description>
@@ -162,7 +163,7 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="h-10 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-white/[0.14] focus:border-brand focus:bg-white/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)]" />
+                className="lg h-11 w-full !rounded-2xl pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-white/[0.14] focus:border-brand focus:bg-white/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)]" />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
@@ -179,7 +180,7 @@ export function AppShell(props: ShellProps) {
           </main>
 
           {/* Navegação inferior — mobile */}
-          <nav aria-label="Atalhos" className="glass fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-2xl p-1.5 lg:hidden">
+          <nav aria-label="Atalhos" className="lg glass-strong fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-2xl p-1.5 lg:hidden">
             {TABS.map((t) => {
               const on = t.href === "/app" ? path === "/app" : path.startsWith(t.href);
               return (

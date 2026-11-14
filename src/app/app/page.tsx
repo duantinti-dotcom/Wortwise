@@ -39,14 +39,14 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="edge-grad relative overflow-hidden rounded-[28px] border bg-[#0e0e0e] p-6 md:p-10">
+      <section className="lg relative overflow-hidden rounded-[32px] p-6 md:p-10">
         <div aria-hidden className="grid-bg absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_60%_80%_at_100%_0%,#000,transparent)]" />
         <div aria-hidden className="aurora -right-20 -top-24 h-72 w-72 bg-brand/25" />
         <div className="relative">
           <div className="text-sm text-muted first-letter:uppercase">{today}</div>
-          <h1 className="text-grad mt-2 text-[30px] font-semibold tracking-[-0.04em] md:text-[44px]">{greeting}{name ? `, ${name}` : ""}.</h1>
+          <h1 className="display mt-2 text-[36px] md:text-[56px]">{greeting}{name ? <>, <span className="accent">{name}</span></> : ""}.</h1>
           <p className="mt-2 max-w-xl text-[15px] text-muted">{isNew ? "Sua conta está pronta. Comece pesquisando um produto que você pensa em vender." : "O que vale a pena vender agora? Pesquise ou retome de onde parou."}</p>
-          <form action="/app/descobrir" role="search" className="mt-7 flex max-w-3xl flex-col gap-2 rounded-2xl border border-white/10 bg-black/40 p-2 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.9)] backdrop-blur sm:flex-row">
+          <form action="/app/descobrir" role="search" className="lg lg-refract mt-7 flex max-w-3xl flex-col gap-2 rounded-[22px] p-2 sm:flex-row">
             <label htmlFor="dash-q" className="sr-only">Pesquisar produto</label>
             <div className="relative flex-1">
               <Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand" />
