@@ -92,20 +92,20 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} aria-label="Termo de pesquisa" placeholder="O que você quer vender? Ex.: fone bluetooth" enterKeyHint="search"
+            <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} aria-label="Termo de pesquisa" placeholder="O que você quer vender?" enterKeyHint="search"
               className="h-12 w-full rounded-xl bg-transparent pl-12 pr-3 text-base outline-none placeholder:text-faint" />
           </div>
           <button type="submit" disabled={loading} aria-label="Pesquisar" className="btn btn-primary !h-12 !px-4 sm:!px-5"><Search size={17} className="sm:hidden" /><span className="hidden sm:inline">{loading ? "Pesquisando…" : "Pesquisar"}</span></button>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-tint/8 px-2 pb-1 pt-2.5">
-          <span className="mr-1 text-[12px] text-faint">Pesquisar em</span>
+        <div className="flex items-center gap-1.5 overflow-x-auto border-t border-tint/8 px-2 pb-1 pt-2.5 [scrollbar-width:none] md:flex-wrap [&::-webkit-scrollbar]:hidden">
+          <span className="mr-1 shrink-0 text-[12px] text-faint">Pesquisar em</span>
           {sources.map((src) => {
             const on = selected.length === 0 ? src.state === "connected" : selected.includes(src.id);
             const ready = src.state === "connected";
             return (
               <button key={src.id} type="button" title={src.detail} aria-pressed={on} disabled={!ready}
                 onClick={() => setSelected((x) => { const base = x.length ? x : sources.filter((q) => q.state === "connected").map((q) => q.id); const next = base.includes(src.id) ? base.filter((i) => i !== src.id) : [...base, src.id]; return next; })}
-                className={cn("chip !h-8 !px-3 !text-[12.5px] disabled:cursor-not-allowed disabled:opacity-55", on && ready && "!bg-fg !text-ink")}>
+                className={cn("chip !h-8 shrink-0 !px-3 !text-[12.5px] disabled:cursor-not-allowed disabled:opacity-55", on && ready && "!bg-fg !text-ink")}>
                 <span className={cn("size-1.5 rounded-full", ready ? "bg-pos" : "bg-faint")} />{src.name}
                 {!ready ? <span className="text-faint">· {src.state === "pending_approval" ? "em credenciamento" : "aguardando credenciais"}</span> : null}
               </button>

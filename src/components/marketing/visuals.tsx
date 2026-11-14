@@ -23,7 +23,7 @@ function Thumb({ p, size = "size-10" }: { p: (typeof PRODUCTS)[number]; size?: s
 }
 
 function Row({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("flex items-center justify-between gap-3 rounded-xl border border-tint/8 bg-tint/[0.035] px-3.5 py-3", className)}>{children}</div>;
+  return <div className={cn("flex items-center justify-between gap-2.5 rounded-xl border border-tint/8 bg-tint/[0.035] px-3 py-2.5 sm:gap-3 sm:px-3.5 sm:py-3", className)}>{children}</div>;
 }
 
 export function SparkPath({ className, animated = true, id = "spark" }: { className?: string; animated?: boolean; id?: string }) {
@@ -49,8 +49,8 @@ export function VisualSearch() {
       {PRODUCTS.map((p, i) => (
         <Row key={p.name} className={i === 0 ? "border-brand/30 bg-brand/[0.06]" : undefined}>
           <span className="flex min-w-0 items-center gap-3"><Thumb p={p} /><span className="min-w-0"><span className="block truncate text-sm font-medium">{p.name}</span>
-            <span className="flex items-center gap-1 text-xs text-muted"><Star size={11} className="fill-brand text-brand" /> {p.rating} · fonte e data da coleta</span></span></span>
-          <span className="tabular text-sm font-semibold">{p.price}</span>
+            <span className="flex items-center gap-1 truncate text-xs text-muted"><Star size={11} className="shrink-0 fill-brand text-brand" /> {p.rating}<span className="hidden sm:inline"> · fonte e data da coleta</span></span></span></span>
+          <span className="tabular shrink-0 whitespace-nowrap text-sm font-semibold">{p.price}</span>
         </Row>
       ))}
     </div>

@@ -28,7 +28,7 @@ export function FeatureTile({ tone, icon, title, text, children, className, flip
         mx.set((e.clientX - r.left) / r.width - 0.5); my.set((e.clientY - r.top) / r.height - 0.5);
       }}
       onPointerLeave={() => { mx.set(0); my.set(0); }}
-      className={cn("tile group flex flex-col p-6 sm:p-8", tone, className)}>
+      className={cn("tile group flex flex-col p-5 sm:p-8", tone, className)}>
       <div className={cn("flex flex-col", flip && "order-2 mt-8")}>
         <div className="flex items-center gap-3">
           <span className="flex size-9 items-center justify-center rounded-[9px] border border-tint/10 bg-tint/[0.05] text-brand [&>svg]:size-[17px]">{icon}</span>
@@ -36,7 +36,7 @@ export function FeatureTile({ tone, icon, title, text, children, className, flip
         </div>
         <p className="tile-muted mt-3 max-w-[46ch] text-[15px] leading-relaxed">{text}</p>
       </div>
-      <motion.div style={reduce ? undefined : { x, y, rotate }} className={cn("demo-screen relative rounded-[14px] p-4 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)] sm:p-5", flip ? "order-1" : "mt-8")}>
+      <motion.div style={reduce ? undefined : { x, y, rotate }} className={cn("demo-screen relative rounded-[14px] p-3 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)] sm:p-5", flip ? "order-1" : "mt-8")}>
         {children}
       </motion.div>
     </motion.article>

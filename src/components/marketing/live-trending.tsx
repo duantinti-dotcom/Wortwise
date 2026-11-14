@@ -57,10 +57,10 @@ export function LiveTrending() {
       </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
         {data === null ? Array.from({ length: 10 }, (_, i) => (
-          <div key={i} className={cn("card overflow-hidden !rounded-[14px]", i >= 8 && "max-lg:hidden")}><div className="skeleton m-2 aspect-square !rounded-[10px]" /><div className="space-y-2 p-4"><div className="skeleton h-4" /><div className="skeleton h-5 w-20" /></div></div>
+          <div key={i} className={cn("card overflow-hidden !rounded-[14px]", i >= 4 && "max-md:hidden", i >= 8 && "max-lg:hidden")}><div className="skeleton m-2 aspect-square !rounded-[10px]" /><div className="space-y-2 p-4"><div className="skeleton h-4" /><div className="skeleton h-5 w-20" /></div></div>
         )) : live ? data!.products.map((p, i) => (
           <motion.a key={p.id} href={p.permalink ?? undefined} target="_blank" rel="noopener noreferrer nofollow" {...item(i)}
-            className={cn("card card-hover group relative flex flex-col overflow-hidden !rounded-[14px]", i >= 8 && "max-lg:hidden")}>
+            className={cn("card card-hover group relative flex flex-col overflow-hidden !rounded-[14px]", i >= 4 && "max-md:hidden", i >= 8 && "max-lg:hidden")}>
             <div className="relative m-2 flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-white p-4">
               <RankBadge rank={p.rank} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -76,7 +76,7 @@ export function LiveTrending() {
             </div>
           </motion.a>
         )) : DEMO.concat(DEMO.slice(0, 2)).map((d, i) => (
-          <motion.div key={i} {...item(i)} className={cn("card relative flex flex-col overflow-hidden !rounded-[14px]", i >= 8 && "max-lg:hidden")}>
+          <motion.div key={i} {...item(i)} className={cn("card relative flex flex-col overflow-hidden !rounded-[14px]", i >= 4 && "max-md:hidden", i >= 8 && "max-lg:hidden")}>
             <div className="relative m-2 flex aspect-square items-center justify-center rounded-[10px] bg-[#f4f4f5]">
               <RankBadge rank={i + 1} />
               <d.icon size={46} strokeWidth={1.25} className="text-black/30" />

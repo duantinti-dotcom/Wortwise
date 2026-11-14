@@ -23,7 +23,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
   }, [initial]);
 
   return (
-    <Stagger className="grid items-stretch gap-5 lg:grid-cols-3">
+    <Stagger className="snap-row-lg items-stretch lg:grid lg:grid-cols-3 lg:gap-5">
       {plans.map((p) => {
         const featured = p.id === "pro";
         return (

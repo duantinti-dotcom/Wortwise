@@ -19,7 +19,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 16);
+    const on = () => setScrolled(window.scrollY > 16 || window.innerWidth < 1024);
     on();
     document.documentElement.dataset.navReady = "1";
     window.addEventListener("scroll", on, { passive: true });

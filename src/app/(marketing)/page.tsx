@@ -2,7 +2,6 @@ import { ArrowRight, Bell, Calculator, Check, LineChart, MessagesSquare, Scale, 
 import Link from "next/link";
 import { Faq } from "@/components/marketing/faq";
 import { FeatureTile } from "@/components/marketing/feature-tile";
-import { HeroWidget } from "@/components/marketing/hero-widget";
 import { LiveTrending } from "@/components/marketing/live-trending";
 import { QuestionMarquee } from "@/components/marketing/marquee";
 import { Pricing } from "@/components/marketing/pricing";
@@ -88,7 +87,7 @@ export default function HomePage() {
       </section>
 
       {/* Em alta agora */}
-      <section id="em-alta" aria-label="Produtos em alta" className="scroll-mt-24 pt-28 md:pt-36">
+      <section id="em-alta" aria-label="Produtos em alta" className="scroll-mt-24 pt-16 md:pt-36">
         <div className="container-page">
           <Reveal className="mx-auto mb-10 max-w-3xl text-center">
             <span className="eyebrow">Em alta agora</span>
@@ -101,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* Números */}
-      <section aria-label="Worthwise em números" className="pt-28 md:pt-36">
+      <section aria-label="Worthwise em números" className="pt-16 md:pt-36">
         <div className="container-page">
           <Stagger className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 bg-tint/10 lg:grid-cols-4">
             {[["R$ 0", "para começar, sem cartão"], ["100%", "dos preços com fonte e data"], ["30 min", "atualização do ranking"], ["0", "números inventados"]].map(([big, small]) => (
@@ -115,10 +114,10 @@ export default function HomePage() {
       </section>
 
       {/* Princípios */}
-      <section className="pt-28 md:pt-36">
+      <section className="pt-16 md:pt-36">
         <div className="container-page">
           <Reveal>
-            <p className="mx-auto max-w-4xl text-center text-[24px] font-medium leading-[1.3] tracking-[-0.03em] text-faint md:text-[36px]">
+            <p className="mx-auto max-w-4xl text-center text-[21px] font-medium leading-[1.32] tracking-[-0.03em] text-faint md:text-[36px]">
               Sem scraping, sem números inventados. <span className="text-fg">Cada preço tem fonte e data,</span> cada CNPJ é conferido na Receita e <span className="text-fg">todo custo entra na conta.</span>
             </p>
           </Reveal>
@@ -126,14 +125,14 @@ export default function HomePage() {
       </section>
 
       {/* Funcionalidades */}
-      <section id="funcionalidades" className="scroll-mt-24 py-28 md:py-36">
+      <section id="funcionalidades" className="scroll-mt-24 py-16 md:py-36">
         <div className="container-page">
-          <Reveal className="mx-auto mb-14 max-w-3xl text-center">
+          <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
             <span className="eyebrow">Funcionalidades</span>
             <Title className="mt-5">Tudo para decidir <span className="accent">o que vender</span></Title>
             <p className="mt-5 text-lg text-muted">Seis ferramentas que conversam entre si. Cada uma mostra de onde veio o dado.</p>
           </Reveal>
-          <div className="grid gap-4 md:grid-cols-2 md:gap-5">
+          <div className="snap-row md:grid md:grid-cols-2 md:gap-5">
             <FeatureTile tone="tile-sunset" icon={<Search />} title="Descubra o que vender" text="Digite um produto e veja preço, avaliações e quem vende — com foto e link para o anúncio."><VisualSearch /></FeatureTile>
             <FeatureTile tone="tile-berry" icon={<Scale />} title="Compare fornecedores" text="Some preço, frete e impostos e descubra quem sai mais barato de verdade. E confira se a empresa existe na Receita." flip><VisualCompare /></FeatureTile>
             <FeatureTile tone="tile-ocean" icon={<LineChart />} title="Entenda o preço" text="Veja se o preço está subindo ou caindo, o menor e o maior preço e quantos vendedores disputam o produto." flip><VisualChart id="ft" /></FeatureTile>
@@ -141,24 +140,25 @@ export default function HomePage() {
             <FeatureTile tone="tile-mint" icon={<Bell />} title="Receba alertas" text="Escolha um preço e seja avisado quando o produto chegar nele. Bom para comprar na hora certa."><VisualWatch /></FeatureTile>
             <FeatureTile tone="tile-night" icon={<MessagesSquare />} title="Pergunte ao assistente" text="Pergunte em português, como para um amigo que entende de vendas. Ele faz as contas e mostra de onde tirou cada número." flip><VisualAssistant /></FeatureTile>
           </div>
+          <p className="mt-1 text-center text-xs text-faint md:hidden">Deslize para o lado →</p>
           <div className="mt-6 flex justify-center"><DemoTag /></div>
         </div>
       </section>
 
       {/* Perguntas */}
-      <section aria-label="Perguntas que o assistente responde" className="pb-28 md:pb-36">
+      <section aria-label="Perguntas que o assistente responde" className="pb-16 md:pb-36">
         <Reveal className="container-page mb-10 text-center"><Title className="!text-[32px] sm:!text-[44px]">Pergunte como perguntaria a um <span className="accent">analista</span></Title></Reveal>
         <div className="space-y-3"><QuestionMarquee items={QUESTIONS_A} /><QuestionMarquee items={QUESTIONS_B} reverse /></div>
       </section>
 
       {/* Como funciona */}
-      <section id="como-funciona" className="scroll-mt-24 py-24 md:py-32">
+      <section id="como-funciona" className="scroll-mt-24 py-16 md:py-32">
         <div className="container-page">
-          <Reveal className="mx-auto mb-14 max-w-3xl text-center">
+          <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
             <span className="eyebrow">Como funciona</span>
             <Title className="mt-5">Da dúvida à decisão em <span className="accent">quatro passos</span></Title>
           </Reveal>
-          <Stagger as="ol" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Stagger as="ol" className="snap-row md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
             {STEPS.map((s, i) => (
               <StaggerItem as="li" key={s.title} className="h-full">
                 <Spot className="lg card-hover flex h-full flex-col rounded-2xl p-6 md:p-7">
@@ -177,20 +177,19 @@ export default function HomePage() {
       </section>
 
       {/* Calculadora */}
-      <section id="demonstracao" className="scroll-mt-24 py-24 md:py-32">
+      <section id="demonstracao" className="scroll-mt-24 py-16 md:py-32">
         <div className="container-page">
-          <Reveal className="mx-auto mb-14 max-w-3xl text-center">
+          <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
             <span className="eyebrow">Grátis, sem cadastro</span>
             <Title className="mt-5">Experimente a <span className="accent">calculadora de lucro</span></Title>
             <p className="mt-5 text-lg text-muted">Mexa nos números e veja o lucro, o preço mínimo e o caminho da receita até o que sobra.</p>
           </Reveal>
-          <div className="mb-8 flex justify-center lg:hidden"><HeroWidget /></div>
           <Reveal><ProfitCalculator compact /></Reveal>
         </div>
       </section>
 
       {/* Planos */}
-      <section id="planos" className="scroll-mt-24 py-24 md:py-32">
+      <section id="planos" className="scroll-mt-24 py-16 md:py-32">
         <div className="container-page">
           <Reveal className="mx-auto mb-16 max-w-3xl text-center">
             <span className="eyebrow">Planos</span>
@@ -198,12 +197,13 @@ export default function HomePage() {
             <p className="mt-5 text-lg text-muted">Limites claros em todos os planos. Cancele quando quiser; o acesso vale até o fim do período pago.</p>
           </Reveal>
           <Pricing />
+          <p className="mt-1 text-center text-xs text-faint lg:hidden">Deslize para ver os outros planos →</p>
           <p className="mt-8 text-center text-sm text-faint">Pagamento processado pela HeroPay (Pix, cartão ou boleto). O Worthwise não armazena dados de cartão.</p>
         </div>
       </section>
 
       {/* FAQ */}
-      <section id="perguntas" className="scroll-mt-24 py-24 md:py-32">
+      <section id="perguntas" className="scroll-mt-24 py-16 md:py-32">
         <div className="container-page !max-w-3xl">
           <Reveal className="mb-12 text-center">
             <span className="eyebrow">Dúvidas</span>
