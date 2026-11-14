@@ -1,5 +1,5 @@
 "use client";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatDate, formatMoney } from "@/lib/utils";
 
 const AXIS = { fontSize: 11, fill: "var(--chart-axis)" };
@@ -82,8 +82,8 @@ export function ProfitCurveChart({ data, current, height = 220 }: { data: { pric
 /** Barras horizontais simples (comparações de preço, canais, fornecedores). */
 export function CompareBars({ data, height, positiveNegative }: { data: { name: string; value: number; highlight?: boolean }[]; height?: number; positiveNegative?: boolean }) {
   return (
-    <ResponsiveContainer width="100%" height={height ?? Math.max(120, data.length * 44)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 0, right: 12, left: 0, bottom: 0 }} barCategoryGap={10}>
+    <ResponsiveContainer width="100%" height={height ?? Math.max(72, data.length * 44)}>
+      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 84, left: 0, bottom: 4 }} barCategoryGap={10}>
         <XAxis type="number" hide domain={positiveNegative ? ["dataMin", "dataMax"] : [0, "dataMax"]} />
         <YAxis type="category" dataKey="name" tick={{ ...AXIS, fill: "var(--soft)", fontSize: 12 }} tickLine={false} axisLine={false} width={150} />
         <Tooltip cursor={{ fill: "rgb(var(--tint) / 0.04)" }}
@@ -92,10 +92,11 @@ export function CompareBars({ data, height, positiveNegative }: { data: { name: 
             if (!active || !p) return null;
             return <TipBox title={p.name} rows={[{ label: "Valor", value: formatMoney(p.value) }]} />;
           }} />
-        <Bar dataKey="value" radius={[4, 4, 4, 4]} animationDuration={600}>
+        <Bar dataKey="value" radius={[6, 6, 6, 6]} animationDuration={600} maxBarSize={26}>
           {data.map((d) => (
-            <Cell key={d.name} fill={positiveNegative ? (d.value >= 0 ? (d.highlight ? "#3ecf8e" : "rgba(62,207,142,0.45)") : "rgba(242,95,92,0.6)") : d.highlight ? "#ff7900" : "var(--chart-muted)"} />
+            <Cell key={d.name} fill={positiveNegative ? (d.value >= 0 ? (d.highlight ? "#3ecf8e" : "rgba(62,207,142,0.45)") : "rgba(242,95,92,0.6)") : d.highlight ? "#ff7900" : "rgba(255,121,0,0.35)"} />
           ))}
+          <LabelList dataKey="value" position="right" formatter={(v: unknown) => formatMoney(Number(v))} style={{ fill: "var(--soft)", fontSize: 12, fontWeight: 600 }} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>
