@@ -129,7 +129,7 @@ export function HeroPreview({ widget }: { widget?: ReactNode }) {
   return (
     <div className="relative mx-auto w-full max-w-[1120px]">
       <div className="relative">
-        <div className="lg glass-strong relative overflow-hidden rounded-[26px] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]">
+        <div className="lg glass-strong relative overflow-hidden rounded-2xl shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]">
           <BorderBeam />
           <div aria-hidden className="beam absolute inset-x-10 top-0 z-10 h-px opacity-80" />
           <div className="flex items-center gap-2 border-b border-tint/10 px-4 py-3">
@@ -158,7 +158,7 @@ export function HeroPreview({ widget }: { widget?: ReactNode }) {
                   <div className="rounded-2xl border border-tint/10 bg-tint/[0.04] p-4">
                     <div className="flex items-center gap-4"><ScoreRing value={82} size={78} /><div><div className="text-sm font-semibold">Worthwise Score</div><div className="mt-0.5 text-xs text-muted">Grau de confiança: <span className="text-fg">moderado</span></div></div></div>
                     <div className="mt-4 space-y-2">{[["Margem estimada", 76], ["Evidências de demanda", 68], ["Preço competitivo", 84]].map(([l, w]) => (
-                      <div key={l} className="flex items-center gap-2.5 text-[11px]"><span className="w-32 shrink-0 text-muted">{l}</span><span className="h-1 flex-1 rounded-full bg-tint/10"><span className="block h-full rounded-full bg-gradient-to-r from-brand to-[#ff4d6d]" style={{ width: `${w}%` }} /></span></div>))}</div>
+                      <div key={l} className="flex items-center gap-2.5 text-[11px]"><span className="w-32 shrink-0 text-muted">{l}</span><span className="h-1 flex-1 rounded-full bg-tint/10"><span className="block h-full rounded-full bg-gradient-to-r from-brand to-brand-hi" style={{ width: `${w}%` }} /></span></div>))}</div>
                   </div>
                   <div className="rounded-2xl border border-tint/10 bg-tint/[0.04] p-4"><div className="text-xs text-muted">Lucro por unidade</div>
                     <div className="mt-1 flex items-baseline gap-2"><span className="tabular text-2xl font-semibold tracking-tight text-pos">R$ 13,70</span><span className="text-xs text-muted">margem 22,8%</span></div></div>

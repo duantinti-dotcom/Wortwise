@@ -42,7 +42,7 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="lg relative overflow-hidden rounded-[32px] p-6 md:p-10">
+      <section className="lg relative overflow-hidden rounded-2xl p-6 md:p-10">
         <BorderBeam />
         <div aria-hidden className="grid-bg absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_60%_80%_at_100%_0%,#000,transparent)]" />
         <div aria-hidden className="aurora -right-20 -top-24 h-72 w-72 bg-brand/25" />
@@ -92,7 +92,7 @@ export default async function Dashboard() {
       </section>
 
       {isNew ? (
-        <section className="card !rounded-3xl p-6 md:p-8">
+        <section className="card !rounded-2xl p-6 md:p-8">
           <div className="flex items-center justify-between"><h2 className="text-lg font-semibold tracking-tight">Primeiros passos</h2><span className="text-xs text-muted">leva menos de 5 minutos</span></div>
           <ol className="mt-6 grid gap-3 md:grid-cols-3">
             {[["1", "Pesquise um produto", "Veja ofertas reais, com fonte e data da coleta.", "/app/descobrir", Search], ["2", "Simule o lucro", "Inclua comissão, frete, impostos e publicidade.", "/app/calculadora", Calculator], ["3", "Compare fornecedores", "Cadastre cotações e veja o custo final por unidade.", "/app/comparar", Scale]].map(([n, t, d, href, I]) => {
@@ -153,7 +153,7 @@ export default async function Dashboard() {
 function Panel({ title, href, icon: Icon, empty, children }: { title: string; href: string; icon: typeof Clock; empty: string; children: React.ReactNode[] | React.ReactNode }) {
   const items = (Array.isArray(children) ? children.flat() : [children]).filter(Boolean);
   return (
-    <section className="card !rounded-3xl p-6">
+    <section className="card !rounded-2xl p-6">
       <div className="flex items-center justify-between"><h2 className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Icon size={14} className="text-brand-hi" /></span>{title}</h2>
         <Link href={href} className="flex items-center gap-1 text-xs text-muted hover:text-fg">Ver tudo <ArrowRight className="btn-arrow" size={12} /></Link></div>
       {items.length ? <ul className="mt-3 divide-y divide-tint/[0.06]">{items}</ul> : <p className="mt-5 rounded-xl border border-dashed border-tint/[0.08] px-4 py-5 text-center text-sm text-muted">{empty}</p>}

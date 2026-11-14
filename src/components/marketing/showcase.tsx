@@ -28,13 +28,13 @@ export function Showcase({ items }: { items: ShowcaseItem[] }) {
               <div className={cn("hidden transition-[grid-template-rows,opacity] duration-500 lg:grid", on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
                 <p className="overflow-hidden pt-1.5 text-[14.5px] leading-relaxed text-muted">{it.text}</p>
               </div>
-              {on && !reduce ? <span key={`${active}-${paused}`} aria-hidden className="absolute inset-x-4 bottom-0 lg:inset-x-5 h-[2px] origin-left rounded-full bg-gradient-to-r from-brand to-[#ff4d6d]"
+              {on && !reduce ? <span key={`${active}-${paused}`} aria-hidden className="absolute inset-x-4 bottom-0 lg:inset-x-5 h-[2px] origin-left rounded-full bg-gradient-to-r from-brand to-brand-hi"
                 style={{ animation: paused ? "none" : "fill 7s linear forwards", transform: paused ? "scaleX(0.35)" : undefined }} /> : null}
             </button>
           );
         })}
       </div>
-      <div id="showcase-panel" role="tabpanel" className="lg relative min-h-[360px] overflow-hidden rounded-[28px] p-5 md:p-8 lg:min-h-[380px]">
+      <div id="showcase-panel" role="tabpanel" className="lg relative min-h-[360px] overflow-hidden rounded-2xl p-5 md:p-8 lg:min-h-[380px]">
         <AnimatePresence mode="wait">
           <motion.div key={cur.id}
             initial={reduce ? false : { opacity: 0, y: 14, filter: "blur(6px)" }}

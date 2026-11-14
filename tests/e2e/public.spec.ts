@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("site público", () => {
   test("landing apresenta a proposta e não tem rolagem horizontal", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Descubra os produtos que mais vendem com");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Descubra os produtos que mais vendem.");
     await expect(page.getByRole("link", { name: /Começar grátis/ }).first()).toBeVisible();
     await expect(page.getByText("Demonstração · dados ilustrativos").filter({ visible: true }).first()).toBeVisible();
     for (const id of ["funcionalidades", "como-funciona", "demonstracao", "planos", "perguntas"]) await expect(page.locator(`#${id}`)).toBeAttached();

@@ -69,7 +69,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
       ) : (
         <>
           {data.trends.length ? (
-            <section aria-label="Buscas em alta" className="lg mb-6 rounded-[24px] p-4 sm:p-5">
+            <section aria-label="Buscas em alta" className="lg mb-6 rounded-2xl p-4 sm:p-5">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><Flame size={16} className="text-brand" />Buscas que mais cresceram em {data.category.name}</div>
               <ul className="flex flex-wrap gap-2">
                 {data.trends.slice(0, 16).map((t, i) => (

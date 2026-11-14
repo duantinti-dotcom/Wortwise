@@ -28,7 +28,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
         const featured = p.id === "pro";
         return (
           <StaggerItem key={p.id} className={cn("flex", featured && "lg:-my-4")}>
-          <Spot className={cn("lg card-hover relative flex flex-1 flex-col rounded-[32px] p-8", featured && "edge-brand lg:py-12")}>
+          <Spot className={cn("lg card-hover relative flex flex-1 flex-col rounded-2xl p-8", featured && "edge-brand lg:py-12")}>
             {featured ? <BorderBeam /> : null}
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>

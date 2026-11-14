@@ -1,20 +1,16 @@
-import { ArrowRight, BadgeCheck, Bell, Calculator, Check, ChevronsRight, Database, LineChart, MessagesSquare, Receipt, Scale, Search, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowRight, Bell, Calculator, Check, LineChart, MessagesSquare, Scale, Search, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { CurvyArrow, Sparkle, Squiggle, Underline } from "@/components/marketing/doodles";
 import { Faq } from "@/components/marketing/faq";
-import { FactsMarquee } from "@/components/marketing/facts";
 import { FeatureTile } from "@/components/marketing/feature-tile";
 import { HeroWidget } from "@/components/marketing/hero-widget";
 import { LiveTrending } from "@/components/marketing/live-trending";
 import { QuestionMarquee } from "@/components/marketing/marquee";
 import { Pricing } from "@/components/marketing/pricing";
-import { WordRotator } from "@/components/marketing/rotator";
 import { ScrollFrame } from "@/components/marketing/scroll-frame";
 import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualCompare, VisualSearch, VisualWatch } from "@/components/marketing/visuals";
 import { ProfitCalculator } from "@/components/profit-calculator";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/reveal";
 import { Spot } from "@/components/ui/spot";
-import { BorderBeam } from "@/components/ui/fx";
 import { publicEnv } from "@/lib/env";
 import { FAQ_ITEMS } from "@/lib/faq";
 import { cn } from "@/lib/utils";
@@ -22,12 +18,6 @@ import { cn } from "@/lib/utils";
 const QUESTIONS_A = ["O que vale a pena vender essa semana?", "Encontre produtos até R$ 50 com boa margem", "Qual fornecedor tem o menor custo total?", "Por quanto eu deveria vender?", "Vale a pena vender isso no Mercado Livre?"];
 const QUESTIONS_B = ["Quanto sobra se eu vender 100 unidades?", "Compare este produto entre canais", "Quais são os riscos desse produto?", "O preço caiu nas últimas semanas?", "Qual o preço mínimo para não ter prejuízo?"];
 
-const ROTATOR = [
-  { word: "dados reais", icon: <Database />, tone: "bg-gradient-to-br from-[#ffb15c] to-[#ff6a00]" },
-  { word: "lucro real", icon: <TrendingUp />, tone: "bg-gradient-to-br from-[#3ee0a0] to-[#0e8f86]" },
-  { word: "preço certo", icon: <Receipt />, tone: "bg-gradient-to-br from-[#7ad7ff] to-[#4b3cff]" },
-  { word: "fonte e data", icon: <BadgeCheck />, tone: "bg-gradient-to-br from-[#ff7ab2] to-[#a12cff]" },
-];
 
 const SOURCES = [
   { icon: Search, label: "API oficial do Mercado Livre" },
@@ -44,7 +34,7 @@ const STEPS = [
 ];
 
 function Title({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <h2 className={cn("display text-[40px] sm:text-[52px] lg:text-[64px]", className)}>{children}</h2>;
+  return <h2 className={cn("display text-[34px] sm:text-[46px] lg:text-[56px]", className)}>{children}</h2>;
 }
 
 export default function HomePage() {
@@ -60,45 +50,40 @@ export default function HomePage() {
 
       {/* Hero */}
       <section id="produto" className="relative overflow-x-clip pt-32 md:pt-44">
-        <Squiggle className="absolute -left-10 top-56 hidden w-[230px] text-fg/70 md:block lg:left-0 xl:left-8" />
-        <Sparkle className="absolute right-[6%] top-40 hidden w-16 text-fg/80 md:block" />
-        <Sparkle className="absolute right-[13%] top-[340px] hidden w-7 text-brand md:block" delay={1.2} />
+        <div aria-hidden className="grid-bg pointer-events-none absolute inset-x-0 top-0 -z-10 h-[720px] [mask-image:radial-gradient(60%_60%_at_50%_0%,#000,transparent)]" />
         <div className="container-page relative text-center">
-          <Reveal y={12}>
-            <Link href="/cadastro" className="group mx-auto inline-flex items-center gap-2 rounded-full border border-tint/12 bg-tint/[0.04] py-1 pl-1 pr-3.5 text-[13px] font-medium text-soft backdrop-blur transition-colors hover:border-brand/40">
-              <span className="rounded-full bg-brand px-2.5 py-1 text-[11.5px] font-bold text-[#1a0900]">Novo</span>
-              Assistente com IA que faz as contas e cita as fontes
-              <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+          <Reveal y={10}>
+            <Link href="/cadastro" className="group mx-auto inline-flex items-center gap-2.5 rounded-full border border-tint/10 bg-tint/[0.03] py-1 pl-1 pr-3 text-[13px] text-muted backdrop-blur transition-colors hover:border-tint/25 hover:text-fg">
+              <span className="rounded-full bg-tint/10 px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-fg">Novo</span>
+              Ranking de mais vendidos do Mercado Livre
+              <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5" />
             </Link>
           </Reveal>
-          <h1 className="display mx-auto mt-7 max-w-[1000px] text-[44px] sm:text-[68px] lg:text-[88px]">
+          <h1 className="display mx-auto mt-8 max-w-[980px] text-[42px] sm:text-[64px] lg:text-[80px]">
             <span className="word" style={{ animationDelay: "60ms" }}>Descubra os produtos</span>{" "}
-            <span className="word" style={{ animationDelay: "140ms" }}>que</span>{" "}
-            <span className="word relative inline-block" style={{ animationDelay: "200ms" }}>mais vendem<Underline className="text-brand/70" /></span>{" "}
-            <span className="word" style={{ animationDelay: "260ms" }}>com</span>{" "}
-            <span className="word whitespace-nowrap" style={{ animationDelay: "320ms" }}><WordRotator items={ROTATOR} /></span>
+            <span className="word" style={{ animationDelay: "140ms" }}>que mais vendem.</span>{" "}
+            <span className="word text-faint" style={{ animationDelay: "240ms" }}>Com dados oficiais e a margem na conta.</span>
           </h1>
-          <p className="animate-fade-up mx-auto mt-7 max-w-[640px] text-[17px] leading-relaxed text-muted [animation-delay:450ms] md:text-xl">
-            Veja o ranking de mais vendidos com foto, preço e link direto, compare fornecedores pelo custo total e saiba quanto você realmente lucra — com a fonte de cada número.
+          <p className="animate-fade-up mx-auto mt-7 max-w-[620px] text-[17px] leading-relaxed text-muted [animation-delay:380ms] md:text-[19px]">
+            Ranking de mais vendidos com foto, preço e link direto, fornecedores comparados pelo custo total e o lucro real de cada venda — com a fonte de cada número.
           </p>
-          <div className="animate-fade-up mt-9 flex justify-center [animation-delay:560ms]">
-            <div className="relative flex flex-wrap justify-center gap-3">
-              <CurvyArrow className="absolute -left-32 -top-6 hidden w-24 -scale-x-100 rotate-[20deg] text-brand lg:block" />
-              <Link href="/cadastro" className="btn btn-contrast btn-xl">Começar grátis <ChevronsRight className="btn-arrow" size={20} /></Link>
-              <Link href="#em-alta" className="btn btn-secondary btn-xl">Ver o que está em alta</Link>
-            </div>
+          <div className="animate-fade-up mt-9 flex flex-wrap justify-center gap-3 [animation-delay:480ms]">
+            <Link href="/cadastro" className="btn btn-primary btn-xl">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
+            <Link href="#em-alta" className="btn btn-secondary btn-xl">Ver o que está em alta</Link>
           </div>
-          <ul className="animate-fade-up mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted [animation-delay:650ms]">
-            {["3 pesquisas grátis", "Sem cartão de crédito", "Cancele quando quiser"].map((t) => <li key={t} className="flex items-center gap-1.5"><Check size={15} strokeWidth={3} className="text-brand" />{t}</li>)}
+          <ul className="animate-fade-up mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[13px] text-faint [animation-delay:560ms]">
+            {["3 pesquisas grátis", "Sem cartão de crédito", "Cancele quando quiser"].map((t) => <li key={t} className="flex items-center gap-1.5"><Check size={14} className="text-brand" />{t}</li>)}
           </ul>
-          <Stagger className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-2">
-            {SOURCES.map((s) => (
-              <StaggerItem key={s.label}><span className="inline-flex h-9 items-center gap-2 rounded-full border border-tint/10 bg-tint/[0.04] px-3.5 text-[13px] text-soft"><s.icon size={14} className="text-brand" />{s.label}</span></StaggerItem>
-            ))}
-          </Stagger>
         </div>
-        <div className="container-page !max-w-[1280px] mt-16 md:mt-20">
+        <div className="container-page !max-w-[1240px] mt-16 md:mt-20">
           <ScrollFrame><HeroPreview /></ScrollFrame>
+        </div>
+        <div className="container-page mt-14">
+          <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 bg-tint/10 md:grid-cols-4">
+            {SOURCES.map((s) => (
+              <li key={s.label} className="flex items-center gap-3 bg-ink px-5 py-4 text-[13.5px] text-soft"><s.icon size={16} className="shrink-0 text-brand" />{s.label}</li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -107,26 +92,34 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mx-auto mb-10 max-w-3xl text-center">
             <span className="eyebrow">Em alta agora</span>
-            <Title className="mt-5">Veja o que está <span className="accent">vendendo agora</span></Title>
+            <Title className="mt-5">O que está vendendo <span className="accent">agora</span></Title>
             <p className="mt-5 text-lg text-muted">O ranking de mais vendidos de cada categoria, com foto, preço e link direto para o anúncio. Dentro do app você filtra por categoria, analisa a margem e monitora o preço.</p>
           </Reveal>
           <LiveTrending />
-          <div className="mt-8 flex justify-center"><Link href="/cadastro" className="btn btn-contrast btn-lg">Ver todos os mais vendidos <ChevronsRight className="btn-arrow" size={18} /></Link></div>
+          <div className="mt-8 flex justify-center"><Link href="/cadastro" className="btn btn-contrast btn-lg">Ver o ranking completo <ArrowRight className="btn-arrow" size={16} /></Link></div>
         </div>
       </section>
 
-      {/* Fatos */}
-      <section aria-label="Worthwise em números" className="pt-24 md:pt-32">
-        <Reveal className="container-page mb-10 text-center"><Title className="!text-[34px] sm:!text-[44px]">Feito para quem vende online <span className="accent">no Brasil</span></Title></Reveal>
-        <FactsMarquee />
+      {/* Números */}
+      <section aria-label="Worthwise em números" className="pt-28 md:pt-36">
+        <div className="container-page">
+          <Stagger className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 bg-tint/10 lg:grid-cols-4">
+            {[["R$ 0", "para começar, sem cartão"], ["100%", "dos preços com fonte e data"], ["30 min", "atualização do ranking"], ["0", "números inventados"]].map(([big, small]) => (
+              <StaggerItem key={small} className="bg-ink p-6 md:p-8">
+                <div className="tabular text-[34px] font-semibold tracking-[-0.04em] md:text-[44px]">{big}</div>
+                <div className="mt-1 font-mono text-[11.5px] uppercase tracking-wider text-faint">{small}</div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
       </section>
 
       {/* Princípios */}
       <section className="pt-28 md:pt-36">
         <div className="container-page">
           <Reveal>
-            <p className="mx-auto max-w-4xl text-center text-[26px] font-semibold leading-[1.25] tracking-[-0.035em] text-faint md:text-[40px]">
-              Sem scraping, sem números inventados. <span className="text-fg">Cada preço tem fonte e data,</span> cada CNPJ é conferido na Receita e <span className="accent">todo custo entra na conta.</span>
+            <p className="mx-auto max-w-4xl text-center text-[24px] font-medium leading-[1.3] tracking-[-0.03em] text-faint md:text-[36px]">
+              Sem scraping, sem números inventados. <span className="text-fg">Cada preço tem fonte e data,</span> cada CNPJ é conferido na Receita e <span className="text-fg">todo custo entra na conta.</span>
             </p>
           </Reveal>
         </div>
@@ -163,17 +156,17 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mb-14 flex flex-wrap items-end justify-between gap-6">
             <div><span className="eyebrow">Como funciona</span><Title className="mt-5 max-w-2xl">Da dúvida à decisão em <span className="accent">quatro passos</span></Title></div>
-            <Link href="/cadastro" className="btn btn-contrast btn-lg">Começar agora <ChevronsRight className="btn-arrow" size={18} /></Link>
+            <Link href="/cadastro" className="btn btn-secondary btn-lg">Começar agora <ArrowRight className="btn-arrow" size={16} /></Link>
           </Reveal>
           <Stagger as="ol" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
               <StaggerItem as="li" key={s.title} className="h-full">
-                <Spot className="lg card-hover flex h-full flex-col rounded-[28px] p-6 md:p-7">
+                <Spot className="lg card-hover flex h-full flex-col rounded-2xl p-6 md:p-7">
                   <div className="flex items-center justify-between">
-                    <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ffb15c] to-brand text-[#1a0900] shadow-[0_10px_24px_-10px_rgba(255,121,0,0.8)]"><s.icon size={22} strokeWidth={2.4} /></span>
-                    <span className="text-[56px] font-bold leading-none tracking-[-0.06em] text-tint/[0.08]">0{i + 1}</span>
+                    <span className="flex size-10 items-center justify-center rounded-[10px] border border-tint/10 bg-tint/[0.04] text-brand"><s.icon size={18} /></span>
+                    <span className="font-mono text-[12px] text-faint">0{i + 1}</span>
                   </div>
-                  <h3 className="mt-8 text-2xl font-bold tracking-tight">{s.title}</h3>
+                  <h3 className="mt-8 text-xl font-semibold tracking-tight">{s.title}</h3>
                   <p className="mt-3 text-[15px] leading-relaxed text-muted">{s.text}</p>
                 </Spot>
               </StaggerItem>
@@ -216,23 +209,21 @@ export default function HomePage() {
             <Title className="mt-5 !text-[40px] md:!text-[52px]">Perguntas <span className="accent">frequentes</span></Title>
             <p className="mt-6 text-muted">Quer os detalhes? Leia a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link> e veja o estado das <Link href="/fontes-de-dados" className="text-brand-hi underline underline-offset-4">fontes de dados</Link>.</p>
           </Reveal>
-          <Reveal delay={0.08}><div className="lg rounded-[28px] px-6 py-2 md:px-8"><Faq /></div></Reveal>
+          <Reveal delay={0.08}><div className="lg rounded-2xl px-6 py-2 md:px-8"><Faq /></div></Reveal>
         </div>
       </section>
 
       {/* CTA */}
       <section className="pb-28 pt-8 md:pb-36">
         <div className="container-page">
-          <Reveal scale={0.96}>
-            <div className="tile tile-sunset anim-gradient relative px-6 py-20 text-center md:py-28">
-              <BorderBeam />
-              <Squiggle className="absolute -left-6 bottom-0 hidden w-48 text-white/60 md:block" />
-              <Sparkle className="absolute right-10 top-10 w-12 text-white/80" />
-              <h2 className="display relative mx-auto max-w-4xl text-[42px] text-white md:text-[72px]">Sua próxima compra merece dados melhores</h2>
-              <p className="tile-muted relative mx-auto mt-6 max-w-xl text-lg">Crie sua conta e faça três pesquisas completas por nossa conta.</p>
+          <Reveal>
+            <div className="tile relative px-6 py-20 text-center md:py-28">
+              <div aria-hidden className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgb(255_255_255/0.04)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/0.04)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(60%_70%_at_50%_100%,#000,transparent)]" />
+              <h2 className="display relative mx-auto max-w-3xl text-[38px] text-white md:text-[60px]">Sua próxima compra merece dados melhores.</h2>
+              <p className="tile-muted relative mx-auto mt-5 max-w-xl text-lg">Crie sua conta e faça três pesquisas completas por nossa conta.</p>
               <div className="relative mt-10 flex flex-wrap justify-center gap-3">
-                <Link href="/cadastro" className="btn btn-xl bg-white text-[#1a0900] shadow-[0_18px_40px_-14px_rgba(0,0,0,0.5)]">Começar grátis <ChevronsRight className="btn-arrow" size={20} /></Link>
-                <Link href="/precos" className="btn btn-xl border-white/40 text-white hover:bg-white/10">Ver planos</Link>
+                <Link href="/cadastro" className="btn btn-primary btn-xl">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
+                <Link href="/precos" className="btn btn-xl border-white/15 bg-white/[0.04] text-white hover:bg-white/10">Ver planos</Link>
               </div>
             </div>
           </Reveal>

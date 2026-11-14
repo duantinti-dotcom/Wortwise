@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export function EmptyState({ icon: Icon, title, children, action }: { icon: LucideIcon; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="@container lg relative overflow-hidden rounded-[28px]">
+    <div className="@container lg relative overflow-hidden rounded-2xl">
     <div className="grid items-center gap-10 px-6 py-12 @2xl:grid-cols-[1fr_1fr] @2xl:px-12 @2xl:py-14">
       <div aria-hidden className="absolute -left-24 -top-24 size-72 rounded-full bg-brand/15 blur-3xl" />
       <div className="relative">

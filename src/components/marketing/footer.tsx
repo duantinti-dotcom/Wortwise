@@ -11,7 +11,7 @@ const COLS = [
 export function Footer() {
   return (
     <footer className="relative px-3 pb-3">
-      <div className="lg relative mx-auto max-w-[1240px] overflow-hidden rounded-[32px]">
+      <div className="lg relative mx-auto max-w-[1240px] overflow-hidden rounded-2xl">
         <div className="grid gap-10 px-6 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)] md:px-12 md:py-14">
           <div>
             <Logo />

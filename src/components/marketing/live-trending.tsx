@@ -1,5 +1,5 @@
 "use client";
-import { ExternalLink, Headphones, Lamp, Smartphone, Sparkles, Trophy, Truck, Watch, Dumbbell, Coffee, Gamepad2, Shirt, type LucideIcon } from "lucide-react";
+import { ExternalLink, Headphones, Lamp, Smartphone, Sparkles, Truck, Watch, Dumbbell, Coffee, Gamepad2, Shirt, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { cn, formatMoney, relativeTime } from "@/lib/utils";
@@ -7,7 +7,6 @@ import { cn, formatMoney, relativeTime } from "@/lib/utils";
 interface LiveProduct { id: string; rank: number; title: string; imageUrl: string | null; price: number | null; originalPrice: number | null; currency: string | null; freeShipping: boolean | null; permalink: string | null }
 interface LiveData { configured: boolean; category: string; updatedAt: string | null; products: LiveProduct[] }
 
-const RANK = ["from-[#ffd36b] to-[#f5a300] text-[#3a2500]", "from-[#f2f2f2] to-[#b9bec7] text-[#23262b]", "from-[#ffb98a] to-[#c8682e] text-[#3a1700]"];
 
 /** Itens ilustrativos (sem foto real) usados só quando a integração ainda não está ativa. */
 const DEMO: { title: string; price: string; icon: LucideIcon; tone: string }[] = [
@@ -23,8 +22,8 @@ const DEMO: { title: string; price: string; icon: LucideIcon; tone: string }[] =
 
 function RankBadge({ rank }: { rank: number }) {
   return (
-    <span className={cn("absolute left-2.5 top-2.5 z-10 flex h-7 items-center gap-1 rounded-full bg-gradient-to-b px-2.5 text-[12px] font-extrabold shadow-[0_6px_16px_-6px_rgba(0,0,0,0.5)]", RANK[rank - 1] ?? "from-[#2a2a2e] to-[#121214] text-white")}>
-      <Trophy size={12} strokeWidth={2.6} />{rank}º
+    <span className={cn("tabular absolute left-2.5 top-2.5 z-10 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11.5px] font-semibold shadow-sm", rank === 1 ? "bg-brand text-[#160800]" : "bg-[#0f0f11] text-white")}>
+      #{rank}
     </span>
   );
 }
@@ -58,33 +57,33 @@ export function LiveTrending() {
       </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
         {data === null ? Array.from({ length: 10 }, (_, i) => (
-          <div key={i} className={cn("card overflow-hidden !rounded-[22px]", i >= 8 && "max-lg:hidden")}><div className="skeleton m-2 aspect-square !rounded-[16px]" /><div className="space-y-2 p-4"><div className="skeleton h-4" /><div className="skeleton h-5 w-20" /></div></div>
+          <div key={i} className={cn("card overflow-hidden !rounded-[14px]", i >= 8 && "max-lg:hidden")}><div className="skeleton m-2 aspect-square !rounded-[10px]" /><div className="space-y-2 p-4"><div className="skeleton h-4" /><div className="skeleton h-5 w-20" /></div></div>
         )) : live ? data!.products.map((p, i) => (
           <motion.a key={p.id} href={p.permalink ?? undefined} target="_blank" rel="noopener noreferrer nofollow" {...item(i)}
-            className={cn("card card-hover group relative flex flex-col overflow-hidden !rounded-[22px]", i >= 8 && "max-lg:hidden")}>
-            <div className="relative m-2 flex aspect-square items-center justify-center overflow-hidden rounded-[16px] bg-white p-4">
+            className={cn("card card-hover group relative flex flex-col overflow-hidden !rounded-[14px]", i >= 8 && "max-lg:hidden")}>
+            <div className="relative m-2 flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-white p-4">
               <RankBadge rank={p.rank} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {p.imageUrl ? <img src={p.imageUrl} alt={p.title} loading="lazy" referrerPolicy="no-referrer" className="max-h-full max-w-full object-contain transition-transform duration-700 group-hover:scale-[1.06]" /> : null}
-              {p.freeShipping ? <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-[#00a650] px-2 py-0.5 text-[10.5px] font-bold text-white"><Truck size={11} />Frete grátis</span> : null}
+              {p.freeShipping ? <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-md bg-[#00a650] px-1.5 py-0.5 text-[10.5px] font-semibold text-white"><Truck size={11} />Frete grátis</span> : null}
             </div>
             <div className="flex flex-1 flex-col px-3.5 pb-4 pt-1.5">
               <h3 className="line-clamp-2 text-[13.5px] font-semibold leading-snug group-hover:text-brand-hi">{p.title}</h3>
               <div className="mt-auto flex items-end justify-between gap-2 pt-2.5">
-                <span className="tabular text-[19px] font-bold tracking-tight">{formatMoney(p.price, p.currency ?? "BRL")}</span>
+                <span className="tabular text-[19px] font-semibold tracking-tight">{formatMoney(p.price, p.currency ?? "BRL")}</span>
                 <ExternalLink size={14} className="mb-1 shrink-0 text-faint transition-colors group-hover:text-brand" />
               </div>
             </div>
           </motion.a>
         )) : DEMO.concat(DEMO.slice(0, 2)).map((d, i) => (
-          <motion.div key={i} {...item(i)} className={cn("card relative flex flex-col overflow-hidden !rounded-[22px]", i >= 8 && "max-lg:hidden")}>
-            <div className={cn("relative m-2 flex aspect-square items-center justify-center rounded-[16px] bg-gradient-to-br", d.tone)}>
+          <motion.div key={i} {...item(i)} className={cn("card relative flex flex-col overflow-hidden !rounded-[14px]", i >= 8 && "max-lg:hidden")}>
+            <div className="relative m-2 flex aspect-square items-center justify-center rounded-[10px] bg-[#f4f4f5]">
               <RankBadge rank={i + 1} />
-              <d.icon size={54} strokeWidth={1.4} className="text-black/55" />
+              <d.icon size={46} strokeWidth={1.25} className="text-black/30" />
             </div>
             <div className="px-3.5 pb-4 pt-1.5">
               <h3 className="line-clamp-2 text-[13.5px] font-semibold leading-snug">{d.title}</h3>
-              <div className="tabular mt-2.5 text-[19px] font-bold tracking-tight">{d.price}</div>
+              <div className="tabular mt-2.5 text-[19px] font-semibold tracking-tight">{d.price}</div>
             </div>
           </motion.div>
         ))}

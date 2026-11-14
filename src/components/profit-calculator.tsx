@@ -108,7 +108,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
 
   return (
     <div className={cn("grid items-start gap-5", compact ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)]")}>
-      <div className="card overflow-hidden !rounded-3xl">
+      <div className="card overflow-hidden !rounded-2xl">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-tint/[0.07] px-5 py-4 md:px-7">
           <div className="text-[15px] font-semibold tracking-tight">Seus números</div>
           {isExample ? <span className="badge badge-brand max-sm:order-3 max-sm:w-full max-sm:justify-center"><Sparkles size={12} />Exemplo — troque pelos seus valores</span> : null}
@@ -151,7 +151,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
       </div>
 
       <div className="space-y-4 lg:sticky lg:top-24">
-        <div className={cn("edge-grad relative overflow-hidden rounded-3xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),var(--surface)]" : "edge-brand bg-[linear-gradient(160deg,rgba(255,121,0,0.16),rgba(255,121,0,0.02)_55%),var(--surface)]")}>
+        <div className={cn("edge-grad relative overflow-hidden rounded-2xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),var(--surface)]" : "edge-brand bg-[linear-gradient(160deg,rgba(255,121,0,0.16),rgba(255,121,0,0.02)_55%),var(--surface)]")}>
           <BorderBeam />
           <div aria-hidden className="aurora -right-16 -top-20 h-56 w-56 bg-brand/20" />
           <div className="relative">
@@ -186,7 +186,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
           </div>
         </div>
 
-        <div className="card !rounded-3xl p-5 md:p-6">
+        <div className="card !rounded-2xl p-5 md:p-6">
           <div className="seg" role="tablist">
             {([["composicao", "Composição"], ["cenarios", "Cenários"], ["canais", "Canais"], ["detalhes", "Detalhes"]] as [Tab, string][]).map(([id, label]) => (
               <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}</button>

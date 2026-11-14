@@ -66,13 +66,13 @@ function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNa
               return (
                 <li key={n.href}>
                   <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined}
-                    className={cn("group relative isolate flex h-9 items-center gap-3 rounded-full px-3 text-[13.5px] transition-colors duration-200",
+                    className={cn("group relative isolate flex h-9 items-center gap-3 rounded-[9px] px-3 text-[13.5px] transition-colors duration-200",
                       on ? "font-semibold text-fg" : "text-muted hover:bg-tint/[0.05] hover:text-fg")}>
                     {on ? <motion.span layoutId={`nav-pill-${layoutKey}`} aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                      className="absolute inset-0 -z-10 rounded-full border border-tint/10 bg-tint/[0.08] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.35)]" /> : null}
+                      className="absolute inset-0 -z-10 rounded-[9px] border border-tint/10 bg-tint/[0.07]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
-                    {n.href === "/app/em-alta" ? <span className="ml-auto rounded-full bg-gradient-to-r from-[#ffb15c] to-brand px-1.5 py-px text-[10px] font-bold text-[#1a0900]">HOT</span> : null}
+                    {n.href === "/app/em-alta" ? <span aria-hidden className="ml-auto size-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,121,0,0.9)]" /> : null}
                     {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#1a0900]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
                   </Link>
                 </li>
@@ -109,7 +109,7 @@ function Profile({ user }: { user: ShellProps["user"] }) {
   const initial = (user.name ?? user.email).trim().charAt(0).toUpperCase();
   return (
     <Menu>
-      <MenuTrigger className="icon-btn overflow-hidden bg-gradient-to-br from-brand/40 to-[#ff4d6d]/30 text-sm font-semibold outline-none" aria-label="Menu do perfil">
+      <MenuTrigger className="icon-btn overflow-hidden bg-gradient-to-br from-brand/40 to-brand/10 text-sm font-semibold outline-none" aria-label="Menu do perfil">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {user.avatarUrl ? <img src={user.avatarUrl} alt="" className="size-full object-cover" referrerPolicy="no-referrer" /> : initial}
       </MenuTrigger>
@@ -143,7 +143,7 @@ export function AppShell(props: ShellProps) {
         <div className="min-h-dvh lg:pl-[276px]">
           <Ambient variant="calm" />
           {/* Sidebar — desktop */}
-          <aside className="lg glass-strong fixed bottom-3 left-3 top-3 z-30 hidden w-[252px] flex-col overflow-hidden rounded-[26px] lg:flex">
+          <aside className="lg glass-strong fixed bottom-3 left-3 top-3 z-30 hidden w-[252px] flex-col overflow-hidden rounded-[18px] lg:flex">
             <Link href="/app" className="relative flex h-16 shrink-0 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
             <nav aria-label="Aplicação" className="relative min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
             <div className="shrink-0 p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
@@ -155,7 +155,7 @@ export function AppShell(props: ShellProps) {
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>
                 <D.Overlay className="fixed inset-0 z-50 bg-black/60 data-[state=open]:animate-overlay-in data-[state=closed]:animate-overlay-out" />
-                <D.Content className="lg glass-strong fixed inset-y-2 left-2 z-50 flex w-[86vw] max-w-[320px] flex-col rounded-[24px] outline-none data-[state=open]:animate-[drawer-in_0.3s_cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:animate-[drawer-out_0.2s_ease-in]">
+                <D.Content className="lg glass-strong fixed inset-y-2 left-2 z-50 flex w-[86vw] max-w-[320px] flex-col rounded-2xl outline-none data-[state=open]:animate-[drawer-in_0.3s_cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:animate-[drawer-out_0.2s_ease-in]">
                   <div className="flex h-14 items-center justify-between px-4"><D.Title asChild><Logo size={26} /></D.Title>
                     <D.Close className="btn btn-ghost !px-2.5" aria-label="Fechar menu"><X size={20} /></D.Close></div>
                   <D.Description className="sr-only">Navegação da aplicação</D.Description>
@@ -168,7 +168,7 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="lg h-11 w-full pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)] !rounded-full" />
+                className="lg h-10 w-full !rounded-[10px] pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)] " />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">

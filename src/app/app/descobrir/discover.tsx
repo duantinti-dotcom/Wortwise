@@ -174,14 +174,14 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
 
         {!loading && !result && !error ? (
           <div className="grid gap-5 lg:grid-cols-3">
-            <div className="card !rounded-3xl p-6 lg:col-span-2">
+            <div className="card !rounded-2xl p-6 lg:col-span-2">
               <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Sparkles size={14} className="text-brand-hi" /></span>Sugestões para começar</h2>
               <p className="mt-2 text-sm text-muted">Clique para preencher a busca — a pesquisa só acontece quando você confirmar.</p>
               <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{SUGGESTIONS.map((s) => (
                 <button key={s} onClick={() => setQuery(s)} className="group flex items-center justify-between gap-2 rounded-xl border border-tint/[0.07] bg-tint/[0.02] px-3.5 py-3 text-left text-sm transition-all hover:border-brand/40 hover:bg-brand/[0.05]">
                   <span className="flex items-center gap-2.5"><Search size={14} className="text-faint group-hover:text-brand" />{s}</span><ArrowUpLeft size={14} className="text-faint opacity-0 transition-opacity group-hover:opacity-100" /></button>))}</div>
             </div>
-            <div className="card !rounded-3xl p-6">
+            <div className="card !rounded-2xl p-6">
               <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Database size={14} className="text-brand-hi" /></span>Fontes de dados</h2>
               <ul className="mt-4 space-y-2.5">
                 {sources.map((s) => (
@@ -192,7 +192,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
                 ))}
               </ul>
             </div>
-            <div className="card !rounded-3xl p-6 lg:col-span-3">
+            <div className="card !rounded-2xl p-6 lg:col-span-3">
               <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Clock size={14} className="text-brand-hi" /></span>Pesquisas recentes</h2>
               {recent.length ? (
                 <ul className="mt-3 divide-y divide-line">
