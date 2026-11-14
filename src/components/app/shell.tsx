@@ -1,5 +1,5 @@
 "use client";
-import { BarChart3, Bell, Bookmark, Calculator, FileText, Home, LogOut, Menu as MenuIcon, MessagesSquare, Scale, Search, Settings, ShieldCheck, Sparkles, Store, TrendingUp, X } from "lucide-react";
+import { BarChart3, Bell, Flame, Bookmark, Calculator, FileText, Home, LogOut, Menu as MenuIcon, MessagesSquare, Scale, Search, Settings, ShieldCheck, Sparkles, Store, TrendingUp, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -17,6 +17,7 @@ import { UpgradeProvider, useUpgrade } from "./upgrade";
 
 const NAV = [
   { href: "/app", label: "Início", icon: Home },
+  { href: "/app/em-alta", label: "Em alta", icon: Flame },
   { href: "/app/descobrir", label: "Descobrir produtos", icon: Search },
   { href: "/app/oportunidades", label: "Oportunidades", icon: TrendingUp },
   { href: "/app/fornecedores", label: "Fornecedores", icon: Store },
@@ -29,7 +30,7 @@ const NAV = [
   { href: "/app/relatorios", label: "Relatórios", icon: FileText },
   { href: "/app/configuracoes", label: "Planos e configurações", icon: Settings },
 ];
-const TABS = [NAV[0]!, NAV[1]!, NAV[6]!, NAV[8]!];
+const TABS = [NAV[0]!, NAV[1]!, NAV[2]!, NAV[9]!];
 
 export interface ShellProps {
   user: { email: string; name: string | null; avatarUrl: string | null };
@@ -44,7 +45,7 @@ export interface ShellProps {
 
 const GROUPS: { label: string; items: string[] }[] = [
   { label: "", items: ["/app"] },
-  { label: "Pesquisa", items: ["/app/descobrir", "/app/oportunidades", "/app/mercado"] },
+  { label: "Produtos", items: ["/app/em-alta", "/app/descobrir", "/app/oportunidades", "/app/mercado"] },
   { label: "Fornecedores", items: ["/app/fornecedores", "/app/comparar"] },
   { label: "Ferramentas", items: ["/app/calculadora", "/app/monitoramento", "/app/assistente"] },
   { label: "Biblioteca", items: ["/app/favoritos", "/app/relatorios"] },
@@ -71,6 +72,7 @@ function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNa
                       className="absolute inset-0 -z-10 rounded-full border border-tint/10 bg-tint/[0.08] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.35)]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
+                    {n.href === "/app/em-alta" ? <span className="ml-auto rounded-full bg-gradient-to-r from-[#ffb15c] to-brand px-1.5 py-px text-[10px] font-bold text-[#1a0900]">HOT</span> : null}
                     {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#1a0900]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
                   </Link>
                 </li>
@@ -191,7 +193,7 @@ export function AppShell(props: ShellProps) {
                 <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
                   className={cn("relative isolate flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:scale-95", on ? "font-semibold text-fg" : "text-muted")}>
                   {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-xl bg-tint/[0.08]" /> : null}
-                  <t.icon size={19} className={on ? "text-brand" : undefined} />{t.label.split(" ")[0]}
+                  <t.icon size={19} className={on ? "text-brand" : undefined} />{t.href === "/app/em-alta" ? "Em alta" : t.label.split(" ")[0]}
                 </Link>
               );
             })}

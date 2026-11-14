@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/#produto", label: "Produto" },
+  { href: "/#em-alta", label: "Em alta" },
   { href: "/#funcionalidades", label: "Funcionalidades" },
   { href: "/#como-funciona", label: "Como funciona" },
   { href: "/precos", label: "Preços" },

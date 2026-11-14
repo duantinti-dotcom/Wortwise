@@ -1,5 +1,5 @@
 "use client";
-import { Bell, Bookmark, ExternalLink, ImageOff, Loader2, Star, Truck } from "lucide-react";
+import { ArrowRight, Bell, Bookmark, ExternalLink, ImageOff, Loader2, Lock, Star, Trophy, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -17,7 +17,7 @@ export function ProductImage({ src, alt, className }: { src: string | null; alt:
   const [failed, setFailed] = useState(false);
   if (!src || failed) return <div className={cn("flex flex-col items-center justify-center gap-2 bg-surface-2 text-faint", className)} aria-label="Imagem não disponível"><ImageOff size={22} /><span className="text-[11px]">Imagem não disponível</span></div>;
   return (
-    <div className={cn("flex items-center justify-center bg-[radial-gradient(circle_at_50%_40%,#ffffff,#ececec)] p-4", className)}>
+    <div className={cn("flex items-center justify-center bg-white p-5", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed(true)} className="max-h-full max-w-full object-contain mix-blend-multiply" />
     </div>
@@ -56,39 +56,80 @@ export function FavoriteButton({ product, initial, onChange, className }: { prod
   );
 }
 
-export function ProductCard({ p, favorite, onFavorite }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void }) {
+const RANK_TONE: Record<number, string> = {
+  1: "from-[#ffd36b] to-[#f5a300] text-[#3a2500]",
+  2: "from-[#f2f2f2] to-[#b9bec7] text-[#23262b]",
+  3: "from-[#ffb98a] to-[#c8682e] text-[#3a1700]",
+};
+
+/**
+ * Cartão de produto: foto grande, preço, sinais da fonte e acesso direto ao anúncio.
+ * O cartão inteiro abre a análise no Worthwise; o botão da fonte abre o anúncio original em nova aba.
+ */
+export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void; rank?: number }) {
   const discount = p.originalPrice && p.price && p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
+  const source = SOURCE_LABELS[p.source] ?? p.source;
   return (
-    <Link href={`/app/produto/${p.source}/${p.externalId}`} className="card card-hover group relative flex flex-col overflow-hidden !rounded-2xl">
-      <div className="relative m-2 overflow-hidden rounded-xl">
-        <ProductImage src={p.imageUrl} alt={p.title} className="aspect-[4/3] w-full transition-transform duration-500 group-hover:scale-[1.03]" />
-        <FavoriteButton key={String(favorite)} product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5" />
-        <span className="badge absolute bottom-2.5 left-2.5 !border-black/10 !bg-ink/85 !text-fg backdrop-blur">{SOURCE_LABELS[p.source] ?? p.source}</span>
+    <article className="card card-hover group relative flex flex-col overflow-hidden !rounded-[22px]">
+      <div className="relative m-2 overflow-hidden rounded-[16px]">
+        <ProductImage src={p.imageUrl} alt={p.title} className="aspect-square w-full transition-transform duration-700 [transition-timing-function:var(--ease-out)] group-hover:scale-[1.05]" />
+        {rank != null ? (
+          <span className={cn("absolute left-2.5 top-2.5 z-10 flex h-8 items-center gap-1 rounded-full bg-gradient-to-b px-2.5 text-[13px] font-extrabold shadow-[0_6px_16px_-6px_rgba(0,0,0,0.5)]",
+            RANK_TONE[rank] ?? "from-[#2a2a2e] to-[#121214] text-white")}>
+            <Trophy size={13} strokeWidth={2.6} />{rank}º
+          </span>
+        ) : discount ? <span className="absolute left-2.5 top-2.5 z-10 rounded-full bg-pos px-2.5 py-1 text-[12px] font-bold text-white">−{discount}%</span> : null}
+        <FavoriteButton key={String(favorite)} product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5 z-10" />
+        {p.freeShipping ? <span className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-1 rounded-full bg-[#00a650] px-2.5 py-1 text-[11.5px] font-bold text-white"><Truck size={12} /> Frete grátis</span> : null}
       </div>
       <div className="flex flex-1 flex-col px-4 pb-4 pt-2">
-        <h3 className="line-clamp-2 text-[14px] font-medium leading-snug group-hover:text-brand-hi">{p.title}</h3>
-        <div className="mt-3 flex items-baseline gap-2">
-          <span className={cn("tabular text-xl font-semibold tracking-tight", p.price == null && "text-sm font-normal text-faint")}>{formatMoney(p.price, p.currency ?? "BRL")}</span>
-          {discount ? <span className="badge badge-pos !h-5 !px-1.5 !text-[11px]">−{discount}%</span> : null}
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+          {rank != null ? <span className="text-brand-hi">Mais vendido · {source}</span> : <span>{source}</span>}
         </div>
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-          <span className="flex items-center gap-1"><Star size={12} className={p.rating != null ? "fill-brand text-brand" : "text-faint"} />
-            {p.rating != null ? `${p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}${p.reviewsCount != null ? ` (${p.reviewsCount.toLocaleString("pt-BR")})` : ""}` : "Sem avaliação na fonte"}</span>
-          {p.freeShipping ? <span className="flex items-center gap-1 text-pos"><Truck size={12} /> Frete grátis</span> : null}
+        <h3 className="mt-1 line-clamp-2 text-[14.5px] font-semibold leading-snug">
+          <Link href={`/app/produto/${p.source}/${p.externalId}`} className="outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-brand-hi">{p.title}</Link>
+        </h3>
+        <div className="mt-2.5 flex flex-wrap items-baseline gap-x-2">
+          <span className={cn("tabular text-[22px] font-bold tracking-tight", p.price == null && "text-sm font-normal text-faint")}>{formatMoney(p.price, p.currency ?? "BRL")}</span>
+          {p.originalPrice && discount ? <span className="tabular text-xs text-faint line-through">{formatMoney(p.originalPrice, p.currency ?? "BRL")}</span> : null}
+          {rank != null && discount ? <span className="badge badge-pos !h-5 !px-1.5 !text-[11px]">−{discount}%</span> : null}
         </div>
-        <div className="mt-auto flex items-center justify-between pt-3 text-[11px] text-faint">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+          {p.rating != null ? <span className="flex items-center gap-1"><Star size={12} className="fill-brand text-brand" />{p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{p.reviewsCount != null ? ` (${p.reviewsCount.toLocaleString("pt-BR")})` : ""}</span> : null}
           <span className="truncate">{p.sellerName ?? (p.kind === "catalog_product" ? "Ficha de catálogo" : "Vendedor não informado")}</span>
-          <span className="shrink-0">coletado {relativeTime(p.collectedAt)}</span>
         </div>
+        <div className="relative z-10 mt-auto grid grid-cols-[1fr_auto] gap-2 pt-4">
+          <Link href={`/app/produto/${p.source}/${p.externalId}`} className="btn btn-contrast btn-sm">Analisar <ArrowRight className="btn-arrow" size={14} /></Link>
+          {p.permalink ? (
+            <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !px-3" aria-label={`Abrir no ${source}`} title={`Abrir no ${source}`}>
+              <ExternalLink size={14} /><span className="hidden sm:inline">{p.source === "mercadolivre" ? "Ver no ML" : "Abrir"}</span>
+            </a>
+          ) : null}
+        </div>
+        <div className="mt-2.5 text-[10.5px] text-faint">coletado {relativeTime(p.collectedAt)}</div>
       </div>
-    </Link>
+    </article>
+  );
+}
+
+/** Espaço de um produto bloqueado pelo plano (o dado não é enviado ao navegador). */
+export function LockedCard({ onUnlock }: { onUnlock: () => void }) {
+  return (
+    <button type="button" onClick={onUnlock} className="card group relative flex flex-col overflow-hidden !rounded-[22px] text-left">
+      <div className="m-2 aspect-square rounded-[16px] bg-[repeating-linear-gradient(135deg,rgb(var(--tint)/0.04)_0_10px,transparent_10px_20px)]" />
+      <div className="space-y-2.5 px-4 pb-5 pt-2" aria-hidden><div className="h-3 w-24 rounded-full bg-tint/10" /><div className="h-4 w-full rounded-full bg-tint/10" /><div className="h-6 w-28 rounded-full bg-tint/10" /></div>
+      <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-ink/40 text-center backdrop-blur-[3px]">
+        <span className="flex size-11 items-center justify-center rounded-full bg-gradient-to-b from-[#ffb15c] to-brand text-[#1a0900] shadow-[0_10px_24px_-10px_rgba(255,121,0,0.9)] transition-transform duration-300 group-hover:scale-110"><Lock size={18} strokeWidth={2.6} /></span>
+        <span className="text-sm font-semibold">Disponível no Pro</span>
+      </span>
+    </button>
   );
 }
 
 export function ProductCardSkeleton() {
   return (
-    <div className="card overflow-hidden" aria-hidden="true">
-      <div className="skeleton aspect-[4/3] w-full !rounded-none" />
+    <div className="card overflow-hidden !rounded-[22px]" aria-hidden="true">
+      <div className="skeleton m-2 aspect-square !rounded-[16px]" />
       <div className="space-y-3 p-4"><div className="skeleton h-4 w-full" /><div className="skeleton h-4 w-2/3" /><div className="skeleton h-6 w-24" /><div className="skeleton h-3 w-40" /></div>
     </div>
   );

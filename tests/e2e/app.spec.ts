@@ -35,7 +35,7 @@ test("dashboard personalizado, sem dados fictícios, com as três pesquisas grat
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/(Bom dia|Boa tarde|Boa noite), Teste/);
   await expect(page.getByText("Plano Grátis").first()).toBeVisible();
   await expect(page.getByText(/3 pesquisas disponíveis no total/)).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Aplicação" }).getByRole("link")).toHaveCount(12);
+  await expect(page.getByRole("navigation", { name: "Aplicação" }).getByRole("link")).toHaveCount(13);
 });
 
 test("pesquisa sem fonte conectada informa o estado real e não consome crédito", async ({ page }) => {

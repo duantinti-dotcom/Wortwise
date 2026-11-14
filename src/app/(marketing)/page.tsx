@@ -5,6 +5,7 @@ import { Faq } from "@/components/marketing/faq";
 import { FactsMarquee } from "@/components/marketing/facts";
 import { FeatureTile } from "@/components/marketing/feature-tile";
 import { HeroWidget } from "@/components/marketing/hero-widget";
+import { LiveTrending } from "@/components/marketing/live-trending";
 import { QuestionMarquee } from "@/components/marketing/marquee";
 import { Pricing } from "@/components/marketing/pricing";
 import { WordRotator } from "@/components/marketing/rotator";
@@ -71,19 +72,20 @@ export default function HomePage() {
             </Link>
           </Reveal>
           <h1 className="display mx-auto mt-7 max-w-[1000px] text-[44px] sm:text-[68px] lg:text-[88px]">
-            <span className="word" style={{ animationDelay: "60ms" }}>Descubra o que</span>{" "}
-            <span className="word relative inline-block" style={{ animationDelay: "140ms" }}>vale a pena<Underline className="text-brand/70" /></span>{" "}
-            <span className="word" style={{ animationDelay: "220ms" }}>vender com</span>{" "}
+            <span className="word" style={{ animationDelay: "60ms" }}>Descubra os produtos</span>{" "}
+            <span className="word" style={{ animationDelay: "140ms" }}>que</span>{" "}
+            <span className="word relative inline-block" style={{ animationDelay: "200ms" }}>mais vendem<Underline className="text-brand/70" /></span>{" "}
+            <span className="word" style={{ animationDelay: "260ms" }}>com</span>{" "}
             <span className="word whitespace-nowrap" style={{ animationDelay: "320ms" }}><WordRotator items={ROTATOR} /></span>
           </h1>
           <p className="animate-fade-up mx-auto mt-7 max-w-[640px] text-[17px] leading-relaxed text-muted [animation-delay:450ms] md:text-xl">
-            O Worthwise encontra oportunidades, compara fornecedores pelo custo total, acompanha preços e mostra quanto você realmente lucra — com a fonte de cada número.
+            Veja o ranking de mais vendidos com foto, preço e link direto, compare fornecedores pelo custo total e saiba quanto você realmente lucra — com a fonte de cada número.
           </p>
           <div className="animate-fade-up mt-9 flex justify-center [animation-delay:560ms]">
             <div className="relative flex flex-wrap justify-center gap-3">
               <CurvyArrow className="absolute -left-32 -top-6 hidden w-24 -scale-x-100 rotate-[20deg] text-brand lg:block" />
               <Link href="/cadastro" className="btn btn-contrast btn-xl">Começar grátis <ChevronsRight className="btn-arrow" size={20} /></Link>
-              <Link href="#demonstracao" className="btn btn-secondary btn-xl">Testar a calculadora</Link>
+              <Link href="#em-alta" className="btn btn-secondary btn-xl">Ver o que está em alta</Link>
             </div>
           </div>
           <ul className="animate-fade-up mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted [animation-delay:650ms]">
@@ -97,6 +99,19 @@ export default function HomePage() {
         </div>
         <div className="container-page !max-w-[1280px] mt-16 md:mt-20">
           <ScrollFrame><HeroPreview /></ScrollFrame>
+        </div>
+      </section>
+
+      {/* Em alta agora */}
+      <section id="em-alta" aria-label="Produtos em alta" className="scroll-mt-24 pt-28 md:pt-36">
+        <div className="container-page">
+          <Reveal className="mx-auto mb-10 max-w-3xl text-center">
+            <span className="eyebrow">Em alta agora</span>
+            <Title className="mt-5">Veja o que está <span className="accent">vendendo agora</span></Title>
+            <p className="mt-5 text-lg text-muted">O ranking de mais vendidos de cada categoria, com foto, preço e link direto para o anúncio. Dentro do app você filtra por categoria, analisa a margem e monitora o preço.</p>
+          </Reveal>
+          <LiveTrending />
+          <div className="mt-8 flex justify-center"><Link href="/cadastro" className="btn btn-contrast btn-lg">Ver todos os mais vendidos <ChevronsRight className="btn-arrow" size={18} /></Link></div>
         </div>
       </section>
 

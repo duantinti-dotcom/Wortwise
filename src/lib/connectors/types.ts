@@ -30,6 +30,14 @@ export interface ProductResult {
   sourceUpdatedAt: string | null;
 }
 
+/** Produto do ranking oficial de mais vendidos de uma categoria (posição informada pela fonte). */
+export interface RankedProduct extends ProductResult { rank: number }
+
+/** Termo de busca em alta informado pela fonte. */
+export interface TrendKeyword { keyword: string; url: string | null }
+
+export interface Category { id: string; name: string }
+
 export interface Offer {
   externalId: string;
   sellerId: string | null;
@@ -99,6 +107,9 @@ export interface Connector {
   getProduct(externalId: string, ctx: ConnectorContext): Promise<ProductDetail>;
   getFees?(price: number, categoryId: string | null, ctx: ConnectorContext): Promise<FeeQuote[]>;
   getBestsellerRank?(categoryId: string, externalId: string, ctx: ConnectorContext): Promise<number | null>;
+  getBestsellers?(categoryId: string, ctx: ConnectorContext): Promise<RankedProduct[]>;
+  getTrends?(categoryId: string | null, ctx: ConnectorContext): Promise<TrendKeyword[]>;
+  getCategories?(ctx: ConnectorContext): Promise<Category[]>;
 }
 
 export const USER_MESSAGES: Record<ConnectorErrorCode, string> = {

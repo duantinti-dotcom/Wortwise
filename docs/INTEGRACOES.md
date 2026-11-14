@@ -72,3 +72,16 @@ Consulta pública e gratuita de CNPJ (`brasilapi.com.br/api/cnpj/v1/{cnpj}`), us
 ## Worthwise Lens (pesquisa por imagem)
 
 Planejado para uma etapa posterior; depende de uma fonte que aceite busca por imagem com licença comercial. Não aparece na interface.
+
+## Vitrine "Em alta" (mais vendidos)
+
+- Tela `/app/em-alta`, faixa no painel e seção "Em alta agora" da página inicial (`/api/trending`, público, top 10).
+- Fonte: API oficial do Mercado Livre, com as mesmas credenciais do conector (`MELI_CLIENT_ID` / `MELI_CLIENT_SECRET`):
+  - `GET /highlights/MLB/category/{id}`: posições do ranking "Mais vendidos" da categoria;
+  - `GET /products/{id}` e `GET /items?ids=`: foto, preço, frete e link de cada posição;
+  - `GET /trends/MLB/{id}`: buscas em alta;
+  - `GET /sites/MLB/categories`: lista de categorias.
+- Cache de 30 minutos em memória por instância: visitas não multiplicam chamadas à API.
+- Plano grátis vê as primeiras posições (mesmo limite de `trial_policy.free_visible_results`); o restante não é enviado ao navegador.
+- Sem credenciais, o app mostra o aviso de integração pendente. A página inicial mostra itens ilustrativos com o selo "Demonstração". Nada é inventado como se fosse real.
+- O Mercado Livre não informa a terceiros a quantidade vendida de anúncios de outros vendedores. Por isso a vitrine mostra a **posição** no ranking oficial, não um número de vendas.

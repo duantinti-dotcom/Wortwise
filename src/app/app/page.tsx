@@ -1,5 +1,7 @@
 import { ArrowRight, BarChart3, Bell, Bookmark, Calculator, Clock, MessagesSquare, Scale, Search, Store, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { HotStrip } from "./hot-strip";
 import { BorderBeam } from "@/components/ui/fx";
 import { getUsage, quotaOf, requireUser } from "@/lib/auth";
 import { PERIOD_LABELS, RESOURCE_LABELS } from "@/lib/plans";
@@ -62,6 +64,8 @@ export default async function Dashboard() {
           </div>
         </div>
       </section>
+
+      <Suspense fallback={null}><HotStrip /></Suspense>
 
       <section aria-label="Acesso rápido" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {TOOLS.map((t) => (

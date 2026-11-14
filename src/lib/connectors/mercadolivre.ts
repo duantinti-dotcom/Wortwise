@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { serverEnv } from "@/lib/env";
 import {
-  ConnectorError, type Connector, type ConnectorContext, type FeeQuote, type Offer, type ProductDetail,
-  type ProductResult, type SearchParams,
+  ConnectorError, type Category, type Connector, type ConnectorContext, type FeeQuote, type Offer, type ProductDetail,
+  type ProductResult, type RankedProduct, type SearchParams, type TrendKeyword,
 } from "./types";
 
 /**
@@ -15,6 +15,10 @@ import {
  *  1. /sites/MLB/search (anúncios, com preço e vendedor). Desde 2025 o Mercado Livre restringe esse
  *     recurso para parte dos aplicativos; se a API responder 401/403, o conector passa a usar
  *  2. /products/search (catálogo) + /products/{id} para o preço da oferta vencedora (buy box).
+ *
+ * Vitrine "Em alta": /highlights/MLB/category/{id} devolve o ranking oficial de mais vendidos da categoria
+ * (somente ids e posições); fotos, preços e links vêm de /products/{id} (fichas de catálogo) e de
+ * /items?ids= (anúncios). /trends/MLB devolve os termos de busca que mais cresceram.
  *
  * O que a API NÃO fornece a terceiros: quantidade vendida de anúncios de outros vendedores,
  * faturamento de concorrentes e histórico de preços. O histórico do Worthwise é construído
@@ -119,11 +123,13 @@ const attr = (attrs: Attr[] | null | undefined, id: string) => attrs?.find((a) =
 const attrList = (attrs: Attr[] | null | undefined) =>
   (attrs ?? []).filter((a) => a.name && a.value_name).slice(0, 30).map((a) => ({ name: a.name!, value: a.value_name! }));
 const https = (u: string | null | undefined) => (u ? u.replace(/^http:\/\//, "https://") : null);
+/** Miniaturas do Mercado Livre terminam em -I.jpg (90 px); -O.jpg é a mesma foto em tamanho maior. */
+const bigImage = (u: string | null | undefined) => (u ? https(u)!.replace(/-I\.(jpe?g|webp|png)$/i, "-O.$1") : null);
 const idStr = (v: string | number | null | undefined) => (v == null ? null : String(v));
 
 function fromListing(l: z.infer<typeof listingSchema>, now: string): ProductResult {
   return {
-    source: "mercadolivre", externalId: `i-${l.id}`, kind: "listing", title: l.title, imageUrl: https(l.thumbnail),
+    source: "mercadolivre", externalId: `i-${l.id}`, kind: "listing", title: l.title, imageUrl: bigImage(l.thumbnail),
     permalink: l.permalink ?? null, price: l.price ?? null, originalPrice: l.original_price ?? null,
     currency: l.currency_id ?? null, rating: null, reviewsCount: null, sellerId: idStr(l.seller?.id),
     sellerName: l.official_store_name ?? l.seller?.nickname ?? null,
@@ -261,6 +267,44 @@ export const mercadoLivre: Connector = {
     } catch {
       return null;
     }
+  },
+
+  async getCategories(ctx: ConnectorContext): Promise<Category[]> {
+    const data = await get(ctx, `/sites/${SITE}/categories`, z.array(z.object({ id: z.string(), name: z.string() }).loose()), "GET /sites/MLB/categories");
+    return data.map((c) => ({ id: c.id, name: c.name }));
+  },
+
+  async getTrends(categoryId: string | null, ctx: ConnectorContext): Promise<TrendKeyword[]> {
+    const path = categoryId && /^MLB\d+$/.test(categoryId) ? `/trends/${SITE}/${categoryId}` : `/trends/${SITE}`;
+    const data = await get(ctx, path, z.array(z.object({ keyword: z.string(), url: str }).loose()), "GET /trends/MLB");
+    return data.filter((t) => t.keyword.trim()).slice(0, 30).map((t) => ({ keyword: t.keyword.trim(), url: https(t.url) }));
+  },
+
+  async getBestsellers(categoryId: string, ctx: ConnectorContext): Promise<RankedProduct[]> {
+    if (!/^MLB\d+$/.test(categoryId)) throw new ConnectorError("mercadolivre", "not_found", "Categoria inválida");
+    const now = new Date().toISOString();
+    const data = await get(ctx, `/highlights/${SITE}/category/${categoryId}`,
+      z.object({ content: z.array(z.object({ id: z.string(), position: num, type: str }).loose()) }).loose(), "GET /highlights/MLB/category/{id}");
+    const ranked = data.content.filter((c) => /^MLB[A-Z]?\d+$/.test(c.id)).slice(0, 20)
+      .map((c, i) => ({ id: c.id, rank: c.position ?? i + 1, type: (c.type ?? "").toUpperCase() }));
+    const productIds = ranked.filter((r) => r.type === "PRODUCT");
+    const itemIds = ranked.filter((r) => r.type === "ITEM");
+
+    const byId = new Map<string, ProductResult>();
+    const products = await Promise.allSettled(productIds.map((r) => get(ctx, `/products/${r.id}`, catalogProductSchema, "GET /products/{id}")));
+    products.forEach((res, i) => { if (res.status === "fulfilled") byId.set(productIds[i]!.id, fromCatalog(res.value, now, true)); });
+    for (let i = 0; i < itemIds.length; i += 20) {
+      const chunk = itemIds.slice(i, i + 20).map((r) => r.id).join(",");
+      try {
+        const items = await get(ctx, `/items?ids=${chunk}`, z.array(z.object({ code: num, body: itemSchema.nullish() }).loose()), "GET /items?ids=");
+        for (const it of items) {
+          if (it.code !== 200 || !it.body) continue;
+          const pic = it.body.pictures?.[0];
+          byId.set(it.body.id, { ...fromListing(it.body, now), imageUrl: https(pic?.secure_url ?? pic?.url) ?? bigImage(it.body.thumbnail) });
+        }
+      } catch { /* lote indisponível: os demais seguem */ }
+    }
+    return ranked.flatMap((r) => { const p = byId.get(r.id); return p ? [{ ...p, rank: r.rank }] : []; }).sort((a, b) => a.rank - b.rank);
   },
 };
 
