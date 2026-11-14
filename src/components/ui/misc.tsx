@@ -4,16 +4,31 @@ import { cn } from "@/lib/utils";
 
 export function EmptyState({ icon: Icon, title, children, action }: { icon: LucideIcon; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="card relative flex flex-col items-center overflow-hidden !rounded-3xl px-6 py-16 text-center">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(50%_100%_at_50%_0%,rgba(255,121,0,0.10),transparent)]" />
+    <div className="@container lg relative overflow-hidden rounded-[28px]">
+    <div className="grid items-center gap-10 px-6 py-12 @2xl:grid-cols-[1fr_1fr] @2xl:px-12 @2xl:py-14">
+      <div aria-hidden className="absolute -left-24 -top-24 size-72 rounded-full bg-brand/15 blur-3xl" />
       <div className="relative">
-        <div aria-hidden className="absolute -inset-3 rounded-[22px] border border-white/[0.05]" />
-        <div aria-hidden className="absolute -inset-6 rounded-[28px] border border-white/[0.03]" />
-        <div className="relative flex size-14 items-center justify-center rounded-2xl border border-brand/30 bg-gradient-to-b from-brand/20 to-brand/5 text-brand-hi shadow-[0_0_30px_-8px_rgba(255,121,0,0.6)]"><Icon size={24} /></div>
+        <div className="relative w-fit">
+          <div aria-hidden className="absolute -inset-3 rounded-[22px] border border-white/[0.06]" />
+          <div className="relative flex size-14 items-center justify-center rounded-2xl border border-brand/40 bg-gradient-to-b from-brand/25 to-brand/5 text-brand-hi shadow-[0_0_34px_-8px_rgba(255,121,0,0.7)]"><Icon size={24} /></div>
+        </div>
+        <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em]">{title}</h3>
+        {children ? <div className="mt-3 max-w-md text-[15px] leading-relaxed text-muted">{children}</div> : null}
+        {action ? <div className="mt-7">{action}</div> : null}
       </div>
-      <h3 className="relative mt-8 text-lg font-semibold tracking-tight">{title}</h3>
-      {children ? <div className="relative mt-2 max-w-md text-[14.5px] leading-relaxed text-muted">{children}</div> : null}
-      {action ? <div className="relative mt-7">{action}</div> : null}
+      {/* Silhueta do que vai aparecer aqui (decorativa) */}
+      <div aria-hidden className="relative hidden pr-6 @2xl:block">
+        <div className="space-y-3 [mask-image:linear-gradient(180deg,#000_40%,transparent)]">
+          {[0.9, 0.7, 0.55].map((o, i) => (
+            <div key={i} className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4" style={{ opacity: o, transform: `translateX(${i * 12}px)` }}>
+              <span className="size-10 shrink-0 rounded-xl bg-gradient-to-br from-brand/30 to-white/5" />
+              <span className="flex-1 space-y-2"><span className="skeleton block h-2.5 w-3/5 !rounded-full" /><span className="skeleton block h-2 w-2/5 !rounded-full opacity-70" /></span>
+              <span className="skeleton block h-3 w-14 !rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
     </div>
   );
 }
