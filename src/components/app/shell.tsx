@@ -182,7 +182,7 @@ export function AppShell(props: ShellProps) {
 
           <main id="conteudo" key={path} className="relative animate-[page-in_0.45s_cubic-bezier(0.16,1,0.3,1)] px-4 pb-28 pt-7 lg:px-10 lg:pb-16 lg:pt-10">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(45%_100%_at_70%_0%,rgba(255,121,0,0.06),transparent)]" />
-            <div className="mx-auto max-w-[1240px]">{props.children}</div>
+            <div className="page-stagger mx-auto max-w-[1240px]">{props.children}</div>
           </main>
 
           {/* Navegação inferior — mobile */}

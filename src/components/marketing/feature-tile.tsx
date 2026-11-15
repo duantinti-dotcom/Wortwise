@@ -2,6 +2,7 @@
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Parallax } from "@/components/ui/scroll-text";
 
 /**
  * Bloco de funcionalidade em gradiente vivo com uma "tela" do produto dentro.
@@ -36,9 +37,11 @@ export function FeatureTile({ tone, icon, title, text, children, className, flip
         </div>
         <p className="tile-muted mt-3 max-w-[46ch] text-[15px] leading-relaxed">{text}</p>
       </div>
-      <motion.div style={reduce ? undefined : { x, y, rotate }} className={cn("demo-screen relative rounded-[14px] p-3 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)] sm:p-5", flip ? "order-1" : "mt-8")}>
-        {children}
-      </motion.div>
+      <Parallax offset={14} className={flip ? "order-1" : "mt-8"}>
+        <motion.div style={reduce ? undefined : { x, y, rotate }} className="demo-screen relative rounded-[14px] p-3 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)] sm:p-5">
+          {children}
+        </motion.div>
+      </Parallax>
     </motion.article>
   );
 }

@@ -12,6 +12,7 @@ import { ProfitCalculator } from "@/components/profit-calculator";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/reveal";
 import { Spot } from "@/components/ui/spot";
 import { CountUp } from "@/components/ui/count-up";
+import { RevealWords, ScaleIn, ScrubWords } from "@/components/ui/scroll-text";
 import { publicEnv } from "@/lib/env";
 import { FAQ_ITEMS } from "@/lib/faq";
 import { cn } from "@/lib/utils";
@@ -34,8 +35,8 @@ const STEPS = [
   { title: "Decida", text: "Uma resposta simples — vale a pena ou não — e alertas para comprar na hora certa.", icon: Check },
 ];
 
-function Title({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <h2 className={cn("display text-[34px] sm:text-[46px] lg:text-[56px]", className)}>{children}</h2>;
+function Title({ a, b, className }: { a: string; b?: string; className?: string }) {
+  return <RevealWords className={cn("display text-[34px] sm:text-[46px] lg:text-[56px]", className)} parts={[{ text: a }, ...(b ? [{ text: b, className: "accent" }] : [])]} />;
 }
 
 export default function HomePage() {
@@ -92,7 +93,7 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mx-auto mb-10 max-w-3xl text-center">
             <span className="eyebrow">Em alta agora</span>
-            <Title className="mt-5">O que está vendendo <span className="accent">agora</span></Title>
+            <Title className="mt-5" a="O que está vendendo" b="agora" />
             <p className="mt-5 text-lg text-muted">O ranking de mais vendidos de cada categoria, com foto, preço e link direto para o anúncio. Dentro do app você filtra por categoria, analisa a margem e monitora o preço.</p>
           </Reveal>
           <LiveTrending />
@@ -117,11 +118,8 @@ export default function HomePage() {
       {/* Princípios */}
       <section className="pt-16 md:pt-36">
         <div className="container-page">
-          <Reveal>
-            <p className="mx-auto max-w-4xl text-center text-[21px] font-medium leading-[1.32] tracking-[-0.03em] text-faint md:text-[36px]">
-              Sem scraping, sem números inventados. <span className="text-fg">Cada preço tem fonte e data,</span> cada CNPJ é conferido na Receita e <span className="text-fg">todo custo entra na conta.</span>
-            </p>
-          </Reveal>
+          <ScrubWords className="mx-auto max-w-4xl text-center text-[21px] font-medium leading-[1.32] tracking-[-0.03em] text-muted md:text-[36px]"
+            parts={[{ text: "Sem scraping, sem números inventados." }, { text: "Cada preço tem fonte e data,", strong: true }, { text: "cada CNPJ é conferido na Receita e" }, { text: "todo custo entra na conta.", strong: true }]} />
         </div>
       </section>
 
@@ -130,7 +128,7 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
             <span className="eyebrow">Funcionalidades</span>
-            <Title className="mt-5">Tudo para decidir <span className="accent">o que vender</span></Title>
+            <Title className="mt-5" a="Tudo para decidir" b="o que vender" />
             <p className="mt-5 text-lg text-muted">Seis ferramentas que conversam entre si. Cada uma mostra de onde veio o dado.</p>
           </Reveal>
           <div className="snap-row md:grid md:grid-cols-2 md:gap-5">
@@ -148,7 +146,7 @@ export default function HomePage() {
 
       {/* Perguntas */}
       <section aria-label="Perguntas que o assistente responde" className="pb-16 md:pb-36">
-        <Reveal className="container-page mb-10 text-center"><Title className="!text-[32px] sm:!text-[44px]">Pergunte como perguntaria a um <span className="accent">analista</span></Title></Reveal>
+        <Reveal className="container-page mb-10 text-center"><Title className="!text-[32px] sm:!text-[44px]" a="Pergunte como perguntaria a um" b="analista" /></Reveal>
         <div className="space-y-3"><QuestionMarquee items={QUESTIONS_A} /><QuestionMarquee items={QUESTIONS_B} reverse /></div>
       </section>
 
@@ -157,7 +155,7 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
             <span className="eyebrow">Como funciona</span>
-            <Title className="mt-5">Da dúvida à decisão em <span className="accent">quatro passos</span></Title>
+            <Title className="mt-5" a="Da dúvida à decisão em" b="quatro passos" />
           </Reveal>
           <Stagger as="ol" className="snap-row md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
             {STEPS.map((s, i) => (
@@ -182,7 +180,7 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
             <span className="eyebrow">Grátis, sem cadastro</span>
-            <Title className="mt-5">Experimente a <span className="accent">calculadora de lucro</span></Title>
+            <Title className="mt-5" a="Experimente a" b="calculadora de lucro" />
             <p className="mt-5 text-lg text-muted">Mexa nos números e veja o lucro, o preço mínimo e o caminho da receita até o que sobra.</p>
           </Reveal>
           <Reveal><ProfitCalculator compact /></Reveal>
@@ -194,7 +192,7 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="mx-auto mb-16 max-w-3xl text-center">
             <span className="eyebrow">Planos</span>
-            <Title className="mt-5">Comece grátis. <span className="accent">Assine quando fizer sentido.</span></Title>
+            <Title className="mt-5" a="Comece grátis." b="Assine quando fizer sentido." />
             <p className="mt-5 text-lg text-muted">Limites claros em todos os planos. Cancele quando quiser; o acesso vale até o fim do período pago.</p>
           </Reveal>
           <Pricing />
@@ -208,7 +206,7 @@ export default function HomePage() {
         <div className="container-page !max-w-3xl">
           <Reveal className="mb-12 text-center">
             <span className="eyebrow">Dúvidas</span>
-            <Title className="mt-5">Perguntas <span className="accent">frequentes</span></Title>
+            <Title className="mt-5" a="Perguntas" b="frequentes" />
             <p className="mt-5 text-muted">Quer os detalhes? Leia a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link> e veja o estado das <Link href="/fontes-de-dados" className="text-brand-hi underline underline-offset-4">fontes de dados</Link>.</p>
           </Reveal>
           <Reveal delay={0.08}><div className="lg rounded-[24px] px-6 py-2 md:px-8"><Faq /></div></Reveal>
@@ -218,7 +216,7 @@ export default function HomePage() {
       {/* CTA */}
       <section className="pb-28 pt-8 md:pb-36">
         <div className="container-page">
-          <Reveal>
+          <ScaleIn>
             <div className="tile relative px-6 py-20 text-center md:py-28">
               <div aria-hidden className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgb(var(--tint)/0.05)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--tint)/0.05)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(60%_70%_at_50%_100%,#000,transparent)]" />
               <h2 className="display relative mx-auto max-w-3xl text-[38px] md:text-[60px]">Sua próxima compra merece dados melhores.</h2>
@@ -228,7 +226,7 @@ export default function HomePage() {
                 <Link href="/precos" className="btn btn-secondary btn-xl">Ver planos</Link>
               </div>
             </div>
-          </Reveal>
+          </ScaleIn>
         </div>
       </section>
     </>

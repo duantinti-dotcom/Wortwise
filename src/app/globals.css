@@ -689,3 +689,20 @@ html.lens .nav-bar.glass-lens {
   -webkit-backdrop-filter: url(#lg-lens) blur(18px) saturate(140%) brightness(1.05);
   backdrop-filter: url(#lg-lens) blur(18px) saturate(140%) brightness(1.05);
 }
+
+/* App: o conteúdo de cada tela entra em cascata, bloco por bloco */
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } }
+.page-stagger > * { animation: rise-in .6s var(--ease-out) backwards; }
+.page-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.page-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.page-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.page-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.page-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.page-stagger > *:nth-child(n+7) { animation-delay: 360ms; }
+/* Grades de cartões do app (dentro de cada bloco) também entram em sequência */
+.page-stagger .grid > .card { animation: rise-in .55s var(--ease-out) backwards; }
+.page-stagger .grid > .card:nth-child(2) { animation-delay: 50ms; }
+.page-stagger .grid > .card:nth-child(3) { animation-delay: 100ms; }
+.page-stagger .grid > .card:nth-child(4) { animation-delay: 150ms; }
+.page-stagger .grid > .card:nth-child(n+5) { animation-delay: 200ms; }
+@media (prefers-reduced-motion: reduce) { .page-stagger > *, .page-stagger .grid > .card { animation: none !important; } }

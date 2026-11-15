@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { FooterMark } from "./footer-mark";
 
 const COLS = [
   { title: "Produto", links: [["/#funcionalidades", "Funcionalidades"], ["/precos", "Preços"], ["/calculadora-de-lucro", "Calculadora de lucro"], ["/cadastro", "Começar grátis"]] },
@@ -27,10 +28,7 @@ export function Footer() {
             </nav>
           ))}
         </div>
-        <div aria-hidden className="pointer-events-none select-none overflow-hidden px-4 pb-2 text-center font-semibold leading-[0.85] tracking-[-0.07em]"
-          style={{ fontSize: "clamp(64px, 16vw, 240px)", backgroundImage: "linear-gradient(180deg, rgb(var(--tint) / 0.14), rgb(var(--tint) / 0.01) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
-          Worthwise
-        </div>
+        <FooterMark />
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-tint/10 px-6 py-5 text-xs text-faint md:px-12">
           <span>© {new Date().getFullYear()} Worthwise. Todos os direitos reservados.</span>
           <span>Não somos afiliados aos marketplaces citados. Marcas pertencem aos seus titulares.</span>

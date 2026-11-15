@@ -10,7 +10,7 @@ export function Reveal({ children, delay = 0, className, y = 28, scale = 1 }: { 
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div className={className}
-      initial={{ opacity: 0, y, scale, filter: "blur(8px)" }}
+      initial={{ opacity: 0, y, scale, filter: "blur(4px)" }}
       whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ ...SPRING, delay, filter: { duration: 0.6, delay } , opacity: { duration: 0.6, delay } }}>
