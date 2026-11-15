@@ -31,7 +31,7 @@ export function serverEnv() {
     aiBaseUrl: (e.AI_BASE_URL ?? "").replace(/\/$/, ""),
     aiApiKey: e.AI_API_KEY ?? "",
     geminiKey: e.GEMINI_API_KEY ?? "",
-    geminiModel: e.GEMINI_MODEL ?? "gemini-3.8-flash",
+    geminiModel: e.GEMINI_MODEL ?? "gemini-3.5-flash",
     groqKey: e.GROQ_API_KEY ?? "",
     groqModel: e.GROQ_MODEL ?? "openai/gpt-oss-120b",
     openrouterKey: e.OPENROUTER_API_KEY ?? "",

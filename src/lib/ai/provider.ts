@@ -138,13 +138,17 @@ function geminiNative(apiKey: string, model: string): AiProvider {
         else if (m.role === "assistant") {
           const parts: unknown[] = [];
           if (m.content) parts.push({ text: m.content });
-          for (const c of m.tool_calls ?? []) parts.push({ functionCall: { name: c.function.name, args: parseArgs(c.function.arguments) } });
+          // O Gemini 3 exige devolver a "assinatura de pensamento" junto da chamada de ferramenta.
+          for (const c of m.tool_calls ?? []) {
+            const sig = c.id.startsWith("g~") ? c.id.slice(2).split("~")[0] : "";
+            parts.push({ functionCall: { name: c.function.name, args: parseArgs(c.function.arguments) }, thoughtSignature: sig || "skip_thought_signature_validator" });
+          }
           if (parts.length) contents.push({ role: "model", parts });
         } else if (m.role === "tool") {
           contents.push({ role: "user", parts: [{ functionResponse: { name: m.name ?? "ferramenta", response: { content: m.content } } }] });
         }
       }
-      const body: Record<string, unknown> = { contents, generationConfig: { maxOutputTokens: maxTokens, temperature: 0.3 } };
+      const body: Record<string, unknown> = { contents, generationConfig: { maxOutputTokens: maxTokens, temperature: 0.3, thinkingConfig: { thinkingLevel: "low" } } };
       if (system) body.systemInstruction = { parts: [{ text: system }] };
       if (tools.length) body.tools = [{ functionDeclarations: tools.map((t) => ({ name: t.name, description: t.description, parameters: t.parameters })) }];
       let res: Response;
@@ -157,13 +161,13 @@ function geminiNative(apiKey: string, model: string): AiProvider {
       }
       if (!res.ok) throw new AiUnavailable(`status ${res.status}: ${(await res.text().catch(() => "")).replace(/\s+/g, " ").slice(0, 160)}`);
       const data = (await res.json()) as {
-        candidates?: { content?: { parts?: { text?: string; thought?: boolean; functionCall?: { name: string; args?: unknown } }[] } }[];
+        candidates?: { content?: { parts?: { text?: string; thought?: boolean; thoughtSignature?: string; functionCall?: { name: string; args?: unknown } }[] } }[];
         usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
       };
       const parts = data.candidates?.[0]?.content?.parts ?? [];
       return {
         content: parts.filter((p) => p.text && !p.thought).map((p) => p.text).join(""),
-        toolCalls: parts.filter((p) => p.functionCall).map((p, i) => ({ id: `gemini_${i}_${Date.now()}`, name: p.functionCall!.name, arguments: parseArgs(p.functionCall!.args) })),
+        toolCalls: parts.filter((p) => p.functionCall).map((p, i) => ({ id: `g~${p.thoughtSignature ?? ""}~${i}`, name: p.functionCall!.name, arguments: parseArgs(p.functionCall!.args) })),
         tokensIn: data.usageMetadata?.promptTokenCount ?? null, tokensOut: data.usageMetadata?.candidatesTokenCount ?? null,
       };
     },
