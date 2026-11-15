@@ -33,6 +33,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const i = t.indexOf('data-component-type="s-search-result"');
     return NextResponse.json({ status: r.status, size: t.length, count: t.split('data-component-type="s-search-result"').length - 1, robot: /captcha|robot/i.test(t.slice(0, 5000)), block: i >= 0 ? (t.split('data-component-type="s-search-result"')[2] ?? '').slice(0, 30000) : t.slice(0, 800) });
   }
+  if (task === "apify-probe") {
+    // Testa o robô de TikTok Shop da Apify (e mostra os campos que ele devolve). Só leitura, poucos itens.
+    const token = serverEnv().apifyToken;
+    if (!token) return NextResponse.json({ error: "APIFY_TOKEN ausente" }, { status: 503 });
+    const u = new URL(req.url);
+    const actor = (u.searchParams.get("actor") ?? "pratikdani~tiktok-shop-scraper").replace("/", "~");
+    const t = Date.now();
+    const info = await fetch(`https://api.apify.com/v2/acts/${actor}?token=${encodeURIComponent(token)}`).then((r) => r.json()).catch(() => null) as { data?: { name?: string; stats?: unknown; defaultRunOptions?: unknown; exampleRunInput?: { body?: string } } } | null;
+    const input = u.searchParams.get("input") ? JSON.parse(u.searchParams.get("input")!) : null;
+    if (!input) return NextResponse.json({ actor, ms: Date.now() - t, exampleInput: info?.data?.exampleRunInput?.body ?? null, name: info?.data?.name ?? null });
+    const r = await fetch(`https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?token=${encodeURIComponent(token)}&limit=5&timeout=120`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(input), signal: AbortSignal.timeout(130000),
+    });
+    const body = await r.text();
+    return NextResponse.json({ actor, status: r.status, ms: Date.now() - t, sample: body.slice(0, 4000) });
+  }
   if (task === "gecko-probe") {
     // Descobre o que a GeckoAPI entrega (tipos e campos) para ligar o Mercado Livre. Só leitura.
     const token = serverEnv().geckoToken;
