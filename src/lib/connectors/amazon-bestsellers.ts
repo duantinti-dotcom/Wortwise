@@ -17,7 +17,7 @@ export const AMAZON_CATEGORIES = [
   { id: "computers", name: "Informática" },
 ];
 
-const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ").trim();
+const decode = (s: string) => s.replace(/&#x([0-9a-f]+);/gi, (_m, h: string) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_m, d: string) => String.fromCodePoint(Number(d))).replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ").trim();
 const brNumber = (s: string | undefined) => {
   if (!s) return null;
   const n = Number(s.replace(/\./g, "").replace(",", "."));
@@ -76,7 +76,7 @@ export async function fetchAmazonBestsellers(categoryId: string): Promise<Ranked
 /** Com cache compartilhado de 6 horas: no máximo 4 leituras por dia por categoria. */
 export async function getAmazonBestsellers(categoryId: string): Promise<{ products: RankedProduct[]; at: string; fresh: boolean }> {
   const edge = (globalThis as { caches?: { default?: Cache } }).caches?.default;
-  const key = new Request(`https://cache.worthwise.site/amazon-bs/v1/${encodeURIComponent(categoryId)}`);
+  const key = new Request(`https://cache.worthwise.site/amazon-bs/v2/${encodeURIComponent(categoryId)}`);
   const hit = await edge?.match(key).catch(() => undefined);
   if (hit) return { ...((await hit.json()) as { products: RankedProduct[]; at: string }), fresh: false };
   const products = await fetchAmazonBestsellers(categoryId);
