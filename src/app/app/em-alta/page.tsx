@@ -55,7 +55,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
               return (
                 <li key={c.id}>
                   <Link href={qs(store, c.id)} scroll={false} aria-current={on ? "page" : undefined}
-                    className={cn("chip whitespace-nowrap", on && "!border-transparent !bg-fg !text-[var(--bg)]")}>{c.name}</Link>
+                    className={cn("chip whitespace-nowrap", on && "!border-transparent !bg-none !bg-fg !text-[var(--bg)]")}>{c.name}</Link>
                 </li>
               );
             })}

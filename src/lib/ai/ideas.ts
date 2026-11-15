@@ -55,13 +55,18 @@ export function parseIdeas(raw: string, store: string): Idea[] {
   return out.slice(0, 12);
 }
 
+/** O ranking da IA é renovado a cada 3 dias (economiza a cota diária da IA). */
+const bucket = () => String(Math.floor(Date.now() / (3 * 86400000)));
+
+export class AiQuotaError extends Error {}
+
 const memory = new Map<string, { at: number; ideas: Idea[] }>();
-const TTL = 12 * 60 * 60 * 1000;
+const TTL = 3 * 24 * 60 * 60 * 1000;
 
 export async function generateIdeas(store: string, categoryId: string): Promise<{ ideas: Idea[]; generatedAt: string } | null> {
   const cat = IDEA_CATEGORIES.find((c) => c.id === categoryId) ?? IDEA_CATEGORIES[0];
   const storeName = STORE_NAMES[store] ?? "marketplaces brasileiros";
-  const key = `v2:${store}:${cat.id}:${new Date().toISOString().slice(0, 10)}`;
+  const key = `v2:${store}:${cat.id}:${bucket()}`;
   const hit = memory.get(key);
   if (hit && Date.now() - hit.at < TTL) return { ideas: hit.ideas, generatedAt: new Date(hit.at).toISOString() };
 
@@ -79,6 +84,10 @@ preco_min e preco_max: faixa de preço de venda típica ao consumidor nessa loja
   // Três partes em paralelo (faixas de preço diferentes): 12 produtos no tempo de 4.
   const parts = await Promise.allSettled([ask("baratos (até uns R$ 50)"), ask("de preço médio (R$ 50 a R$ 150)"), ask("de ticket mais alto (acima de R$ 150)")]);
   const seen = new Set<string>();
+  if (parts.every((p) => p.status === "rejected")) {
+    const msg = parts.map((p) => (p.status === "rejected" ? String((p.reason as Error)?.message ?? p.reason) : "")).join(" ");
+    if (/allocation|neurons|429|quota|capacity/i.test(msg)) throw new AiQuotaError(msg);
+  }
   const lists = parts.map((p) => (p.status === "fulfilled" ? parseIdeas(p.value.content, store) : []));
   const ideas: Idea[] = [];
   for (let i = 0; i < 4; i++) for (const l of lists) { const it = l[i]; if (it && !seen.has(it.nome.toLowerCase())) { seen.add(it.nome.toLowerCase()); ideas.push(it); } }
@@ -91,7 +100,7 @@ preco_min e preco_max: faixa de preço de venda típica ao consumidor nessa loja
 const STORE_IDS = ["mercadolivre", "shopee", "amazon", "tiktokshop"] as const;
 type IdeasResult = { ideas: Idea[]; generatedAt: string };
 const edgeCache = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
-const cacheKey = (store: string, cat: string) => new Request(`https://cache.worthwise.site/ideas-v2/${store}/${cat}/${new Date().toISOString().slice(0, 10)}`);
+const cacheKey = (store: string, cat: string) => new Request(`https://cache.worthwise.site/ideas-v2/${store}/${cat}/${bucket()}`);
 
 /** Lê do cache compartilhado do Cloudflare; se não houver, pede à IA e guarda por 24 h. */
 export async function getIdeasCached(store: string, cat: string): Promise<IdeasResult | null> {
@@ -101,7 +110,7 @@ export async function getIdeasCached(store: string, cat: string): Promise<IdeasR
   if (hit) return (await hit.json()) as IdeasResult;
   const out = await generateIdeas(store, cat);
   if (edge && out?.ideas.length) {
-    await edge.put(key, new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": "public, max-age=86400" } })).catch(() => {});
+    await edge.put(key, new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": "public, max-age=259200" } })).catch(() => {});
   }
   return out;
 }

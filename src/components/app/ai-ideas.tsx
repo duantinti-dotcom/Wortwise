@@ -51,7 +51,7 @@ export function AiIdeas({ store }: { store: string }) {
         <div className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
           {CATS.map((c) => (
             <button key={c.id} type="button" onClick={() => setCat(c.id)} aria-pressed={c.id === cat}
-              className={cn("chip whitespace-nowrap", c.id === cat && "!bg-[#2563EB] !text-white !shadow-none")}>{c.name}</button>
+              className={cn("chip whitespace-nowrap", c.id === cat && "!bg-none !bg-[#2563EB] !text-white !shadow-none")}>{c.name}</button>
           ))}
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { getUser } from "@/lib/auth";
-import { getIdeasCached, IDEA_CATEGORIES } from "@/lib/ai/ideas";
+import { AiQuotaError, getIdeasCached, IDEA_CATEGORIES } from "@/lib/ai/ideas";
 import { apiError } from "@/lib/http";
 import { supabaseServer } from "@/lib/supabase/server";
 
@@ -20,6 +20,7 @@ export async function GET(req: Request) {
     if (!out) return apiError("not_configured", "A IA ainda não está disponível neste ambiente.");
     return Response.json(out, { headers: { "cache-control": "private, max-age=600" } });
   } catch (e) {
+    if (e instanceof AiQuotaError) return apiError("rate_limited", "A IA atingiu o limite de uso de hoje. Volta a funcionar às 21h (horário de Brasília).");
     console.error("[ideas]", e instanceof Error ? e.message : e);
     return apiError("source_unavailable", "A IA não respondeu agora. Tente de novo em instantes.");
   }

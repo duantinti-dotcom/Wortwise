@@ -85,7 +85,10 @@ function workersAi(model: string): AiProvider | null {
     async chat(messages, tools, maxTokens, timeoutMs = TIMEOUT_MS) {
       const run = ai.run(model, { messages, tools: tools.length ? toOpenAiTools(tools) : undefined, max_tokens: maxTokens, temperature: 0.3 });
       const timeout = new Promise<never>((_, rej) => setTimeout(() => rej(new AiUnavailable("timeout")), timeoutMs));
-      const out = (await Promise.race([run, timeout])) as WorkersAiOutput;
+      const out = (await Promise.race([run, timeout]).catch((e: unknown) => {
+        const m = e instanceof Error ? e.message : String(e);
+        throw new AiUnavailable(/allocation|neurons|\b429\b/i.test(m) ? "quota" : m.slice(0, 200));
+      })) as WorkersAiOutput;
       return parseWorkersAi(out);
     },
   };

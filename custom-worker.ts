@@ -10,8 +10,8 @@ const worker = {
     // O cron chama a própria aplicação por dentro, autenticado pelo segredo do cron.
     const base = env.APP_URL ?? "https://worthwise.internal";
     const daily = event.cron === "17 6 * * *";
-    // Diário: manutenção do banco e preparo das ideias da IA (para ninguém esperar durante o dia).
-    const tasks = daily ? ["purge", "ideas"] : ["monitor"];
+    // Diário: manutenção do banco. (O preparo das ideias da IA fica em /api/cron/ideas, para rodar sob demanda.)
+    const tasks = daily ? ["purge"] : ["monitor"];
     for (const task of tasks) {
       const req = new Request(`${base}/api/cron/${task}`, {
         method: "POST",

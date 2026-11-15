@@ -97,8 +97,9 @@ export async function POST(req: Request) {
       } catch (e) {
         console.error("[assistant]", e instanceof Error ? e.message : e);
         const timeout = e instanceof AiUnavailable && e.message === "timeout";
+        const quota = e instanceof AiUnavailable && e.message === "quota";
         emit({ type: "error", code: timeout ? "timeout" : "unavailable",
-          message: timeout ? "O assistente demorou demais para responder. Tente novamente." : "O assistente está indisponível no momento. Tente novamente em instantes." });
+          message: quota ? "A IA atingiu o limite de uso de hoje. A Wise volta às 21h (horário de Brasília)." : timeout ? "O assistente demorou demais para responder. Tente novamente." : "O assistente está indisponível no momento. Tente novamente em instantes." });
       } finally {
         controller.close();
       }
