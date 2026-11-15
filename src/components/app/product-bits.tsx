@@ -115,7 +115,8 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           {p.originalPrice && discount ? <span className="tabular text-xs text-faint line-through">{formatMoney(p.originalPrice, p.currency ?? "BRL")}</span> : null}
           {rank != null && discount ? <span className="badge badge-pos !h-5 !px-1.5 !text-[11px]">−{discount}%</span> : null}
         </div>
-        {p.soldQuantity ? <div className="mt-1.5 text-[13px] font-medium text-soft">+{p.soldQuantity.toLocaleString("pt-BR")} vendidos</div> : null}
+        {p.soldLabel ? <div className="mt-1.5 text-[13px] font-medium text-pos">{p.soldLabel}</div>
+          : p.soldQuantity ? <div className="mt-1.5 text-[13px] font-medium text-soft">+{p.soldQuantity.toLocaleString("pt-BR")} vendidos</div> : null}
         {history ? (
           <div className="mt-3">
             <div className="text-[11.5px] text-faint">Preço nos últimos dias</div>

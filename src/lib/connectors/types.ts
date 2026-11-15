@@ -32,6 +32,8 @@ export interface ProductResult {
   salesRank?: { rank: number; category: string | null } | null;
   /** Quantidade vendida informada pela própria fonte (quando ela informa). */
   soldQuantity?: number | null;
+  /** Texto de vendas como a loja mostra (ex.: "Mais de 5 mil compras no mês passado"). */
+  soldLabel?: string | null;
   /** Selo de entrega rápida da fonte (ex.: Prime). */
   fastDelivery?: boolean | null;
 }

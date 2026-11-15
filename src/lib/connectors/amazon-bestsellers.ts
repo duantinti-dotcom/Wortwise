@@ -1,4 +1,4 @@
-import type { RankedProduct } from "./types";
+import type { ProductResult, RankedProduct } from "./types";
 
 /**
  * Mais vendidos da Amazon Brasil lidos da página pública /gp/bestsellers (permitida no robots.txt da Amazon).
@@ -86,4 +86,63 @@ export async function getAmazonBestsellers(categoryId: string): Promise<{ produc
   const out = { products, at: new Date().toISOString() };
   await edge?.put(key, new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": "public, max-age=21600" } })).catch(() => {});
   return { ...out, fresh: true };
+}
+
+/* ───────────── Busca pública (/s?k=, permitida no robots.txt) ───────────── */
+const human = (s: string | undefined) => {
+  if (!s) return null;
+  const m = /([\d.,]+)\s*(mil)?/i.exec(s);
+  if (!m) return null;
+  const n = brNumber(m[1]!.includes(",") || !m[2] ? m[1]! : m[1]!.replace(/\./g, ""));
+  return n == null ? null : Math.round(m[2] ? n * 1000 : n);
+};
+
+/** Converte a página de resultados da busca da Amazon em produtos (sem anúncios patrocinados). Exportado para testes. */
+export function parseAmazonSearch(html: string, now = new Date().toISOString()): ProductResult[] {
+  const out: ProductResult[] = [];
+  for (const b of html.split('data-component-type="s-search-result"').slice(1)) {
+    const block = b.slice(0, 40000);
+    const asin = /data-asin="([A-Z0-9]{10})"/.exec(block)?.[1];
+    if (!asin || /Patrocinado|AdHolder|sp-sponsored/i.test(block.slice(0, 6000))) continue;
+    const title = decode(/<h2[^>]*aria-label="([^"]+)"/.exec(block)?.[1] ?? /<h2[^>]*>\s*<span[^>]*>([^<]+)</.exec(block)?.[1] ?? "");
+    if (!title) continue;
+    const srcset = /class="s-image"[^>]*srcset="([^"]+)"/.exec(block)?.[1];
+    const image = srcset ? srcset.split(",").map((x) => x.trim().split(" ")[0]!).filter((u) => u.startsWith("https://")).at(-1) ?? null
+      : /class="s-image"[^>]*src="(https:\/\/[^"]+)"/.exec(block)?.[1] ?? null;
+    const whole = /a-price-whole">([\d.]+)/.exec(block)?.[1];
+    const fraction = /a-price-fraction">(\d{2})/.exec(block)?.[1];
+    const price = whole ? brNumber(`${whole},${fraction ?? "00"}`) : null;
+    const rating = brNumber(/aria-label="([\d,]+) de 5 estrelas/.exec(block)?.[1]);
+    const reviews = human(/s-underline-text">\(?([\d.,]+\s*(?:mil)?)\)?</.exec(block)?.[1]);
+    const sold = /(Mais de [\d.,]+\s*(?:mil)?\s*compras? no mês passado)/i.exec(block)?.[1]?.replace(/\s+/g, " ") ?? null;
+    out.push({
+      source: "amazon", externalId: `a-${asin}`, kind: "listing", title, imageUrl: image,
+      permalink: `https://www.amazon.com.br/dp/${asin}`, price, originalPrice: null, currency: price != null ? "BRL" : null,
+      rating, reviewsCount: reviews, sellerId: null, sellerName: null, available: price != null ? true : null, freeShipping: null, condition: "new",
+      brand: null, model: null, gtin: null, categoryId: null, offersCount: null, attributes: sold ? [{ name: "Vendas", value: sold }] : [],
+      collectedAt: now, sourceUpdatedAt: null, soldLabel: sold,
+    });
+  }
+  return out;
+}
+
+export async function searchAmazonPublic(query: string): Promise<ProductResult[]> {
+  const q = query.trim().replace(/\s+/g, " ").slice(0, 100);
+  const edge = (globalThis as { caches?: { default?: Cache } }).caches?.default;
+  const key = new Request(`https://cache.worthwise.site/amazon-search/v1/${encodeURIComponent(q.toLowerCase())}`);
+  const hit = await edge?.match(key).catch(() => undefined);
+  if (hit) return (await hit.json()) as ProductResult[];
+  let res: Response;
+  try {
+    res = await fetch(`https://www.amazon.com.br/s?k=${encodeURIComponent(q)}`, {
+      headers: { accept: "text/html", "accept-language": "pt-BR,pt;q=0.9", "user-agent": "Mozilla/5.0 (compatible; WorthwiseBot/1.0; +https://worthwise.site)" },
+      signal: AbortSignal.timeout(12000),
+    });
+  } catch {
+    throw new AmazonPageError("A Amazon não respondeu agora.");
+  }
+  if (!res.ok) throw new AmazonPageError(`A Amazon respondeu ${res.status}.`);
+  const items = parseAmazonSearch(await res.text());
+  if (items.length) await edge?.put(key, new Response(JSON.stringify(items), { headers: { "content-type": "application/json", "cache-control": "public, max-age=21600" } })).catch(() => {});
+  return items;
 }

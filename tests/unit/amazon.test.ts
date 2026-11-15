@@ -76,9 +76,15 @@ describe("Amazon · Product Advertising API", () => {
     expect(r!.price).toBe(79.9);
   });
 
-  it("sem credenciais informa 'não configurado'", async () => {
+  it("sem credenciais usa a busca pública da Amazon (dados reais da página)", async () => {
     delete process.env.AMAZON_PARTNER_TAG;
-    expect(amazon.state().state).toBe("not_configured");
-    await expect(amazon.search({ query: "fone", limit: 10, offset: 0 }, { logs: [] })).rejects.toMatchObject({ code: "not_configured" });
+    expect(amazon.state().state).toBe("connected");
+    const html = (await import("node:fs")).readFileSync("tests/fixtures/amazon-search.html", "utf8");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(html, { status: 200 })));
+    const out = await amazon.search({ query: "garrafa termica", limit: 10, offset: 0 }, { logs: [] });
+    expect(out[0]).toMatchObject({ source: "amazon", externalId: "a-B0HF1LQFDD", price: 124.88, rating: 4.8, reviewsCount: 14000,
+      soldLabel: "Mais de 5 mil compras no mês passado", permalink: "https://www.amazon.com.br/dp/B0HF1LQFDD" });
+    expect(out[0]!.title).toContain("Stanley Garrafa Térmica");
+    expect(out[0]!.imageUrl).toMatch(/^https:\/\/m\.media-amazon\.com\/images\/I\/51pimE-7XRL/);
   });
 });

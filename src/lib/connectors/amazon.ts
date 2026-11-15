@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { serverEnv } from "@/lib/env";
 import { signV4 } from "./sigv4";
+import { searchAmazonPublic } from "./amazon-bestsellers";
+
+/** Sem as credenciais da API, a busca usa a página pública da Amazon. */
+const PUBLIC_SEARCH = true;
 import { ConnectorError, type Connector, type ConnectorContext, type ProductDetail, type ProductResult, type SearchParams } from "./types";
 
 /**
@@ -179,10 +183,22 @@ export const amazon: Connector = {
   state() {
     return configured()
       ? { state: "connected", detail: "Product Advertising API configurada." }
+      : PUBLIC_SEARCH ? { state: "connected", detail: "Busca pública da Amazon (permitida no robots.txt)." }
       : { state: "not_configured", detail: "Defina AMAZON_PAAPI_ACCESS_KEY, AMAZON_PAAPI_SECRET_KEY e AMAZON_PARTNER_TAG (conta de Associado Amazon com acesso à API)." };
   },
 
   async search(params: SearchParams, ctx: ConnectorContext): Promise<ProductResult[]> {
+    if (!configured()) {
+      const started = Date.now();
+      try {
+        const items = await searchAmazonPublic(params.query);
+        ctx.logs.push({ source: "amazon", endpoint: "GET /s (página pública)", status: 200, ok: true, ms: Date.now() - started, error: null });
+        return items.slice(0, params.limit);
+      } catch (e) {
+        ctx.logs.push({ source: "amazon", endpoint: "GET /s (página pública)", status: null, ok: false, ms: Date.now() - started, error: "unavailable" });
+        throw new ConnectorError("amazon", "unavailable", e instanceof Error ? e.message : "A Amazon não respondeu.");
+      }
+    }
     const now = new Date().toISOString();
     const pages = Math.min(2, Math.max(1, Math.ceil(params.limit / 10)));
     const out: ProductResult[] = [];
