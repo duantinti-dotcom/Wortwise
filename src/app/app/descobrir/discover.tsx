@@ -242,7 +242,7 @@ function SourceList({ sources, compact }: { sources: SourceReport[]; compact?: b
   const label: Record<string, string> = { ok: "respondeu", empty: "sem resultados", not_configured: "não configurado", pending_approval: "em credenciamento", error: "indisponível", skipped: "não consultado" };
   return (
     <ul className={cn("flex flex-wrap gap-2", !compact && "pl-7")}>
-      {sources.map((s) => (
+      {sources.filter((s) => s.status === "ok" || s.status === "empty" || s.status === "error").map((s) => (
         <li key={s.source} title={s.message ?? undefined} className="badge">
           <span className={cn("size-1.5 rounded-full", s.status === "ok" ? "bg-pos" : s.status === "error" ? "bg-neg" : "bg-faint")} />
           {s.name} · {s.status === "ok" ? `${s.count}` : label[s.status] ?? s.status}
