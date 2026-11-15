@@ -6,20 +6,23 @@ Eu já deixei pronto:
 - seu plano Ilimitado;
 - painel administrativo só seu;
 - banco de dados com limpeza automática;
-- HeroPay com links do Pro e do Business e avisos de pagamento cadastrados.
+- HeroPay com links do Pro e do Business e avisos de pagamento protegidos por senha;
+- vitrine para você montar o top 10 real (Administração → Vitrine).
 
 O que sobrou precisa do **seu login** ou do **seu cartão**. Nunca cole senhas ou chaves no chat.
 
 ---
 
-## 1. Liberar o pagamento dos clientes (5 min) · URGENTE
-Sem isso, quem pagar não recebe o plano.
-1. No painel da **HeroPay**, procure **Webhooks** (ou Integrações) e copie o **segredo / chave de assinatura**.
-2. Abra **dash.cloudflare.com** → **Workers & Pages** → **worthwise** → **Settings** → **Variables and Secrets** → **+ Add**.
-   - **Type:** Secret
-   - **Name:** `HEROPAY_WEBHOOK_SECRET`
-   - **Value:** cole o segredo
-3. Clique em **Deploy**.
+## 1. Pagamentos (já resolvido)
+- Os avisos da HeroPay agora chegam com uma senha secreta. Não precisa procurar segredo no painel: a HeroPay não usa segredo de assinatura.
+- **Faça uma compra de teste** com outra conta (não a sua, que já é Ilimitada):
+  1. assine o Pro com Pix ou cartão;
+  2. confira se o plano mudou para Pro;
+  3. peça o estorno na HeroPay.
+
+## 1b. E-mails de cadastro em volume (2 min)
+O envio padrão do Supabase manda poucos e-mails por hora. Já criei o envio profissional (Resend), falta só autorizar:
+- Responda **"pode adicionar os registros de e-mail"**. Eu coloco 5 registros no domínio worthwise.site na Cloudflare e ligo o envio no Supabase.
 
 ## 2. Mercado Livre com produtos reais, foto e preço (10 min)
 Sem isso, a aba Mercado Livre mostra "chegando em breve".
