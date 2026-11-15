@@ -13,6 +13,6 @@ export function GET() {
     cronSecret: Boolean(e.cronSecret),
     heropay: { token: heropayConfigured(), webhookSecret: Boolean(e.heropayWebhookSecret), sandbox: e.heropayUrl.includes("beta") },
     sources: sourcesOverview().map((s) => ({ id: s.id, state: s.state })),
-    ai: { provider: e.aiProvider, model: e.aiModel },
+    ai: { providers: [e.geminiKey && "gemini", e.groqKey && "groq", e.openrouterKey && "openrouter", "cloudflare"].filter(Boolean) },
   });
 }

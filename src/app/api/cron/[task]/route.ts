@@ -5,6 +5,7 @@ import { publicEnv, serverEnv } from "@/lib/env";
 import { createSubscriptionLink, getPaymentLink, HANDLED_TRIGGERS, registerWebhook } from "@/lib/billing/heropay";
 import { runMaintenance } from "@/lib/maintenance";
 import { warmAllIdeas } from "@/lib/ai/ideas";
+import { aiProviders } from "@/lib/ai/provider";
 import { flushLogs, toMarketItem } from "@/lib/search/service";
 import { serverRpc, serverRpcSafe, supabaseAnon } from "@/lib/supabase/server";
 
@@ -24,6 +25,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   // "purge" (nome antigo do agendamento) e "maintenance" executam a mesma rotina.
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
+  }
+  if (task === "ai-check") {
+    const results = [];
+    for (const p of aiProviders()) {
+      const t = Date.now();
+      try {
+        const r = await p.provider.chat([{ role: "user", content: "Responda apenas: ok" }], [], 400, 30000);
+        results.push({ id: p.id, model: p.model, ok: true, ms: Date.now() - t, reply: r.content.slice(0, 40) });
+      } catch (e) { results.push({ id: p.id, model: p.model, ok: false, ms: Date.now() - t, error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }); }
+    }
+    return NextResponse.json({ task, results });
   }
   if (task === "heropay-check") {
     const ids = (new URL(req.url).searchParams.get("ids") ?? "").split(",").map(Number).filter((n) => Number.isFinite(n) && n > 0).slice(0, 5);

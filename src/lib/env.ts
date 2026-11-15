@@ -30,6 +30,12 @@ export function serverEnv() {
     aiFallbackModel: e.AI_FALLBACK_MODEL ?? "@cf/meta/llama-4-scout-17b-16e-instruct",
     aiBaseUrl: (e.AI_BASE_URL ?? "").replace(/\/$/, ""),
     aiApiKey: e.AI_API_KEY ?? "",
+    geminiKey: e.GEMINI_API_KEY ?? "",
+    geminiModel: e.GEMINI_MODEL ?? "gemini-flash-latest",
+    groqKey: e.GROQ_API_KEY ?? "",
+    groqModel: e.GROQ_MODEL ?? "openai/gpt-oss-120b",
+    openrouterKey: e.OPENROUTER_API_KEY ?? "",
+    openrouterModel: e.OPENROUTER_MODEL ?? "openai/gpt-oss-120b:free",
   };
 }
 

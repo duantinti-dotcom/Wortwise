@@ -110,7 +110,7 @@ function openAiCompatible(baseUrl: string, apiKey: string, model: string): AiPro
       } catch {
         throw new AiUnavailable("network");
       }
-      if (!res.ok) throw new AiUnavailable(`status ${res.status}`);
+      if (!res.ok) throw new AiUnavailable(`status ${res.status}: ${(await res.text().catch(() => "")).replace(/\s+/g, " ").slice(0, 160)}`);
       const data = (await res.json()) as {
         choices?: { message?: { content?: string | null; tool_calls?: { id: string; function: { name: string; arguments: string } }[] } }[];
         usage?: { prompt_tokens?: number; completion_tokens?: number };
@@ -125,24 +125,51 @@ function openAiCompatible(baseUrl: string, apiKey: string, model: string): AiPro
   };
 }
 
-/** Retorna o provedor configurado, ou null quando a IA não está disponível (a interface mostra o estado real). */
-export function getAiProvider(): AiProvider | null {
-  const e = serverEnv();
-  if (e.aiProvider === "openai-compatible") {
-    return e.aiBaseUrl ? openAiCompatible(e.aiBaseUrl, e.aiApiKey, e.aiModel) : null;
-  }
-  const main = workersAi(e.aiModel);
-  if (!main) return null;
-  const backup = e.aiFallbackModel && e.aiFallbackModel !== e.aiModel ? workersAi(e.aiFallbackModel) : null;
-  if (!backup) return main;
-  // Se o modelo principal falhar (fila cheia, instabilidade), tenta uma vez o modelo reserva.
+/** Encadeia provedores: se um falhar (limite grátis, fora do ar, demora), tenta o próximo. */
+function chain(list: AiProvider[]): AiProvider {
   return {
-    id: main.id, model: main.model,
+    id: list.map((p) => p.id).join(">"), model: list[0]!.model,
     async chat(messages, tools, maxTokens, timeoutMs) {
-      try { return await main.chat(messages, tools, maxTokens, timeoutMs); } catch (err) {
-        console.warn("[ai] modelo principal falhou, usando reserva:", err instanceof Error ? err.message : err);
-        return backup.chat(messages, tools, maxTokens, timeoutMs);
+      let last: unknown;
+      for (const p of list) {
+        try { return await p.chat(messages, tools, maxTokens, Math.min(timeoutMs ?? TIMEOUT_MS, 50000)); } catch (err) {
+          last = err;
+          console.warn(`[ai] ${p.id}/${p.model} falhou, tentando o próximo:`, err instanceof Error ? err.message : err);
+        }
       }
+      const m = last instanceof Error ? last.message : String(last);
+      throw new AiUnavailable(/quota|429|allocation|limit/i.test(m) ? "quota" : m || "unavailable");
     },
   };
+}
+
+/** Fila de IAs: Gemini → Groq → OpenRouter → Cloudflare (as que tiverem chave configurada). */
+export function getAiProvider(): AiProvider | null {
+  const e = serverEnv();
+  const list: AiProvider[] = [];
+  const named = (id: string, p: AiProvider): AiProvider => ({ ...p, id });
+  if (e.geminiKey) list.push(named("gemini", openAiCompatible("https://generativelanguage.googleapis.com/v1beta/openai", e.geminiKey, e.geminiModel)));
+  if (e.groqKey) list.push(named("groq", openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, e.groqModel)));
+  if (e.openrouterKey) list.push(named("openrouter", openAiCompatible("https://openrouter.ai/api/v1", e.openrouterKey, e.openrouterModel)));
+  if (e.aiProvider === "openai-compatible" && e.aiBaseUrl) list.push(openAiCompatible(e.aiBaseUrl, e.aiApiKey, e.aiModel));
+  else {
+    const main = workersAi(e.aiModel);
+    if (main) list.push(main);
+    const backup = e.aiFallbackModel && e.aiFallbackModel !== e.aiModel ? workersAi(e.aiFallbackModel) : null;
+    if (backup) list.push(backup);
+  }
+  if (!list.length) return null;
+  return list.length === 1 ? list[0]! : chain(list);
+}
+
+/** Lista os provedores configurados (para a página de saúde e testes). */
+export function aiProviders(): { id: string; model: string; provider: AiProvider }[] {
+  const e = serverEnv();
+  const out: { id: string; model: string; provider: AiProvider }[] = [];
+  if (e.geminiKey) out.push({ id: "gemini", model: e.geminiModel, provider: openAiCompatible("https://generativelanguage.googleapis.com/v1beta/openai", e.geminiKey, e.geminiModel) });
+  if (e.groqKey) out.push({ id: "groq", model: e.groqModel, provider: openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, e.groqModel) });
+  if (e.openrouterKey) out.push({ id: "openrouter", model: e.openrouterModel, provider: openAiCompatible("https://openrouter.ai/api/v1", e.openrouterKey, e.openrouterModel) });
+  const w = workersAi(e.aiModel);
+  if (w) out.push({ id: "cloudflare", model: e.aiModel, provider: w });
+  return out;
 }
