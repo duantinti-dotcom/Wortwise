@@ -63,7 +63,7 @@ export default async function Dashboard() {
           <label htmlFor="dash-q" className="sr-only">Pesquisar produto</label>
           <div className="relative min-w-0 flex-1">
             <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
-            <input id="dash-q" name="q" required minLength={2} maxLength={120} placeholder="Ex.: fone bluetooth" className="input !h-12 !pl-11 !text-[16px]" />
+            <input id="dash-q" name="q" required minLength={2} maxLength={120} placeholder="Ex.: fone bluetooth" className="input !h-12 !rounded-full !pl-11 !text-[16px]" />
           </div>
           <button className="btn btn-primary btn-lg shrink-0">Pesquisar</button>
         </form>
@@ -82,7 +82,7 @@ export default async function Dashboard() {
             ["/app/comparar", Store, "Comparar fornecedores", "Descubra quem sai mais barato somando frete e impostos."],
           ] as const).map(([href, Icon, title, text]) => (
             <Link key={href} href={href} className="card card-hover group flex items-start gap-4 p-5 md:flex-col md:gap-0 md:p-6">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-tint/[0.06] text-brand-hi"><Icon size={19} /></span>
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-tint/[0.08] text-brand-hi"><Icon size={19} /></span>
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="text-[16.5px] font-semibold tracking-tight md:mt-5 md:text-[17px]">{title}</span>
                 <span className="mt-1.5 text-[14.5px] leading-relaxed text-muted md:mt-2">{text}</span>

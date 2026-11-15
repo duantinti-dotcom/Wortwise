@@ -94,13 +94,13 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
       <PageHeader title="Pesquisar produtos" description="Digite o nome de um produto e veja preço, avaliações e quem vende — com foto e link para o anúncio." help={{ id: "pesquisar", steps: ["Digite o produto, por exemplo “fone bluetooth”, e toque em Pesquisar", "Use os filtros para ficar só com os melhores (preço, nota, frete grátis)", "Toque em Analisar para saber se vale a pena e quanto você lucra"] }} />
 
       <div role="tablist" aria-label="Lojas" className="-mx-5 mb-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-        <div className="flex w-max gap-2 border-b border-tint/[0.08] lg:w-full">
+        <div className="flex w-max gap-2 p-1">
           {[{ id: "", name: "Todas as lojas", state: "connected" }, ...sources].map((src) => {
             const on = src.id ? selected.length === 1 && selected[0] === src.id : selected.length !== 1;
             return (
               <button key={src.id || "all"} type="button" role="tab" aria-selected={on} title={"detail" in src ? (src as SourceInfo).detail : undefined}
                 onClick={() => { setSelected(src.id ? [src.id] : []); setError(null); }}
-                className={cn("-mb-px flex h-12 shrink-0 items-center gap-2.5 border-b-2 px-3 text-[15px] font-medium transition-colors", on ? "border-[#3B82F6] text-fg" : "border-transparent text-muted hover:text-fg")}>
+                className={cn("chip !h-11 shrink-0 !gap-2.5 !px-4 !text-[15px] font-medium", on ? "!text-fg ring-2 ring-[#3B82F6]/70" : "!text-muted")}>
                 {src.id ? <SourceMark source={src.id} size={20} /> : null}{src.name}
                 {src.state !== "connected" ? <span className="rounded-full bg-tint/[0.07] px-2 py-0.5 text-[11.5px] font-normal text-faint">em breve</span> : null}
               </button>
@@ -113,7 +113,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
         <div className="relative min-w-0 flex-1">
           <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
           <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} aria-label="Termo de pesquisa" placeholder="Ex.: fone bluetooth" enterKeyHint="search"
-            className="input !h-12 !pl-11 !text-[16px]" />
+            className="input !h-12 !rounded-full !pl-11 !text-[16px]" />
         </div>
         <button type="submit" disabled={loading} className="btn btn-primary btn-lg shrink-0">{loading ? "Pesquisando…" : "Pesquisar"}</button>
       </form>

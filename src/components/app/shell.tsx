@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Dialog as D } from "radix-ui";
 import { useEffect, useState, type ReactNode } from "react";
+import { Ambient } from "@/components/ambient";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
@@ -65,10 +66,10 @@ function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNa
               return (
                 <li key={n.href}>
                   <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined} title={n.hint}
-                    className={cn("group relative isolate flex h-10 items-center gap-3 rounded-[9px] px-3 text-[14px] transition-colors duration-200",
+                    className={cn("group relative isolate flex h-10 items-center gap-3 rounded-full px-3.5 text-[14px] transition-colors duration-200",
                       on ? "font-semibold text-fg" : "text-muted hover:bg-tint/[0.05] hover:text-fg")}>
                     {on ? <motion.span layoutId={`nav-pill-${layoutKey}`} aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                      className="absolute inset-0 -z-10 rounded-[9px] bg-tint/[0.07]" /> : null}
+                      className="absolute inset-0 -z-10 rounded-full bg-tint/[0.09] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
                     {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#FFFFFF]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
@@ -90,7 +91,7 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
   const { openUpgrade } = useUpgrade();
   const pct = search && search.limit > 0 ? Math.min(100, (search.used / search.limit) * 100) : 0;
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl border p-4", "border-tint/[0.08] bg-tint/[0.03]")}>
+    <div className={cn("relative overflow-hidden rounded-[20px] border p-4", "border-tint/[0.08] bg-tint/[0.04]")}>
       <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold">Plano {planName}</span>
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>
@@ -138,16 +139,17 @@ export function AppShell(props: ShellProps) {
   return (
     <ToastProvider>
       <UpgradeProvider plans={props.plans} currentPlan={props.plan}>
-        <div className="min-h-dvh lg:pl-[260px]">
+        <div className="min-h-dvh lg:pl-[284px]">
+          <Ambient variant="calm" />
           {/* Sidebar — desktop */}
-          <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-tint/[0.08] bg-[var(--bg-raised)] lg:flex">
+          <aside className="glass fixed bottom-3 left-3 top-3 z-30 hidden w-[260px] flex-col overflow-hidden rounded-[28px] lg:flex">
             <Link href="/app" className="relative flex h-16 shrink-0 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
             <nav aria-label="Aplicação" className="relative min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
             <div className="shrink-0 p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
           </aside>
 
           {/* Barra superior */}
-          <header className="glass sticky top-0 z-20 flex h-16 items-center gap-3 !border-x-0 !border-t-0 px-4 lg:px-10">
+          <header className="sticky top-0 z-20 flex h-16 items-center gap-3 px-4 lg:h-[76px] lg:px-10">
             <D.Root open={drawer} onOpenChange={setDrawer}>
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>
@@ -165,7 +167,7 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="input !h-10 pl-10 pr-12 text-sm" />
+                className="glass h-11 w-full rounded-full pl-10 pr-12 text-sm outline-none placeholder:text-faint focus:shadow-[0_0_0_3px_rgba(59,130,246,0.25)]" />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
@@ -182,13 +184,13 @@ export function AppShell(props: ShellProps) {
           </main>
 
           {/* Navegação inferior — mobile */}
-          <nav aria-label="Atalhos" className="glass fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 !border-x-0 !border-b-0 px-2 pb-[max(6px,env(safe-area-inset-bottom))] pt-1.5 lg:hidden">
+          <nav aria-label="Atalhos" className="glass fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-full p-1.5 lg:hidden">
             {TABS.map((t) => {
               const on = t.href === "/app" ? path === "/app" : path.startsWith(t.href);
               return (
                 <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
                   className={cn("relative isolate flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:scale-95", on ? "font-semibold text-fg" : "text-muted")}>
-                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-x-3 inset-y-1 -z-10 rounded-xl bg-tint/[0.08]" /> : null}
+                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-full bg-tint/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]" /> : null}
                   <t.icon size={19} className={on ? "text-brand" : undefined} />{({ "/app": "Início", "/app/em-alta": "Em alta", "/app/descobrir": "Pesquisar", "/app/calculadora": "Lucro" } as Record<string, string>)[t.href] ?? t.label}
                 </Link>
               );
