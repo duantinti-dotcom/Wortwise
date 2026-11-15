@@ -2,6 +2,7 @@
 import { ExternalLink, Sparkles, Truck } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
+import { SourceMark } from "@/components/source-mark";
 import { cn, formatMoney, relativeTime } from "@/lib/utils";
 
 interface LiveProduct { id: string; rank: number; title: string; imageUrl: string | null; price: number | null; originalPrice: number | null; currency: string | null; freeShipping: boolean | null; permalink: string | null }
@@ -9,17 +10,9 @@ interface LiveData { configured: boolean; category: string; updatedAt: string | 
 
 
 /** Itens ilustrativos (sem foto real) usados só quando a integração ainda não está ativa. */
-const DEMO: { title: string; price: string; img: string }[] = [
-  { title: "Fone Bluetooth TWS com estojo", price: "R$ 58,90", img: "fone" },
-  { title: "Smartwatch esportivo à prova d'água", price: "R$ 129,00", img: "smartwatch" },
-  { title: "Luminária de mesa LED recarregável", price: "R$ 74,50", img: "luminaria" },
-  { title: "Kit elásticos de treino 5 níveis", price: "R$ 39,90", img: "elasticos" },
-  { title: "Garrafa térmica inox 1 litro", price: "R$ 49,90", img: "garrafa" },
-  { title: "Suporte de celular articulado", price: "R$ 29,90", img: "suporte" },
-  { title: "Controle sem fio para PC e celular", price: "R$ 89,90", img: "controle" },
-  { title: "Camiseta dry fit masculina", price: "R$ 34,90", img: "camiseta" },
-  { title: "Mochila para notebook com divisórias", price: "R$ 119,90", img: "mochila" },
-  { title: "Organizador de gavetas modular", price: "R$ 27,90", img: "organizador" },
+const STORES = [
+  { id: "mercadolivre", name: "Mercado Livre" }, { id: "shopee", name: "Shopee" },
+  { id: "amazon", name: "Amazon" }, { id: "tiktokshop", name: "TikTok Shop" },
 ];
 
 function RankBadge({ rank }: { rank: number }) {
@@ -54,10 +47,10 @@ export function LiveTrending() {
         {data === null ? <span className="badge">carregando…</span> : live ? (
           <span className="badge badge-brand !h-auto !whitespace-normal py-1 text-center"><span className="live-dot !size-1.5 shrink-0" />Ao vivo · Mais vendidos em {data!.category} · atualizado {relativeTime(data!.updatedAt)}</span>
         ) : (
-          <span className="badge !h-auto !whitespace-normal py-1 text-center"><span className="size-1.5 shrink-0 rounded-full bg-brand" />Produtos em alta · imagens ilustrativas e preços de referência</span>
+          <span className="badge !h-auto !whitespace-normal py-1 text-center">Mercado Livre · Shopee · Amazon · TikTok Shop</span>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+      <div className={cn("grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4", live && "lg:grid-cols-5")}>
         {data === null ? Array.from({ length: 10 }, (_, i) => (
           <div key={i} className={cn("card overflow-hidden !rounded-[14px]", i >= 4 && "max-md:hidden", i >= 8 && "max-lg:hidden")}><div className="skeleton m-2 aspect-square !rounded-[10px]" /><div className="space-y-2 p-4"><div className="skeleton h-4" /><div className="skeleton h-5 w-20" /></div></div>
         )) : live ? data!.products.map((p, i) => (
@@ -77,21 +70,16 @@ export function LiveTrending() {
               </div>
             </div>
           </motion.a>
-        )) : DEMO.map((d, i) => (
-          <motion.div key={i} {...item(i)} className={cn("card relative flex flex-col overflow-hidden !rounded-[14px]", i >= 4 && "max-md:hidden", i >= 8 && "max-lg:hidden")}>
-            <div className="relative m-2 flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-white">
-              <RankBadge rank={i + 1} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/demo/${d.img}.webp`} alt={d.title} loading="lazy" width={480} height={480} className="size-full object-cover transition-transform duration-700 hover:scale-[1.05]" />
-            </div>
-            <div className="px-3.5 pb-4 pt-1.5">
-              <h3 className="line-clamp-2 text-[13.5px] font-semibold leading-snug">{d.title}</h3>
-              <div className="tabular mt-2.5 text-[19px] font-semibold tracking-tight">{d.price}</div>
-            </div>
-          </motion.div>
+        )) : STORES.map((st, i) => (
+          <motion.a key={st.id} href="/cadastro" {...item(i)} className={cn("card card-hover group flex flex-col items-center gap-4 p-6 text-center", i >= 4 && "hidden")}>
+            <SourceMark source={st.id} size={56} />
+            <span className="text-[16px] font-semibold">{st.name}</span>
+            <span className="text-[13.5px] leading-relaxed text-muted">Mais vendidos por categoria, com link direto para as ofertas.</span>
+            <span className="mt-auto inline-flex items-center gap-1 text-[14px] font-medium text-brand-hi">Ver no app<ExternalLink size={13} /></span>
+          </motion.a>
         ))}
       </div>
-      <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-faint"><Sparkles size={12} className="text-brand" />{live ? "Posição informada pelo Mercado Livre. O Worthwise não inventa vendas: mostra a fonte e a data de cada dado." : "Imagens ilustrativas e preços de referência. No app, veja o ranking completo de cada loja e categoria."}</p>
+      <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-faint"><Sparkles size={12} className="text-brand" />{live ? "Posição informada pelo Mercado Livre. O Worthwise não inventa vendas: mostra a fonte e a data de cada dado." : "Crie sua conta grátis e veja os produtos de cada loja por categoria."}</p>
     </div>
   );
 }

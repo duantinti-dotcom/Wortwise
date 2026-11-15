@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SourceMark, sourceName } from "@/components/source-mark";
-import { cn, formatMoney } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export interface EstimateItem { emoji: string; nome: string; descricao: string; por_que_vende: string; publico: string; preco_min: number; preco_max: number; dica: string; busca: string; imagem?: string; link: string }
 const CATS = [
@@ -16,16 +16,10 @@ const CATS = [
 const PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classico", shopee: "shopee", amazon: "amazon", tiktokshop: "tiktokshop" };
 
 function Photo({ item, big }: { item: EstimateItem; big?: boolean }) {
-  const [state, setState] = useState<"loading" | "ok" | "failed">("loading");
-  const desc = item.imagem || item.busca;
-  if (state === "failed" || !desc) return <span className={cn("leading-none", big ? "text-[96px]" : "text-[56px]")} aria-hidden>{item.emoji}</span>;
   return (
-    <>
-      {state === "loading" ? <span className="skeleton absolute inset-0 !rounded-none" aria-hidden /> : null}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/ideas/image?d=${encodeURIComponent(desc)}`} alt={item.nome} loading="lazy" onLoad={() => setState("ok")} onError={() => setState("failed")}
-        className={cn("relative size-full object-cover transition-[transform,opacity] duration-700 group-hover:scale-[1.04]", state === "ok" ? "opacity-100" : "opacity-0")} />
-    </>
+    <span className="flex size-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.16),transparent_60%),linear-gradient(180deg,rgb(var(--tint)/0.06),rgb(var(--tint)/0.02))]" aria-hidden>
+      <span className={cn("leading-none drop-shadow-sm", big ? "text-[88px]" : "text-[52px]")}>{item.emoji}</span>
+    </span>
   );
 }
 
@@ -33,14 +27,12 @@ function Details({ item, store, rank, open, onOpenChange }: { item: EstimateItem
   const name = sourceName(store);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent wide title={item.nome} description={rank ? `${rank}º em ${name}` : name}>
+      <DialogContent wide title={item.nome} description={name}>
         <div className="grid gap-6 sm:grid-cols-[240px_1fr]">
-          <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[14px] bg-white"><Photo item={item} big /></div>
+          <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[14px]"><Photo item={item} big /></div>
           <div>
-            <div className="text-[12.5px] text-faint">Melhor preço estimado</div>
-            <div className="tabular text-[30px] font-semibold leading-tight tracking-tight">{formatMoney(item.preco_min)}</div>
-            <div className="mt-0.5 text-[14px] text-muted">Faixa comum: {formatMoney(item.preco_min)} a {formatMoney(item.preco_max)}</div>
-            <p className="mt-4 text-[15px] leading-relaxed text-soft">{item.descricao}</p>
+            <p className="text-[15.5px] leading-relaxed text-soft">{item.descricao}</p>
+            <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-hi hover:underline">Ver fotos e preços reais em {sourceName(store)}<ArrowUpRight size={14} /></a>
           </div>
         </div>
         <ul className="mt-6 space-y-3 text-[14.5px] leading-relaxed">
@@ -49,11 +41,10 @@ function Details({ item, store, rank, open, onOpenChange }: { item: EstimateItem
           {item.dica ? <li className="flex gap-3"><Lightbulb size={17} className="mt-0.5 shrink-0 text-brand-hi" /><span><b className="font-semibold">Dica para vender:</b> <span className="text-muted">{item.dica}</span></span></li> : null}
         </ul>
         <div className="mt-7 grid gap-2.5 sm:grid-cols-3">
-          <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary">Ver em {name}<ArrowUpRight size={16} /></a>
+          <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary">Ver ofertas em {name}<ArrowUpRight size={16} /></a>
           <Link href={`/app/calculadora?canal=${PRESET[store] ?? ""}`} className="btn btn-secondary"><Calculator size={16} />Calcular lucro</Link>
           <Link href={`/app/assistente?q=${encodeURIComponent(`Vale a pena revender "${item.nome}" na ${name}? Como eu começo?`)}`} className="btn btn-secondary"><MessagesSquare size={16} />Perguntar à Wise</Link>
         </div>
-        <p className="mt-5 text-[12px] leading-relaxed text-faint">Preço estimado e imagem ilustrativa. As ofertas do momento aparecem em “Ver em {name}”.</p>
       </DialogContent>
     </Dialog>
   );
@@ -66,20 +57,18 @@ function Card({ item, store, rank, index }: { item: EstimateItem; store: string;
     <motion.li initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 140, damping: 18, delay: Math.min(index, 10) * 0.04 }} className="card card-hover group flex flex-col overflow-hidden">
       <button type="button" onClick={() => setOpen(true)} className="flex flex-1 flex-col text-left outline-none" aria-label={`Ver detalhes de ${item.nome}`}>
-        <span className="relative m-2 flex aspect-square items-center justify-center overflow-hidden rounded-[12px] bg-white">
+        <span className="relative m-2 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[12px]">
           <Photo item={item} />
-          {rank ? <span className="tabular absolute left-2.5 top-2.5 flex h-7 min-w-7 items-center justify-center rounded-[8px] bg-[#18181B]/85 px-2 text-[12.5px] font-semibold text-white backdrop-blur">{rank}º</span> : null}
         </span>
         <span className="flex flex-1 flex-col px-4 pt-2">
           <span className="flex items-center gap-2 text-[12px] text-muted"><SourceMark source={store} size={16} />{name}</span>
           <span className="mt-2.5 line-clamp-2 text-[15px] font-semibold leading-snug group-hover:text-brand-hi">{item.nome}</span>
-          <span className="mt-2 text-[11.5px] text-faint">preço estimado</span>
-          <span className="tabular text-[19px] font-semibold leading-tight tracking-tight">{formatMoney(item.preco_min)}<span className="text-[14px] font-normal text-muted"> a {formatMoney(item.preco_max)}</span></span>
-          <span className="mt-2 line-clamp-2 text-[13.5px] leading-relaxed text-muted">{item.descricao}</span>
+          <span className="mt-2 line-clamp-3 text-[13.5px] leading-relaxed text-muted">{item.descricao}</span>
+          <span className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-soft"><b className="font-semibold">Por que vende:</b> {item.por_que_vende}</span>
         </span>
       </button>
       <div className="grid grid-cols-[1fr_auto] gap-2 px-4 pb-4 pt-4">
-        <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary btn-sm">Ver em {name}<ArrowUpRight size={15} /></a>
+        <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary btn-sm">Ver ofertas<ArrowUpRight size={15} /></a>
         <Link href={`/app/calculadora?canal=${PRESET[store] ?? ""}`} className="btn btn-secondary btn-sm !w-10 !px-0" aria-label="Calcular lucro" title="Calcular lucro"><Calculator size={16} /></Link>
       </div>
       <Details item={item} store={store} rank={rank} open={open} onOpenChange={setOpen} />
@@ -132,7 +121,8 @@ export function AiIdeas({ store }: { store: string }) {
   const r = useEstimates(`/api/ideas?loja=${store}&categoria=${cat}`);
   const name = sourceName(store);
   return (
-    <section aria-label={`Mais vendidos em ${name}`}>
+    <section aria-label={`Produtos que vendem bem em ${name}`}>
+      <h2 className="mb-5 text-[19px] font-semibold tracking-tight">Produtos que costumam vender bem em {name}</h2>
       <div className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
         <div className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
           {CATS.map((c) => (
@@ -142,9 +132,9 @@ export function AiIdeas({ store }: { store: string }) {
         </div>
       </div>
       <div className="mt-7" aria-live="polite">
-        {r.loading ? <Loading text={`Carregando os mais vendidos de ${name}…`} /> : r.error ? <ErrorBox text={r.error} retry={r.retry} /> : <Grid items={r.items ?? []} store={store} ranked k={r.k} />}
+        {r.loading ? <Loading text={`Carregando produtos de ${name}…`} /> : r.error ? <ErrorBox text={r.error} retry={r.retry} /> : <Grid items={r.items ?? []} store={store} k={r.k} />}
       </div>
-      <p className="mt-6 text-[12px] text-faint">Preços estimados e imagens ilustrativas. Toque em um produto para ver os detalhes.</p>
+      <p className="mt-6 text-[12.5px] text-faint">Toque em “Ver ofertas” para ver fotos, preços e vendedores reais na loja.</p>
     </section>
   );
 }
@@ -158,7 +148,7 @@ export function AiSearchResults({ query, store }: { query: string; store: string
     <section aria-label="Resultados" aria-live="polite">
       <div className="mb-5 flex items-center gap-2 text-[14px] text-muted"><Search size={15} />Resultados para <b className="font-semibold text-fg">“{query.trim()}”</b>{store ? <> em {sourceName(store)}</> : null}</div>
       {r.loading ? <Loading text="Buscando os produtos…" /> : r.error ? <ErrorBox text={r.error} retry={r.retry} /> : <Grid items={r.items ?? []} store={shown} k={r.k} />}
-      <p className="mt-6 text-[12px] text-faint">Preços estimados e imagens ilustrativas. Toque em um produto para ver os detalhes.</p>
+      <p className="mt-6 text-[12.5px] text-faint">Toque em “Ver ofertas” para ver fotos, preços e vendedores reais na loja.</p>
     </section>
   );
 }

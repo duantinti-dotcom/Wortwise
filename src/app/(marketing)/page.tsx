@@ -68,7 +68,7 @@ export default function HomePage() {
       {/* Mais vendidos */}
       <section id="em-alta" aria-label="Produtos em alta" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page">
-          <SectionHead label="Mais vendidos" title="O que está vendendo agora" text="O ranking oficial de cada categoria, com foto, preço e link direto para o anúncio." />
+          <SectionHead label="Mais vendidos" title="O que está vendendo agora" text="Os produtos que mais saem em cada loja, por categoria, com link direto para as ofertas." />
           <LiveTrending />
           <div className="mt-10 flex justify-center"><Link href="/cadastro" className="btn btn-secondary">Ver o ranking completo <ArrowRight className="btn-arrow" size={16} /></Link></div>
         </div>

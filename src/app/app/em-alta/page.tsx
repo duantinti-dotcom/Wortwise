@@ -41,7 +41,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
 
   return (
     <>
-      <PageHeader title="Mais vendidos" description="O que mais está vendendo agora em cada loja, com foto, preço e link do anúncio."
+      <PageHeader title="Mais vendidos" description="Os produtos que mais saem em cada loja, por categoria."
         action={data.updatedAt ? <span className="badge"><TrendingUp size={13} />atualizado {relativeTime(data.updatedAt)}</span> : undefined} />
 
       <StoreTabs stores={STORES} active={store} links={Object.fromEntries(STORES.map((s) => [s, qs(s)]))} />

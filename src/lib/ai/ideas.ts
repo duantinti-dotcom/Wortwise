@@ -21,8 +21,8 @@ export const ideaSchema = z.object({
   descricao: z.string().min(5).max(260),
   por_que_vende: z.string().min(5).max(220),
   publico: z.string().max(100).catch(""),
-  preco_min: z.coerce.number().min(1).max(20000),
-  preco_max: z.coerce.number().min(1).max(20000),
+  preco_min: z.coerce.number().min(0).max(20000).catch(0),
+  preco_max: z.coerce.number().min(0).max(20000).catch(0),
   dica: z.string().max(200).catch(""),
   busca: z.string().min(2).max(60),
   imagem: z.string().max(160).catch(""),
@@ -66,7 +66,7 @@ const TTL = 3 * 24 * 60 * 60 * 1000;
 export async function generateIdeas(store: string, categoryId: string): Promise<{ ideas: Idea[]; generatedAt: string } | null> {
   const cat = IDEA_CATEGORIES.find((c) => c.id === categoryId) ?? IDEA_CATEGORIES[0];
   const storeName = STORE_NAMES[store] ?? "marketplaces brasileiros";
-  const key = `v2:${store}:${cat.id}:${bucket()}`;
+  const key = `v3:${store}:${cat.id}:${bucket()}`;
   const hit = memory.get(key);
   if (hit && Date.now() - hit.at < TTL) return { ideas: hit.ideas, generatedAt: new Date(hit.at).toISOString() };
 
@@ -78,11 +78,10 @@ export async function generateIdeas(store: string, categoryId: string): Promise<
     { role: "user", content: `Liste 4 produtos ${angle} entre os que MAIS VENDEM hoje na ${storeName}, categoria "${cat.name}" (${month}), do mais vendido para o menos vendido.
 Use produtos genéricos (sem marcas famosas registradas), do tipo que aparece no ranking de mais vendidos.
 Devolva um array JSON com 4 objetos, cada um com exatamente estes campos:
-{"emoji": "um emoji", "nome": "nome do produto como aparece num anúncio (curto)", "descricao": "o que é, em 1 frase curta", "por_que_vende": "por que vende tanto, em 1 frase curta", "publico": "para quem", "preco_min": número em reais, "preco_max": número em reais, "dica": "1 dica prática curta para vender", "busca": "2 a 4 palavras para buscar na loja", "imagem": "descrição curta EM INGLÊS da aparência do produto para gerar uma foto"}
-preco_min e preco_max: faixa de preço de venda típica ao consumidor nessa loja.` },
+{"emoji": "um emoji", "nome": "nome do produto como aparece num anúncio (curto)", "descricao": "o que é, em 1 frase curta", "por_que_vende": "por que vende tanto, em 1 frase curta", "publico": "para quem", "dica": "1 dica prática curta para vender", "busca": "2 a 4 palavras para buscar na loja"}` },
   ], [], 1700, 80000);
   // Três partes em paralelo (faixas de preço diferentes): 12 produtos no tempo de 4.
-  const parts = await Promise.allSettled([ask("baratos (até uns R$ 50)"), ask("de preço médio (R$ 50 a R$ 150)"), ask("de ticket mais alto (acima de R$ 150)")]);
+  const parts = await Promise.allSettled([ask("de compra por impulso"), ask("do dia a dia"), ask("de maior valor")]);
   const seen = new Set<string>();
   if (parts.every((p) => p.status === "rejected")) {
     const msg = parts.map((p) => (p.status === "rejected" ? String((p.reason as Error)?.message ?? p.reason) : "")).join(" ");
@@ -100,7 +99,7 @@ preco_min e preco_max: faixa de preço de venda típica ao consumidor nessa loja
 const STORE_IDS = ["mercadolivre", "shopee", "amazon", "tiktokshop"] as const;
 type IdeasResult = { ideas: Idea[]; generatedAt: string };
 const edgeCache = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
-const cacheKey = (store: string, cat: string) => new Request(`https://cache.worthwise.site/ideas-v2/${store}/${cat}/${bucket()}`);
+const cacheKey = (store: string, cat: string) => new Request(`https://cache.worthwise.site/ideas-v3/${store}/${cat}/${bucket()}`);
 
 /** Lê do cache compartilhado do Cloudflare; se não houver, pede à IA e guarda por 24 h. */
 export async function getIdeasCached(store: string, cat: string): Promise<IdeasResult | null> {
@@ -131,11 +130,11 @@ export async function searchProducts(query: string, store: string | null): Promi
   const q = query.trim().replace(/\s+/g, " ").slice(0, 80);
   const where = store ? `na ${STORE_NAMES[store] ?? "loja"}` : "nos marketplaces brasileiros (Mercado Livre, Shopee, Amazon, TikTok Shop)";
   const target = store ?? "mercadolivre";
-  const key = `s1:${target}:${q.toLowerCase()}:${bucket()}`;
+  const key = `s2:${target}:${q.toLowerCase()}:${bucket()}`;
   const hit = memory.get(key);
   if (hit && Date.now() - hit.at < TTL) return { ideas: hit.ideas, generatedAt: new Date(hit.at).toISOString() };
   const edge = edgeCache();
-  const edgeKey = new Request(`https://cache.worthwise.site/search-v1/${target}/${encodeURIComponent(q.toLowerCase())}/${bucket()}`);
+  const edgeKey = new Request(`https://cache.worthwise.site/search-v2/${target}/${encodeURIComponent(q.toLowerCase())}/${bucket()}`);
   const cached = await edge?.match(edgeKey).catch(() => undefined);
   if (cached) return (await cached.json()) as IdeasResult;
 
@@ -146,8 +145,7 @@ export async function searchProducts(query: string, store: string | null): Promi
     { role: "user", content: `A pessoa pesquisou "${q}" ${where}. Liste 4 produtos ${angle} que correspondem a essa pesquisa, como aparecem nos anúncios.
 Use produtos genéricos (sem marcas famosas registradas).
 Devolva um array JSON com 4 objetos, cada um com exatamente estes campos:
-{"emoji": "um emoji", "nome": "nome do produto como num anúncio (curto)", "descricao": "o que é e principais características, em 1 a 2 frases", "por_que_vende": "por que é uma boa opção para revender, em 1 frase", "publico": "para quem", "preco_min": número em reais, "preco_max": número em reais, "dica": "1 dica prática para vender", "busca": "2 a 5 palavras para buscar na loja", "imagem": "descrição curta EM INGLÊS da aparência do produto para gerar uma foto"}
-preco_min = menor preço típico encontrado; preco_max = preço típico mais alto.` },
+{"emoji": "um emoji", "nome": "nome do produto como num anúncio (curto)", "descricao": "o que é e principais características, em 1 a 2 frases", "por_que_vende": "por que é uma boa opção para revender, em 1 frase", "publico": "para quem", "dica": "1 dica prática para vender", "busca": "2 a 5 palavras para buscar na loja"}` },
   ], [], 1700, 80000);
   const parts = await Promise.allSettled([ask("entre os mais vendidos e populares"), ask("com melhor custo-benefício")]);
   if (parts.every((p) => p.status === "rejected")) {
