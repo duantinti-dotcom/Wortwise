@@ -2,6 +2,8 @@
 import { CircleAlert, Clock, Lock, Search, SlidersHorizontal, X } from "lucide-react";
 import { SourceMark } from "@/components/source-mark";
 import { STORE_MESSAGE, StoreGuide } from "@/components/app/store-guide";
+import { StorePill } from "@/components/app/store-tabs";
+import { motion } from "motion/react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { activeCount, applyFilters, type SearchFilters, type SortKey } from "@/lib/search/filters";
 import { ActiveChips, RefinePanel, SORTS } from "./refine";
@@ -94,15 +96,15 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
       <PageHeader title="Pesquisar produtos" description="Digite o nome de um produto e veja preço, avaliações e quem vende — com foto e link para o anúncio." help={{ id: "pesquisar", steps: ["Digite o produto, por exemplo “fone bluetooth”, e toque em Pesquisar", "Use os filtros para ficar só com os melhores (preço, nota, frete grátis)", "Toque em Analisar para saber se vale a pena e quanto você lucra"] }} />
 
       <div role="tablist" aria-label="Lojas" className="-mx-5 mb-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-        <div className="flex w-max gap-2 p-1">
+        <div className="glass flex w-max gap-1 rounded-full p-1.5">
           {[{ id: "", name: "Todas as lojas", state: "connected" }, ...sources].map((src) => {
             const on = src.id ? selected.length === 1 && selected[0] === src.id : selected.length !== 1;
             return (
-              <button key={src.id || "all"} type="button" role="tab" aria-selected={on} title={"detail" in src ? (src as SourceInfo).detail : undefined}
+              <button key={src.id || "all"} type="button" role="tab" aria-selected={on}
                 onClick={() => { setSelected(src.id ? [src.id] : []); setError(null); }}
-                className={cn("chip !h-11 shrink-0 !gap-2.5 !px-4 !text-[15px] font-medium", on ? "!text-fg ring-2 ring-[#3B82F6]/70" : "!text-muted")}>
-                {src.id ? <SourceMark source={src.id} size={20} /> : null}{src.name}
-                {src.state !== "connected" ? <span className="rounded-full bg-tint/[0.07] px-2 py-0.5 text-[11.5px] font-normal text-faint">em breve</span> : null}
+                className={cn("relative isolate flex h-11 shrink-0 items-center gap-2.5 rounded-full px-4 text-[15px] font-medium transition-colors", on ? "text-fg" : "text-muted hover:text-fg")}>
+                {on ? <StorePill id="discover" /> : null}
+                {src.id ? <motion.span animate={on ? { scale: [1, 1.18, 1], rotate: [0, -8, 0] } : { scale: 1 }} transition={{ duration: 0.45 }} className="flex"><SourceMark source={src.id} size={22} /></motion.span> : null}{src.name}
               </button>
             );
           })}
@@ -201,7 +203,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
           </>
         ) : null}
 
-        {!loading && !result && blockedStore ? <StoreGuide store={blockedStore} message={STORE_MESSAGE[blockedStore] ?? ""} /> : null}
+        {!loading && !result && blockedStore ? <motion.div key={blockedStore} initial={{ opacity: 0, y: 14, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}><StoreGuide store={blockedStore} message={STORE_MESSAGE[blockedStore] ?? ""} /></motion.div> : null}
         {!loading && !result && !error && !blockedStore ? (
           <div className="space-y-10">
             <section>

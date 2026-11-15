@@ -1,28 +1,50 @@
+"use client";
+import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { SourceMark, sourceName } from "@/components/source-mark";
 import { cn } from "@/lib/utils";
 
-/** Abas de loja (Mercado Livre, Shopee, Amazon), cada uma com a sua marquinha. */
-export function StoreTabs({ stores, active, href, status }: {
-  stores: readonly string[]; active: string; href: (store: string) => string; status?: Record<string, boolean>;
-}) {
+/** Pílula de vidro que desliza até a loja escolhida. */
+export function StorePill({ id }: { id: string }) {
+  return (
+    <motion.span layoutId={`store-pill-${id}`} aria-hidden transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      className="absolute inset-0 -z-10 rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.06))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),inset_0_0_0_1px_rgba(255,255,255,0.18),0_6px_18px_-6px_rgba(59,130,246,0.55)] ring-1 ring-[#3B82F6]/60" />
+  );
+}
+
+/** Abas de loja (Mercado Livre, Shopee, Amazon, TikTok Shop) com logo e animação de troca. */
+export function StoreTabs({ stores, active, links }: { stores: readonly string[]; active: string; links: Record<string, string> }) {
   return (
     <nav aria-label="Lojas" className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-      <ul className="flex w-max gap-2 p-1">
+      <ul className="glass flex w-max gap-1 rounded-full p-1.5">
         {stores.map((s) => {
           const on = s === active;
           return (
             <li key={s}>
-              <Link href={href(s)} scroll={false} aria-current={on ? "page" : undefined}
-                className={cn("chip !h-11 !gap-2.5 !px-4 !text-[15px] font-medium", on ? "!text-fg ring-2 ring-[#3B82F6]/70" : "!text-muted")}>
-                <SourceMark source={s} size={20} />
+              <Link href={links[s] ?? "#"} scroll={false} aria-current={on ? "page" : undefined}
+                className={cn("relative isolate flex h-11 items-center gap-2.5 rounded-full px-4 text-[15px] font-medium transition-colors", on ? "text-fg" : "text-muted hover:text-fg")}>
+                {on ? <StorePill id="tabs" /> : null}
+                <motion.span animate={on ? { scale: [1, 1.18, 1], rotate: [0, -8, 0] } : { scale: 1, rotate: 0 }} transition={{ duration: 0.45 }} className="flex">
+                  <SourceMark source={s} size={22} />
+                </motion.span>
                 {sourceName(s)}
-                {status && status[s] === false ? <span className="rounded-full bg-tint/[0.07] px-2 py-0.5 text-[11.5px] font-normal text-faint">em breve</span> : null}
               </Link>
             </li>
           );
         })}
       </ul>
     </nav>
+  );
+}
+
+/** Conteúdo da loja escolhida entra com um leve deslize e desfoque. */
+export function StoreSwitch({ store, children }: { store: string; children: ReactNode }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div key={store} initial={reduce ? false : { opacity: 0, y: 14, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>
+      {children}
+    </motion.div>
   );
 }

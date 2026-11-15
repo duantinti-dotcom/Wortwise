@@ -52,7 +52,7 @@ describe("teste grátis único", () => {
     expect((await register(h, "ip-x", "dev-z")).status).toBe("known");
     expect((await usage(h)).trial_denied).toBe("same_network");
     const admin = await db.createUser("admin@test.dev");
-    await db.pool.query("insert into public.user_roles (user_id, role) values ($1, 'admin')", [admin]);
+    await db.pool.query("with r as (insert into public.user_roles (user_id, role) values ($1, 'admin') returning user_id) insert into app_private.admin_emails select lower(u.email) from auth.users u join r on r.user_id = u.id on conflict do nothing", [admin]);
     await db.as(admin, "select public.admin_set_free_trial($1, true)", [h]);
     expect((await usage(h)).trial_denied).toBeNull();
     await expect(db.as(h, "select public.admin_set_free_trial($1, true)", [h])).rejects.toThrow();

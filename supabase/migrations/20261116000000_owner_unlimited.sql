@@ -25,3 +25,18 @@ returns text language sql stable security definer set search_path = '' as $$
   end;
 $$;
 revoke all on function public.plan_of(uuid) from public, anon, authenticated;
+
+-- Painel administrativo: além do papel em user_roles, o e-mail (confirmado) precisa estar na lista do dono.
+create table if not exists app_private.admin_emails (email text primary key check (email = lower(email)));
+insert into app_private.admin_emails (email) values ('duantinti@gmail.com') on conflict do nothing;
+revoke all on app_private.admin_emails from public, anon, authenticated;
+
+create or replace function public.is_admin()
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.user_roles r
+      join auth.users u on u.id = r.user_id
+      join app_private.admin_emails a on a.email = lower(u.email)
+    where r.user_id = (select auth.uid()) and r.role = 'admin' and u.email_confirmed_at is not null
+  );
+$$;

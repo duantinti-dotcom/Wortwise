@@ -35,9 +35,12 @@ export async function requireUser(next = "/app"): Promise<SessionUser> {
   return user;
 }
 
+/** Só o dono acessa o painel administrativo (além do papel no banco, o e-mail precisa bater). */
+export const OWNER_EMAILS = (process.env.ADMIN_EMAILS ?? "duantinti@gmail.com").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+
 export const isAdmin = cache(async (): Promise<boolean> => {
   const user = await getUser();
-  if (!user) return false;
+  if (!user || !OWNER_EMAILS.includes(user.email.toLowerCase())) return false;
   const supabase = await supabaseServer();
   const { data } = await supabase.rpc("is_admin");
   return data === true;

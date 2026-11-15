@@ -1,5 +1,5 @@
 "use client";
-import { BarChart3, Bell, Flame, Bookmark, Calculator, FileText, Home, LogOut, Menu as MenuIcon, MessagesSquare, Scale, Search, Settings, ShieldCheck, Store, TrendingUp, X } from "lucide-react";
+import { BarChart3, Bell, Flame, Bookmark, Calculator, FileText, Home, LogOut, Menu as MenuIcon, MessagesSquare, Scale, Search, Settings, ShieldCheck, Sparkles, Store, TrendingUp, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -91,14 +91,14 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
   const { openUpgrade } = useUpgrade();
   const pct = search && search.limit > 0 ? Math.min(100, (search.used / search.limit) * 100) : 0;
   return (
-    <div className={cn("relative overflow-hidden rounded-[20px] border p-4", "border-tint/[0.08] bg-tint/[0.04]")}>
+    <div className={"glass relative overflow-hidden rounded-[22px] p-4"}>
       <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold">Plano {planName}</span>
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-tint/10"><div className={cn("h-full rounded-full transition-[width] duration-700", pct >= 100 ? "bg-neg" : "bg-brand")} style={{ width: `${Math.max(pct, 2)}%` }} /></div>
         <div className="mt-2 text-[11px] text-muted">pesquisas {search.period === "total" ? "gratuitas usadas" : "usadas neste mês"}</div>
       </>) : null}
-      {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-primary btn-sm mt-3.5 w-full">Fazer upgrade</button> : null}
+      {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-upgrade mt-4 w-full !h-10 !text-[14px] font-semibold"><Sparkles size={15} /><span>Fazer upgrade</span></button> : null}
     </div>
   );
 }

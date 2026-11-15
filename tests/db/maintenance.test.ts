@@ -84,7 +84,7 @@ describe("limpeza automática", () => {
     await expect(db.as(null, "select public.server_maintenance('segredo-errado')")).rejects.toThrow();
     await expect(db.as(u, "select * from app_private.maintenance_runs")).rejects.toThrow();
     const a = await db.createUser("adm-maint@test.dev");
-    await q("insert into public.user_roles (user_id, role) values ($1, 'admin')", [a]);
+    await q("with r as (insert into public.user_roles (user_id, role) values ($1, 'admin') returning user_id) insert into app_private.admin_emails select lower(u.email) from auth.users u join r on r.user_id = u.id on conflict do nothing", [a]);
     const [{ h }] = await db.as<{ h: { db_bytes: number; percent: number; tables: unknown[]; runs: unknown[] } }>(a, "select public.admin_db_health() h");
     expect(h.db_bytes).toBeGreaterThan(0);
     expect(h.tables.length).toBeGreaterThan(0);
@@ -151,7 +151,7 @@ describe("histórico de preços", () => {
 describe("alertas de cota", () => {
   it("avisa os administradores ao cruzar 70%, 85% e 95% — uma vez por nível", async () => {
     const a = await db.createUser("adm-alert@test.dev");
-    await q("insert into public.user_roles (user_id, role) values ($1, 'admin')", [a]);
+    await q("with r as (insert into public.user_roles (user_id, role) values ($1, 'admin') returning user_id) insert into app_private.admin_emails select lower(u.email) from auth.users u join r on r.user_id = u.id on conflict do nothing", [a]);
     const [{ size }] = await q<{ size: string }>("select pg_database_size(current_database()) size");
     const quotaFor = (pct: number) => Math.floor(Number(size) * 100 / pct);
     const setQuota = (b: number) => q("update public.app_settings set value = jsonb_set(value, '{quota_bytes}', to_jsonb($1::bigint)) where key = 'maintenance'", [b]);

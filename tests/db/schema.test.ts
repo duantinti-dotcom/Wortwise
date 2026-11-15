@@ -170,7 +170,7 @@ describe("administração e dados globais", () => {
     const u = await db.createUser("m@test.dev");
     await expect(db.as(u, "select public.admin_overview()")).rejects.toThrow(/forbidden/);
     await expect(db.as(u, "update public.plans set price_cents = 1 where id = 'pro' returning id")).resolves.toHaveLength(0);
-    await db.pool.query("insert into public.user_roles (user_id, role) values ($1, 'admin')", [u]);
+    await db.pool.query("with r as (insert into public.user_roles (user_id, role) values ($1, 'admin') returning user_id) insert into app_private.admin_emails select lower(u.email) from auth.users u join r on r.user_id = u.id on conflict do nothing", [u]);
     const [{ o }] = await db.as<{ o: { users: number } }>(u, "select public.admin_overview() o");
     expect(o.users).toBeGreaterThan(0);
     expect(await db.as(u, "update public.plans set price_cents = 5990 where id = 'pro' returning id")).toHaveLength(1);

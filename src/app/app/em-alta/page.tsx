@@ -1,8 +1,9 @@
 import { ArrowUpRight, Flame, Search, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AiIdeas } from "@/components/app/ai-ideas";
 import { STORE_MESSAGE, StoreGuide } from "@/components/app/store-guide";
-import { StoreTabs } from "@/components/app/store-tabs";
+import { StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
 import { sourceName } from "@/components/source-mark";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { getUsage, isAdmin } from "@/lib/auth";
@@ -43,8 +44,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
       <PageHeader title="Mais vendidos" description="O que mais está vendendo agora em cada loja, com foto, preço e link do anúncio."
         action={data.updatedAt ? <span className="badge"><TrendingUp size={13} />atualizado {relativeTime(data.updatedAt)}</span> : undefined} />
 
-      <StoreTabs stores={STORES} active={store} href={(s) => qs(s)} />
+      <StoreTabs stores={STORES} active={store} links={Object.fromEntries(STORES.map((s) => [s, qs(s)]))} />
 
+      <StoreSwitch store={store}>
       {data.state.ok && data.categories.length ? (
         <nav aria-label="Categorias" className="-mx-5 mt-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
           <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
@@ -70,7 +72,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
           ) : (
             <>
               {admin && store !== "amazon" ? <p className="mb-6 text-[14px] text-muted">Você é administrador: <Link href="/admin/integracoes" className="text-brand-hi hover:underline">cadastrar as chaves de {name}</Link>.</p> : null}
-              <StoreGuide store={store} message={STORE_MESSAGE[store] ?? ""} />
+              <div className="space-y-14">
+                <AiIdeas store={store} />
+                <StoreGuide store={store} message={STORE_MESSAGE[store] ?? ""} />
+              </div>
             </>
           )
         ) : (
@@ -97,6 +102,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
           </>
         )}
       </div>
+      </StoreSwitch>
     </>
   );
 }
