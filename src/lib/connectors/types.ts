@@ -105,7 +105,7 @@ export interface ConnectorContext {
   logs: ApiCallLog[];
 }
 
-export type ConnectorErrorCode = "not_configured" | "pending_approval" | "unauthorized" | "rate_limited" | "unavailable" | "timeout" | "not_found" | "bad_response" | "no_credits";
+export type ConnectorErrorCode = "not_configured" | "pending_approval" | "unauthorized" | "rate_limited" | "unavailable" | "timeout" | "not_found" | "bad_response" | "no_credits" | "daily_limit";
 
 export class ConnectorError extends Error {
   constructor(public source: SourceId, public code: ConnectorErrorCode, message: string, public httpStatus?: number) {
@@ -138,5 +138,6 @@ export const USER_MESSAGES: Record<ConnectorErrorCode, string> = {
   timeout: "A fonte demorou demais para responder.",
   not_found: "Produto não encontrado na fonte.",
   bad_response: "A fonte respondeu em formato inesperado.",
+  daily_limit: "Este conteúdo ainda não foi carregado. Ele chega na próxima atualização automática.",
   no_credits: "Os créditos da fonte de dados acabaram. Os dados voltam assim que os créditos forem renovados.",
 };

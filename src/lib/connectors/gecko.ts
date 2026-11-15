@@ -89,7 +89,7 @@ async function extract(source: SourceId, kind: Kind, body: Json, ctx: ConnectorC
   if (prev && (kind === "ranking" || Date.now() - Date.parse(prev.at) <= FRESH_MS[kind])) return prev;
   if (!(await claim(key))) {
     if (prev) return prev;
-    throw new ConnectorError(source, "rate_limited", "Limite diário de consultas à GeckoAPI atingido");
+    throw new ConnectorError(source, "daily_limit", "Limite diário de consultas à GeckoAPI atingido");
   }
   const data = await call(source, body, ctx);
   await dbPut(key, data, kind === "ranking" ? body : null);
@@ -110,6 +110,25 @@ async function offlineProduct(source: SourceId, target: string, pdpBody: Json, m
   const p = found ? toItem(found.item, found.at) : null;
   if (!p) throw new ConnectorError(source, "not_found", "Este produto ainda não está guardado no Worthwise. Abra direto na loja.");
   return detail(fix(p), {});
+}
+
+/**
+ * Pesquisa econômica: primeiro nos produtos já guardados (0 crédito). Só consulta a Gecko se achar
+ * menos de 8 e ainda houver consulta no dia. Nunca mostra erro de limite: devolve o que tiver.
+ */
+async function economicSearch(source: SourceId, target: string, query: string, limit: number, toItem: (i: Json, at: string) => ProductResult | null, online: () => Promise<ProductResult[]>): Promise<ProductResult[]> {
+  const words = query.trim().split(/\s+/).filter((w) => w.length >= 2).slice(0, 6);
+  const rows = words.length ? await serverRpc<{ item: Json; at: string }[]>("server_gecko_search_items", { p_target: target, p_words: words, p_limit: 40 }).catch(() => []) : [];
+  const local = rows.map((r) => toItem(r.item, r.at)).filter((p): p is ProductResult => Boolean(p));
+  if (local.length >= 8) return local.slice(0, limit);
+  try {
+    const remote = await online();
+    const seen = new Set(remote.map((p) => p.externalId));
+    return [...remote, ...local.filter((p) => !seen.has(p.externalId))].slice(0, limit);
+  } catch (e) {
+    if (e instanceof ConnectorError && (e.code === "daily_limit" || e.code === "rate_limited" || e.code === "no_credits" || e.code === "timeout" || e.code === "unavailable")) return local.slice(0, limit);
+    throw e;
+  }
 }
 
 const SOURCE_OF: Record<string, SourceId> = { "mercadolivre.com.br": "mercadolivre", "shopee.com.br": "shopee", "tiktok.com": "tiktokshop" };
@@ -283,9 +302,11 @@ const mlRanked = (data: Json, at: string): RankedProduct[] => arr(data.items).ma
 export const geckoMercadoLivre: Connector = {
   id: "mercadolivre", name: "Mercado Livre", capabilities: caps, state: stateOf("Mercado Livre"),
   async search(params: SearchParams, ctx) {
+    return economicSearch("mercadolivre", "mercadolivre.com.br", params.query, params.limit, (i, at) => mlItem(i, at), async () => {
     const slug = params.query.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const { data, at } = await extract("mercadolivre", "search", { target: "mercadolivre.com.br", type: "plp", region: "BR", url: `https://lista.mercadolivre.com.br/${slug}`, page: 1 }, ctx);
     return arr(data.items).map(obj).filter((i) => i.isSponsored !== true).map((i) => mlItem(i, at)).filter((p): p is ProductResult => Boolean(p)).slice(0, params.limit);
+    });
   },
   async getProduct(externalId, ctx) {
     const [k, id] = [externalId.slice(0, 1), externalId.slice(2)];
@@ -312,9 +333,11 @@ const shopeeList = (data: Json, at: string) => arr(data.items).map(obj).filter((
 export const geckoShopee: Connector = {
   id: "shopee", name: "Shopee", capabilities: caps, state: stateOf("Shopee"),
   async search(params, ctx) {
+    return economicSearch("shopee", "shopee.com.br", params.query, params.limit, (i, at) => shopeeItem(i, at), async () => {
     const sort = params.sort === "reviews" ? "&sortBy=sales" : params.sort === "price_asc" ? "&sortBy=price&order=asc" : params.sort === "price_desc" ? "&sortBy=price&order=desc" : "";
     const { data, at } = await extract("shopee", "search", { target: "shopee.com.br", type: "plp", region: "BR", url: `https://shopee.com.br/search?keyword=${encodeURIComponent(params.query.trim())}${sort}` }, ctx);
     return arr(data.items).map(obj).filter((i) => i.sponsored !== true).map((i) => shopeeItem(i, at)).filter((p): p is ProductResult => Boolean(p)).slice(0, params.limit);
+    });
   },
   async getProduct(externalId, ctx) {
     const m = /^s-(\d{1,20})x(\d{1,20})$/.exec(externalId);
@@ -355,7 +378,9 @@ const bySold = (items: ProductResult[]) => ranked(items.filter((p) => p.soldQuan
 
 export const geckoTikTok: Connector = {
   id: "tiktokshop", name: "TikTok Shop", capabilities: caps, state: stateOf("TikTok Shop"),
-  async search(params, ctx) { return (await tiktokSearch(params.query, "search", ctx)).slice(0, params.limit); },
+  async search(params, ctx) {
+    return economicSearch("tiktokshop", "tiktok.com", params.query, params.limit, (i, at) => tiktokItem(i, at), async () => (await tiktokSearch(params.query, "search", ctx)).slice(0, params.limit));
+  },
   async getProduct(externalId, ctx) {
     const id = externalId.slice(2);
     if (!externalId.startsWith("t-") || !/^\d{6,25}$/.test(id)) throw new ConnectorError("tiktokshop", "not_found", "Identificador inválido");
