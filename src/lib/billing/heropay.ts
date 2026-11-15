@@ -71,6 +71,8 @@ export async function createSubscriptionLink(plan: { id: string; name: string; d
       period: "monthly",
       frequency_type: "unlimited",
       payment_methods: ["credit_card", "pix", "bank_slip"],
+      // Pix Automático: o Pix também renova sozinho todo mês (não vira pagamento único).
+      pix_automatic_installment: true,
       src: `plan-${plan.id}`,
     },
   });

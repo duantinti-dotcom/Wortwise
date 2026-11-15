@@ -36,12 +36,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const { data: plans } = await supabaseAnon().from("plans").select("id, name, description, price_cents, provider_checkout_url").in("id", ["pro", "business"]);
     const links: { plan: string; id?: number; url?: string; error?: string; existing?: string }[] = [];
     for (const p of (plans ?? []) as { id: string; name: string; description: string | null; price_cents: number; provider_checkout_url: string | null }[]) {
-      if (p.provider_checkout_url) { links.push({ plan: p.id, existing: p.provider_checkout_url }); continue; }
+      if (p.provider_checkout_url && new URL(req.url).searchParams.get("recriar") !== "1") { links.push({ plan: p.id, existing: p.provider_checkout_url }); continue; }
       try { const l = await createSubscriptionLink(p); links.push({ plan: p.id, id: l.id, url: l.url }); }
       catch (e) { links.push({ plan: p.id, error: e instanceof Error ? e.message : "erro" }); }
     }
     const hooks = [];
-    for (const trigger of HANDLED_TRIGGERS) hooks.push(await registerWebhook(trigger, `${publicEnv.appUrl}/api/webhooks/heropay?trigger=${trigger}`));
+    if (new URL(req.url).searchParams.get("webhooks") !== "0") for (const trigger of HANDLED_TRIGGERS) hooks.push(await registerWebhook(trigger, `${publicEnv.appUrl}/api/webhooks/heropay?trigger=${trigger}`));
     return NextResponse.json({ task, links, hooks });
   }
   if (task === "ideas") {
