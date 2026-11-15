@@ -31,7 +31,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const r = await fetch("https://www.amazon.com.br/s?k=garrafa+termica", { headers: { accept: "text/html", "accept-language": "pt-BR,pt;q=0.9", "user-agent": "Mozilla/5.0 (compatible; WorthwiseBot/1.0; +https://worthwise.site)" }, signal: AbortSignal.timeout(12000) });
     const t = await r.text();
     const i = t.indexOf('data-component-type="s-search-result"');
-    return NextResponse.json({ status: r.status, size: t.length, count: t.split('data-component-type="s-search-result"').length - 1, robot: /captcha|robot/i.test(t.slice(0, 5000)), block: i >= 0 ? t.slice(i - 300, i + 6000) : t.slice(0, 800) });
+    return NextResponse.json({ status: r.status, size: t.length, count: t.split('data-component-type="s-search-result"').length - 1, robot: /captcha|robot/i.test(t.slice(0, 5000)), block: i >= 0 ? (t.split('data-component-type="s-search-result"')[2] ?? '').slice(0, 30000) : t.slice(0, 800) });
   }
   if (task === "img-check") {
     const u = "https://images-na.ssl-images-amazon.com/images/I/61Wa-avvnwL._AC_UL900_SR900,600_.jpg";
