@@ -59,6 +59,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const body = await r.text();
     return NextResponse.json({ actor, status: r.status, ms: Date.now() - t, sample: body.slice(0, 4000) });
   }
+  if (task === "gecko-refresh") {
+    // Diário: atualiza sozinho os rankings da GeckoAPI guardados há mais de 3 dias.
+    const { refreshStaleGecko } = await import("@/lib/connectors/gecko");
+    return NextResponse.json({ task, result: await refreshStaleGecko() });
+  }
   if (task === "gecko-check") {
     // Testa o caminho real do site: top 10, busca e produto, por loja. Só leitura (grava o histórico de preço, como o site).
     const { loadStoreTrending } = await import("@/lib/trending");

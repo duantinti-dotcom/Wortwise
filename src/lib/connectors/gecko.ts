@@ -1,4 +1,3 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { serverEnv } from "@/lib/env";
 import { serverRpc, serverRpcSafe } from "@/lib/supabase/server";
 import { FALLBACK_ML_CATEGORIES } from "./ml-categories";
@@ -60,10 +59,6 @@ async function call(source: SourceId, body: Json, ctx: ConnectorContext): Promis
   }
 }
 
-function waitUntil(p: Promise<unknown>) {
-  try { getCloudflareContext().ctx.waitUntil(p); } catch { void p.catch(() => {}); }
-}
-
 /** Busca na Gecko com cache: resposta nova é guardada; resposta antiga é devolvida e atualizada em segundo plano. */
 /** Máximo de consultas pagas por dia (protege os créditos). Ajustável por GECKO_DAILY_MAX. */
 const dailyMax = () => Math.max(0, Number(process.env.GECKO_DAILY_MAX ?? 5) || 0);
@@ -73,7 +68,7 @@ type Stored = { data: Json; at: string };
 async function dbGet(key: string): Promise<Stored | null> {
   try { return (await serverRpc<Stored | null>("server_gecko_get", { p_key: key })) ?? null; } catch { return null; }
 }
-async function dbPut(key: string, data: Json) { await serverRpcSafe("server_gecko_put", { p_key: key, p_body: data }); }
+async function dbPut(key: string, data: Json, req: Json | null) { await serverRpcSafe("server_gecko_put", { p_key: key, p_body: data, p_req: req }); }
 async function claim(key: string) {
   try { return await serverRpc<boolean>("server_gecko_claim", { p_key: key, p_max_per_day: dailyMax() }); } catch { return false; }
 }
@@ -83,25 +78,49 @@ async function peek(body: Json): Promise<Stored | null> { return dbGet(await key
 
 /**
  * Consulta com cache permanente no banco:
- *  - guardado há menos de 3 dias → devolve o guardado (0 crédito);
- *  - mais antigo → devolve o guardado e atualiza em segundo plano (1 crédito, no máximo 1 vez);
+ *  - rankings já guardados → sempre o guardado (0 crédito); quem atualiza é o servidor, sozinho, a cada 3 dias (refreshStaleGecko);
+ *  - busca/produto guardados há menos de 3 dias → o guardado (0 crédito);
  *  - nunca guardado → consulta a Gecko (1 crédito), se o limite do dia permitir.
  */
 async function extract(source: SourceId, kind: Kind, body: Json, ctx: ConnectorContext): Promise<Stored> {
   if (!geckoConfigured()) throw new ConnectorError(source, "not_configured", "GECKO_API_KEY ausente");
   const key = await keyOf(body);
   const prev = await dbGet(key);
-  const refresh = async (): Promise<Stored> => {
-    const data = await call(source, body, ctx);
-    await dbPut(key, data);
-    return { data, at: new Date().toISOString() };
-  };
-  if (prev) {
-    if (Date.now() - Date.parse(prev.at) > FRESH_MS[kind] && (await claim(key))) waitUntil(refresh());
-    return prev;
+  if (prev && (kind === "ranking" || Date.now() - Date.parse(prev.at) <= FRESH_MS[kind])) return prev;
+  if (!(await claim(key))) {
+    if (prev) return prev;
+    throw new ConnectorError(source, "rate_limited", "Limite diário de consultas à GeckoAPI atingido");
   }
-  if (!(await claim(key))) throw new ConnectorError(source, "rate_limited", "Limite diário de consultas à GeckoAPI atingido");
-  return refresh();
+  const data = await call(source, body, ctx);
+  await dbPut(key, data, kind === "ranking" ? body : null);
+  return { data, at: new Date().toISOString() };
+}
+
+const SOURCE_OF: Record<string, SourceId> = { "mercadolivre.com.br": "mercadolivre", "shopee.com.br": "shopee", "tiktok.com": "tiktokshop" };
+
+/** Tarefa diária: atualiza os rankings guardados há mais de 3 dias (dentro do limite diário de consultas). */
+export async function refreshStaleGecko(): Promise<{ refreshed: number; skipped: number; errors: string[] }> {
+  const out = { refreshed: 0, skipped: 0, errors: [] as string[] };
+  if (!geckoConfigured()) return out;
+  const stale = await serverRpc<{ key: string; req: Json }[]>("server_gecko_stale", { p_hours: 72, p_limit: dailyMax() }).catch(() => []);
+  const ctx: ConnectorContext = { logs: [] };
+  for (const { key, req } of stale) {
+    const source = SOURCE_OF[String(req.target)];
+    if (!source) { out.skipped++; continue; }
+    if (!(await claim(key))) { out.skipped++; continue; }
+    try {
+      await dbPut(key, await call(source, req, ctx), req);
+      out.refreshed++;
+    } catch (e) {
+      out.errors.push(e instanceof ConnectorError ? `${source}: ${e.code}` : String(e).slice(0, 80));
+      if (e instanceof ConnectorError && e.code === "no_credits") break;
+    }
+  }
+  if (ctx.logs.length) {
+    const { flushLogs } = await import("@/lib/search/service");
+    await flushLogs(ctx.logs).catch(() => {});
+  }
+  return out;
 }
 
 /* ───────────── Normalização (só copia o que a Gecko devolveu) ───────────── */
