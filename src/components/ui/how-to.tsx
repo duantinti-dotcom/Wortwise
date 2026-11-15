@@ -5,16 +5,16 @@ import { useSyncExternalStore } from "react";
 
 const KEY = (id: string) => `ww-howto-${id}`;
 const listeners = new Set<() => void>();
-const read = (id: string) => { try { return localStorage.getItem(KEY(id)) === "0"; } catch { return false; } };
+const read = (id: string) => { try { return localStorage.getItem(KEY(id)) !== "1"; } catch { return true; } };
 const write = (id: string, hidden: boolean) => {
-  try { if (hidden) localStorage.setItem(KEY(id), "0"); else localStorage.removeItem(KEY(id)); } catch { /* sem armazenamento: vale só agora */ }
+  try { if (hidden) localStorage.removeItem(KEY(id)); else localStorage.setItem(KEY(id), "1"); } catch { /* sem armazenamento: vale só agora */ }
   listeners.forEach((l) => l());
 };
 const subscribe = (l: () => void) => { listeners.add(l); return () => listeners.delete(l); };
 
 /** "Como usar" da tela: 3 passos curtos em linguagem simples. Pode ser fechado e reaberto. */
 export function HowTo({ id, steps }: { id: string; steps: string[] }) {
-  const hidden = useSyncExternalStore(subscribe, () => read(id), () => false);
+  const hidden = useSyncExternalStore(subscribe, () => read(id), () => true);
   return (
     <AnimatePresence initial={false} mode="wait">
       {hidden ? (

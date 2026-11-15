@@ -125,3 +125,43 @@ export async function warmAllIdeas(): Promise<{ ok: number; failed: number }> {
   }
   return { ok, failed };
 }
+
+/* ───────────── Pesquisa de produtos (quando a loja não tem dados conectados) ───────────── */
+export async function searchProducts(query: string, store: string | null): Promise<IdeasResult | null> {
+  const q = query.trim().replace(/\s+/g, " ").slice(0, 80);
+  const where = store ? `na ${STORE_NAMES[store] ?? "loja"}` : "nos marketplaces brasileiros (Mercado Livre, Shopee, Amazon, TikTok Shop)";
+  const target = store ?? "mercadolivre";
+  const key = `s1:${target}:${q.toLowerCase()}:${bucket()}`;
+  const hit = memory.get(key);
+  if (hit && Date.now() - hit.at < TTL) return { ideas: hit.ideas, generatedAt: new Date(hit.at).toISOString() };
+  const edge = edgeCache();
+  const edgeKey = new Request(`https://cache.worthwise.site/search-v1/${target}/${encodeURIComponent(q.toLowerCase())}/${bucket()}`);
+  const cached = await edge?.match(edgeKey).catch(() => undefined);
+  if (cached) return (await cached.json()) as IdeasResult;
+
+  const provider = getAiProvider();
+  if (!provider) return null;
+  const ask = (angle: string) => provider.chat([
+    { role: "system", content: "Você é analista de e-commerce no Brasil. Responda SOMENTE com JSON válido, sem texto antes ou depois." },
+    { role: "user", content: `A pessoa pesquisou "${q}" ${where}. Liste 4 produtos ${angle} que correspondem a essa pesquisa, como aparecem nos anúncios.
+Use produtos genéricos (sem marcas famosas registradas).
+Devolva um array JSON com 4 objetos, cada um com exatamente estes campos:
+{"emoji": "um emoji", "nome": "nome do produto como num anúncio (curto)", "descricao": "o que é e principais características, em 1 a 2 frases", "por_que_vende": "por que é uma boa opção para revender, em 1 frase", "publico": "para quem", "preco_min": número em reais, "preco_max": número em reais, "dica": "1 dica prática para vender", "busca": "2 a 5 palavras para buscar na loja", "imagem": "descrição curta EM INGLÊS da aparência do produto para gerar uma foto"}
+preco_min = menor preço típico encontrado; preco_max = preço típico mais alto.` },
+  ], [], 1700, 80000);
+  const parts = await Promise.allSettled([ask("entre os mais vendidos e populares"), ask("com melhor custo-benefício")]);
+  if (parts.every((p) => p.status === "rejected")) {
+    const msg = parts.map((p) => (p.status === "rejected" ? String((p.reason as Error)?.message ?? p.reason) : "")).join(" ");
+    if (/allocation|neurons|429|quota|capacity/i.test(msg)) throw new AiQuotaError(msg);
+  }
+  const seen = new Set<string>();
+  const lists = parts.map((p) => (p.status === "fulfilled" ? parseIdeas(p.value.content, target) : []));
+  const ideas: Idea[] = [];
+  for (let i = 0; i < 4; i++) for (const l of lists) { const it = l[i]; if (it && !seen.has(it.nome.toLowerCase())) { seen.add(it.nome.toLowerCase()); ideas.push(it); } }
+  const out = { ideas, generatedAt: new Date().toISOString() };
+  if (ideas.length) {
+    memory.set(key, { at: Date.now(), ideas });
+    await edge?.put(edgeKey, new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": "public, max-age=259200" } })).catch(() => {});
+  }
+  return out;
+}

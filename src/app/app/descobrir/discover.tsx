@@ -1,7 +1,7 @@
 "use client";
 import { CircleAlert, Clock, Lock, Search, SlidersHorizontal, X } from "lucide-react";
 import { SourceMark } from "@/components/source-mark";
-import { STORE_MESSAGE, StoreGuide } from "@/components/app/store-guide";
+import { AiSearchResults } from "@/components/app/ai-ideas";
 import { StorePill } from "@/components/app/store-tabs";
 import { motion } from "motion/react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -37,6 +37,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<{ code: string; message: string; sources?: SourceReport[] } | null>(null);
   const [favs, setFavs] = useState<Set<string>>(new Set());
+  const [aiQuery, setAiQuery] = useState<string | null>(null);
   const ran = useRef<string | null>(null);
 
   useEffect(() => {
@@ -49,7 +50,8 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     const term = q.trim();
     if (term.length < 2) { setError({ code: "invalid_input", message: "Digite pelo menos 2 caracteres." }); return; }
     const blocked = selected.length === 1 ? sources.find((x) => x.id === selected[0] && x.state !== "connected") : null;
-    if (blocked) { setResult(null); setError({ code: "not_configured", message: `${blocked.name} ainda não está conectado. Escolha outra loja ou "Todas".` }); return; }
+    if (blocked || (!selected.length && !sources.some((x) => x.state === "connected"))) { setResult(null); setError(null); setAiQuery(term); return; }
+    setAiQuery(null);
     setLoading(true);
     setError(null);
     // Só a escolha de fontes vai para o servidor; o refinamento é feito na tela, sem custo.
@@ -101,7 +103,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
             const on = src.id ? selected.length === 1 && selected[0] === src.id : selected.length !== 1;
             return (
               <button key={src.id || "all"} type="button" role="tab" aria-selected={on}
-                onClick={() => { setSelected(src.id ? [src.id] : []); setError(null); }}
+                onClick={() => { setSelected(src.id ? [src.id] : []); setError(null); setAiQuery((q) => q); }}
                 className={cn("relative isolate flex h-10 shrink-0 items-center gap-2.5 rounded-[10px] px-3.5 text-[15px] font-medium transition-colors", on ? "text-fg" : "text-muted hover:text-fg")}>
                 {on ? <StorePill id="discover" /> : null}
                 {src.id ? <motion.span animate={on ? { scale: [1, 1.18, 1], rotate: [0, -8, 0] } : { scale: 1 }} transition={{ duration: 0.45 }} className="flex"><SourceMark source={src.id} size={22} /></motion.span> : null}{src.name}
@@ -203,8 +205,8 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
           </>
         ) : null}
 
-        {!loading && !result && blockedStore ? <motion.div key={blockedStore} initial={{ opacity: 0, y: 14, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}><StoreGuide store={blockedStore} message={STORE_MESSAGE[blockedStore] ?? ""} /></motion.div> : null}
-        {!loading && !result && !error && !blockedStore ? (
+        {aiQuery ? <motion.div key={`${aiQuery}:${selected.join(",")}`} initial={{ opacity: 0, y: 14, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}><AiSearchResults query={aiQuery} store={blockedStore} /></motion.div> : null}
+        {!loading && !result && !error && !aiQuery ? (
           <div className="space-y-10">
             <section>
               <h2 className="text-[16px] font-semibold tracking-tight">Ideias para começar</h2>

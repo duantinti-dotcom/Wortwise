@@ -54,7 +54,7 @@ export function LiveTrending() {
         {data === null ? <span className="badge">carregando…</span> : live ? (
           <span className="badge badge-brand !h-auto !whitespace-normal py-1 text-center"><span className="live-dot !size-1.5 shrink-0" />Ao vivo · Mais vendidos em {data!.category} · atualizado {relativeTime(data!.updatedAt)}</span>
         ) : (
-          <span className="badge !h-auto !whitespace-normal py-1 text-center"><span className="size-1.5 shrink-0 rounded-full bg-brand" />Demonstração · exemplo ilustrativo (o ranking real aparece quando a integração está ativa)</span>
+          <span className="badge !h-auto !whitespace-normal py-1 text-center"><span className="size-1.5 shrink-0 rounded-full bg-brand" />Produtos em alta · imagens ilustrativas e preços de referência</span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
@@ -91,7 +91,7 @@ export function LiveTrending() {
           </motion.div>
         ))}
       </div>
-      <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-faint"><Sparkles size={12} className="text-brand" />{live ? "Posição informada pelo Mercado Livre. O Worthwise não inventa vendas: mostra a fonte e a data de cada dado." : "Exemplo ilustrativo: fotos criadas por IA. Com a integração ativa, aparecem os produtos e fotos reais do ranking."}</p>
+      <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-faint"><Sparkles size={12} className="text-brand" />{live ? "Posição informada pelo Mercado Livre. O Worthwise não inventa vendas: mostra a fonte e a data de cada dado." : "Imagens ilustrativas e preços de referência. No app, veja o ranking completo de cada loja e categoria."}</p>
     </div>
   );
 }

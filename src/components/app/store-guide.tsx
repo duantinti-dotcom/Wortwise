@@ -61,22 +61,12 @@ export const STORE_MESSAGE: Record<string, string> = {
   tiktokshop: "O TikTok Shop só libera dados de produtos para parceiros aprovados por ele. O pedido de acesso ainda precisa ser feito.",
 };
 
-export function StoreGuide({ store, message }: { store: string; message: string }) {
+export function StoreGuide({ store }: { store: string; message?: string }) {
   const g = GUIDES[store];
   const name = sourceName(store);
   if (!g) return null;
   return (
     <div className="space-y-8">
-      <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3">
-          <SourceMark source={store} size={28} className="mt-0.5" />
-          <div>
-            <p className="text-[15.5px] font-semibold">Os produtos de {name} aparecem aqui assim que a conexão estiver ativa</p>
-            <p className="mt-1 text-[14px] leading-relaxed text-muted">{message} Enquanto isso, use o que já funciona abaixo.</p>
-          </div>
-        </div>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
         <Link href={`/app/calculadora?canal=${g.preset}`} className="card card-hover flex items-start gap-4 p-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-tint/[0.06] text-brand-hi"><Calculator size={19} /></span>

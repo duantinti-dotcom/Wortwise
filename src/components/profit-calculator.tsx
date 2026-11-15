@@ -118,7 +118,7 @@ export function ProfitCalculator({ initial, initialPreset, onSave, saving, compa
       <div className="card overflow-hidden !rounded-2xl">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-tint/[0.07] px-5 py-4 md:px-7">
           <div className="text-[15px] font-semibold tracking-tight">Seus números</div>
-          {isExample ? <span className="badge badge-brand max-sm:order-3 max-sm:w-full max-sm:justify-center"><Sparkles size={12} />Exemplo — troque pelos seus valores</span> : null}
+          {isExample ? <span className="badge badge-brand order-3 w-full justify-center"><Sparkles size={12} />Exemplo — troque pelos seus valores</span> : null}
           <button className="btn btn-ghost btn-sm -mr-2" onClick={() => { setI({ ...DEFAULT_INPUTS, quantity: 1 }); setPreset(""); setIsExample(false); }}><RotateCcw size={14} /> Limpar</button>
         </div>
         <div className="border-b border-tint/[0.07] px-5 pt-4 md:px-7">

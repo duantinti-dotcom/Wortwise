@@ -45,9 +45,9 @@ export interface ShellProps {
 
 const GROUPS: { label: string; items: string[] }[] = [
   { label: "", items: ["/app"] },
-  { label: "Encontrar produtos", items: ["/app/em-alta", "/app/descobrir", "/app/oportunidades"] },
-  { label: "Fazer as contas", items: ["/app/calculadora", "/app/comparar", "/app/fornecedores", "/app/mercado"] },
-  { label: "Acompanhar", items: ["/app/monitoramento", "/app/favoritos", "/app/relatorios"] },
+  { label: "Encontrar produtos", items: ["/app/em-alta", "/app/descobrir"] },
+  { label: "Fazer as contas", items: ["/app/calculadora", "/app/comparar", "/app/fornecedores"] },
+  { label: "Acompanhar", items: ["/app/favoritos", "/app/relatorios"] },
   { label: "Ajuda", items: ["/app/assistente"] },
   { label: "Conta", items: ["/app/configuracoes"] },
 ];

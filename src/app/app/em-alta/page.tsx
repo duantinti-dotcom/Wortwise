@@ -2,7 +2,7 @@ import { ArrowUpRight, Flame, Search, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AiIdeas } from "@/components/app/ai-ideas";
-import { STORE_MESSAGE, StoreGuide } from "@/components/app/store-guide";
+import { StoreGuide } from "@/components/app/store-guide";
 import { StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
 import { sourceName } from "@/components/source-mark";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
@@ -70,13 +70,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
               {data.state.message} Nenhum dado foi inventado para preencher o espaço.
             </EmptyState>
           ) : (
-            <>
-              {admin && store !== "amazon" ? <p className="mb-6 text-[14px] text-muted">Você é administrador: <Link href="/admin/integracoes" className="text-brand-hi hover:underline">cadastrar as chaves de {name}</Link>.</p> : null}
-              <div className="space-y-14">
-                <AiIdeas store={store} />
-                <StoreGuide store={store} message={STORE_MESSAGE[store] ?? ""} />
-              </div>
-            </>
+            <div className="space-y-16">
+              <AiIdeas store={store} />
+              <StoreGuide store={store} />
+            </div>
           )
         ) : (
           <>
