@@ -3,7 +3,8 @@ import { AiQuotaError, searchProducts } from "@/lib/ai/ideas";
 import { apiError } from "@/lib/http";
 import { supabaseServer } from "@/lib/supabase/server";
 
-const STORES = new Set(["mercadolivre", "shopee", "amazon", "tiktokshop"]);
+// A IA só é usada nas lojas sem API rápida de conseguir (o Mercado Livre usa só dados oficiais).
+const STORES = new Set(["shopee", "amazon", "tiktokshop"]);
 
 /** Pesquisa de produtos com estimativas (usada enquanto a loja não tem dados conectados). */
 export async function GET(req: Request) {
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   const q = (url.searchParams.get("q") ?? "").trim();
   const loja = url.searchParams.get("loja");
   if (q.length < 2 || q.length > 80) return apiError("invalid_input", "Digite de 2 a 80 caracteres.");
-  if (loja && !STORES.has(loja)) return apiError("invalid_input", "Loja inválida.");
+  if (!loja || !STORES.has(loja)) return apiError("invalid_input", "Escolha Shopee, Amazon ou TikTok Shop.");
   const supabase = await supabaseServer();
   const { data: allowed } = await supabase.rpc("rate_limit_me", { p_bucket: "search" });
   if (allowed === false) return apiError("rate_limited", "Muitas pesquisas seguidas. Aguarde um minuto.");

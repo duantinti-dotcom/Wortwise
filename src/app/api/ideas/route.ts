@@ -3,13 +3,14 @@ import { AiQuotaError, getIdeasCached, IDEA_CATEGORIES } from "@/lib/ai/ideas";
 import { apiError } from "@/lib/http";
 import { supabaseServer } from "@/lib/supabase/server";
 
-const STORES = new Set(["mercadolivre", "shopee", "amazon", "tiktokshop"]);
+// A IA só é usada nas lojas sem API rápida de conseguir (o Mercado Livre usa só dados oficiais).
+const STORES = new Set(["shopee", "amazon", "tiktokshop"]);
 
 export async function GET(req: Request) {
   const user = await getUser();
   if (!user) return apiError("unauthenticated", "Entre na sua conta para ver as ideias.");
   const url = new URL(req.url);
-  const store = url.searchParams.get("loja") ?? "mercadolivre";
+  const store = url.searchParams.get("loja") ?? "shopee";
   const cat = url.searchParams.get("categoria") ?? IDEA_CATEGORIES[0].id;
   if (!STORES.has(store) || !IDEA_CATEGORIES.some((c) => c.id === cat)) return apiError("invalid_input", "Loja ou categoria inválida.");
   const supabase = await supabaseServer();

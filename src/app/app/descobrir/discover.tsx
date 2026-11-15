@@ -28,7 +28,8 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
   const router = useRouter();
   const { openUpgrade } = useUpgrade();
   const [query, setQuery] = useState(params.get("q") ?? "");
-  const [selected, setSelected] = useState<string[]>(() => { const l = params.get("loja"); return l ? [l] : []; });
+  const anyConnected = sources.some((x) => x.state === "connected");
+  const [selected, setSelected] = useState<string[]>(() => { const l = params.get("loja"); return l ? [l] : anyConnected ? [] : ["shopee"]; });
   const [refine, setRefineState] = useState<SearchFilters>({ sort: "relevance" });
   const setRefine = useCallback((patch: Partial<SearchFilters>) => setRefineState((f) => ({ ...f, ...patch })), []);
   const resetRefine = useCallback(() => setRefineState((f) => ({ sort: f.sort })), []);
@@ -50,7 +51,8 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     const term = q.trim();
     if (term.length < 2) { setError({ code: "invalid_input", message: "Digite pelo menos 2 caracteres." }); return; }
     const blocked = selected.length === 1 ? sources.find((x) => x.id === selected[0] && x.state !== "connected") : null;
-    if (blocked || (!selected.length && !sources.some((x) => x.state === "connected"))) { setResult(null); setError(null); setAiQuery(term); return; }
+    if (blocked?.id === "mercadolivre") { setResult(null); setAiQuery(null); setError({ code: "soon", message: "A pesquisa no Mercado Livre chega em breve. Enquanto isso, pesquise na Shopee, Amazon ou TikTok Shop." }); return; }
+    if (blocked) { setResult(null); setError(null); setAiQuery(term); return; }
     setAiQuery(null);
     setLoading(true);
     setError(null);
@@ -83,6 +85,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
   }, [params, run]);
 
   const blockedStore = selected.length === 1 && sources.some((x) => x.id === selected[0] && x.state !== "connected") ? selected[0]! : null;
+  const aiStore = blockedStore && blockedStore !== "mercadolivre" ? blockedStore : null;
   const items = useMemo(() => result?.results ?? [], [result]);
   const filtered = useMemo(() => applyFilters(items, refine), [items, refine]);
   const nActive = activeCount(refine);
@@ -99,7 +102,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
 
       <div role="tablist" aria-label="Lojas" className="-mx-5 mb-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
         <div className="glass flex w-max gap-1 rounded-[14px] p-1">
-          {[{ id: "", name: "Todas as lojas", state: "connected" }, ...sources].map((src) => {
+          {[...(anyConnected ? [{ id: "", name: "Todas as lojas", state: "connected" }] : []), ...sources].map((src) => {
             const on = src.id ? selected.length === 1 && selected[0] === src.id : selected.length !== 1;
             return (
               <button key={src.id || "all"} type="button" role="tab" aria-selected={on}
@@ -124,8 +127,8 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
 
       <div className="mt-10" aria-live="polite">
         {error && error.code !== "quota_exceeded" ? (
-          <div role="alert" className="card flex flex-col gap-3 border-neg/25 p-5">
-            <div className="flex items-start gap-3"><CircleAlert size={18} className="mt-0.5 shrink-0 text-neg" /><div><p className="font-medium">{error.message}</p>
+          <div role="alert" className={cn("card flex flex-col gap-3 p-5", error.code !== "soon" && "border-neg/25")}>
+            <div className="flex items-start gap-3"><CircleAlert size={18} className={cn("mt-0.5 shrink-0", error.code === "soon" ? "text-brand-hi" : "text-neg")} /><div><p className="font-medium">{error.message}</p>
               {error.code === "not_configured" ? <p className="mt-1 text-sm text-muted">Veja abaixo a situação real de cada fonte. Assim que uma fonte estiver conectada, a pesquisa passa a funcionar.</p> : null}</div></div>
             {error.sources ? <SourceList sources={error.sources} /> : null}
             {["timeout", "offline", "internal", "source_unavailable", "rate_limited"].includes(error.code) ? <button onClick={() => void run(query)} className="btn btn-secondary btn-sm w-fit">Tentar novamente</button> : null}
@@ -205,7 +208,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
           </>
         ) : null}
 
-        {aiQuery ? <motion.div key={`${aiQuery}:${selected.join(",")}`} initial={{ opacity: 0, y: 14, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}><AiSearchResults query={aiQuery} store={blockedStore} /></motion.div> : null}
+        {aiQuery ? <motion.div key={`${aiQuery}:${selected.join(",")}`} initial={{ opacity: 0, y: 14, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}><AiSearchResults query={aiQuery} store={aiStore} /></motion.div> : null}
         {!loading && !result && !error && !aiQuery ? (
           <div className="space-y-10">
             <section>

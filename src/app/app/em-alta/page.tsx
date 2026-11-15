@@ -7,7 +7,7 @@ import { StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
 import { sourceName } from "@/components/source-mark";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { getUsage, isAdmin } from "@/lib/auth";
-import { isStore, loadStoreTrending, STORES, type StoreId } from "@/lib/trending";
+import { isStore, loadStoreTrending, STORES, trendingConfigured, type StoreId } from "@/lib/trending";
 import { supabaseAnon } from "@/lib/supabase/server";
 import { cn, relativeTime } from "@/lib/utils";
 import { TrendingGrid } from "./grid";
@@ -30,7 +30,8 @@ const SOURCE_NOTE: Record<StoreId, { text: string; link: string }> = {
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ categoria?: string; loja?: string }> }) {
   const { categoria, loja } = await searchParams;
-  const store: StoreId = isStore(loja) ? loja : "mercadolivre";
+  // Sem o Mercado Livre conectado, a tela abre direto na Shopee (que tem conteúdo).
+  const store: StoreId = isStore(loja) ? loja : trendingConfigured() ? "mercadolivre" : "shopee";
   const [data, usage, admin] = await Promise.all([loadStoreTrending(store, categoria), getUsage(), isAdmin()]);
   const free = usage.plan === "free";
   const visible = free ? await freeVisible() : data.products.length;
@@ -65,7 +66,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
 
       <div className="mt-8">
         {!data.state.ok ? (
-          data.state.reason === "error" && store !== "amazon" ? (
+          store === "mercadolivre" ? (
+            <div className="space-y-16">
+              <EmptyState icon={Flame} title="Ranking do Mercado Livre chegando">
+                Em breve aqui: os mais vendidos oficiais do Mercado Livre, com foto, preço e link de cada anúncio. Enquanto isso, veja as outras lojas acima.
+              </EmptyState>
+              <StoreGuide store={store} />
+            </div>
+          ) : data.state.reason === "error" && store !== "amazon" ? (
             <EmptyState icon={Flame} title="Não foi possível carregar agora" action={<Link href={qs(store, data.category.id)} className="btn btn-secondary">Tentar de novo</Link>}>
               {data.state.message} Nenhum dado foi inventado para preencher o espaço.
             </EmptyState>
