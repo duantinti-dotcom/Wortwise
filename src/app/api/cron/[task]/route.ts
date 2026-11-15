@@ -62,14 +62,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (task === "gecko-probe") {
     // Descobre o que a GeckoAPI entrega (tipos e campos) para ligar o Mercado Livre. Só leitura.
     const token = serverEnv().geckoToken;
-    if (!token) return NextResponse.json({ error: "GECKO_API_TOKEN ausente" }, { status: 503 });
+    if (!token) return NextResponse.json({ error: "GECKO_API_KEY ausente" }, { status: 503 });
+    // Parâmetros do teste: target (ex.: mercadolivre.com.br, shopee.com.br), types (plp,pdp,review) e url.
     const u = new URL(req.url);
-    const productUrl = "https://produto.mercadolivre.com.br/MLB-4997536398-acrilico-toque-de-seda-premium-leve-brilho-162l-suvinil-_JM";
-    const tries: Record<string, unknown>[] = (u.searchParams.get("types") ?? "product,search,bestsellers").split(",").map((type) => ({
-      target: "mercadolivre.com.br", type, region: "BR",
-      ...(type === "search" ? { query: "garrafa termica", url: "https://lista.mercadolivre.com.br/garrafa-termica" } : type === "bestsellers" ? { url: "https://www.mercadolivre.com.br/mais-vendidos/MLB1574" } : { url: productUrl }),
-      page: 0,
-    }));
+    const target = u.searchParams.get("target") ?? "mercadolivre.com.br";
+    const url = u.searchParams.get("url") ?? "https://produto.mercadolivre.com.br/MLB-4997536398-acrilico-toque-de-seda-premium-leve-brilho-162l-suvinil-_JM";
+    const tries: Record<string, unknown>[] = (u.searchParams.get("types") ?? "pdp").split(",").map((type) => ({ target, type, region: "BR", url, page: 0 }));
     const out = [];
     for (const body of tries) {
       const t = Date.now();

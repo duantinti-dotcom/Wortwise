@@ -19,7 +19,7 @@ export function serverEnv() {
     amazonPartnerTag: e.AMAZON_PARTNER_TAG ?? "",
     amazonHost: e.AMAZON_PAAPI_HOST ?? "webservices.amazon.com.br",
     amazonMarketplace: e.AMAZON_MARKETPLACE ?? "www.amazon.com.br",
-    geckoToken: e.GECKO_API_TOKEN ?? "",
+    geckoToken: e.GECKO_API_KEY ?? e.GECKO_API_TOKEN ?? "",
     apifyToken: e.APIFY_TOKEN ?? "",
     shopeeAppId: e.SHOPEE_AFFILIATE_APP_ID ?? "",
     shopeeSecret: e.SHOPEE_AFFILIATE_SECRET ?? "",
