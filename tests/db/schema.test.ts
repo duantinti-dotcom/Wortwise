@@ -83,7 +83,7 @@ describe("isolamento entre usuários (RLS)", () => {
     expect(await db.as(b, "select * from public.favorites")).toHaveLength(0);
     expect(await db.as(b, "select id from public.searches")).toHaveLength(0);
     await expect(db.as(b, "insert into public.favorites (user_id, source, external_id, title) values ($1, 'mercadolivre', 'MLB2', 'x')", [a])).rejects.toThrow();
-    expect(await db.as(null, "select * from public.plans")).toHaveLength(3);
+    expect(await db.as(null, "select * from public.plans where active")).toHaveLength(3);
     await expect(db.as(null, "select * from public.profiles")).rejects.toThrow();
   });
 });

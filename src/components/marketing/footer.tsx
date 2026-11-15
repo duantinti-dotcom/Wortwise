@@ -29,7 +29,7 @@ export function Footer() {
         </div>
         <div className="flex flex-col items-center justify-center gap-1.5 border-t border-tint/10 px-6 py-5 text-center text-xs text-faint md:px-12">
           <span>© {new Date().getFullYear()} Worthwise. Todos os direitos reservados.</span>
-          <span>Não somos afiliados aos marketplaces citados. Marcas pertencem aos seus titulares.</span>
+          <span>Não somos afiliados aos marketplaces citados. Marcas e logotipos pertencem aos seus titulares (ícone da Amazon: Font Awesome, CC BY 4.0).</span>
         </div>
       </div>
     </footer>

@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Marquinha pequena que identifica cada loja nas abas e nos cartões.
- * Não usa o logotipo oficial: só a cor da loja com a inicial, para reconhecer de relance.
+ * Logo de cada loja nas abas e nos cartões (uso apenas para identificar a origem do dado).
+ * Arquivos em /public/brands. As marcas pertencem aos seus titulares.
  */
-const MARKS: Record<string, { bg: string; fg: string; text: string; name: string }> = {
-  mercadolivre: { bg: "#FFE600", fg: "#2D3277", text: "ML", name: "Mercado Livre" },
-  shopee: { bg: "#EE4D2D", fg: "#FFFFFF", text: "S", name: "Shopee" },
-  amazon: { bg: "#232F3E", fg: "#FF9900", text: "a", name: "Amazon" },
-  tiktokshop: { bg: "#111111", fg: "#FFFFFF", text: "T", name: "TikTok Shop" },
+const MARKS: Record<string, { name: string; file: string | null }> = {
+  mercadolivre: { name: "Mercado Livre", file: "/brands/mercadolivre.svg" },
+  shopee: { name: "Shopee", file: "/brands/shopee.svg" },
+  amazon: { name: "Amazon", file: "/brands/amazon.svg" },
+  tiktokshop: { name: "TikTok Shop", file: "/brands/tiktok.svg" },
 };
 
 export function sourceName(id: string) {
@@ -16,11 +16,11 @@ export function sourceName(id: string) {
 }
 
 export function SourceMark({ source, size = 18, className }: { source: string; size?: number; className?: string }) {
-  const m = MARKS[source] ?? { bg: "#71717A", fg: "#fff", text: "?", name: source };
+  const m = MARKS[source];
+  if (!m?.file) return <span aria-hidden className={cn("inline-block shrink-0 rounded-[6px] bg-tint/10", className)} style={{ width: size, height: size }} />;
   return (
-    <span aria-hidden className={cn("inline-flex shrink-0 items-center justify-center rounded-[5px] font-bold leading-none ring-1 ring-black/10", className)}
-      style={{ width: size, height: size, background: m.bg, color: m.fg, fontSize: Math.round(size * (m.text.length > 1 ? 0.46 : 0.6)) }}>
-      {m.text}
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={m.file} alt="" aria-hidden width={size} height={size} draggable={false}
+      className={cn("inline-block shrink-0 select-none", className)} style={{ width: size, height: size, borderRadius: Math.round(size * 0.24) }} />
   );
 }

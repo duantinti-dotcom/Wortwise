@@ -20,8 +20,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       user={{ email: user.email, name: user.name, avatarUrl: user.avatarUrl }}
-      plan={usage.plan} planName={plans.find((p) => p.id === usage.plan)?.name ?? "Grátis"}
-      search={search ? { used: search.used, limit: search.limit, period: search.period } : null}
+      plan={usage.plan} planName={usage.plan === "ilimitado" ? "Ilimitado" : plans.find((p) => p.id === usage.plan)?.name ?? "Grátis"}
+      search={search && usage.plan !== "ilimitado" ? { used: search.used, limit: search.limit, period: search.period } : null}
       unreadAlerts={alertsRes.count ?? 0} admin={admin} plans={plans}
     >
       {children}

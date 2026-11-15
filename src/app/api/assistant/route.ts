@@ -60,7 +60,7 @@ export async function POST(req: Request) {
   const sq = u?.quotas?.find((x) => x.resource === "search");
   const context: AgentContext = {
     firstName: ((profile?.full_name as string | null) ?? user.name ?? "").split(" ")[0] || null,
-    plan: ({ free: "Grátis", pro: "Pro", business: "Business" } as Record<string, string>)[u?.plan ?? "free"] ?? (u?.plan ?? "Grátis"),
+    plan: ({ free: "Grátis", pro: "Pro", business: "Business", ilimitado: "Ilimitado (dono do Worthwise)" } as Record<string, string>)[u?.plan ?? "free"] ?? (u?.plan ?? "Grátis"),
     searchesLeft: sq ? Math.max(0, sq.limit - sq.used) : null,
     stores: sourcesOverview().map((x) => ({ name: x.name, connected: x.state === "connected" })),
     interests: ((profile?.categories as string[] | null) ?? []).slice(0, 6),

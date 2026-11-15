@@ -6,7 +6,7 @@ import { LiveTrending } from "@/components/marketing/live-trending";
 import { Pricing } from "@/components/marketing/pricing";
 import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualCompare, VisualSearch, VisualWatch } from "@/components/marketing/visuals";
 import { ProfitCalculator } from "@/components/profit-calculator";
-import { SourceMark } from "@/components/source-mark";
+import { SourceMark, sourceName } from "@/components/source-mark";
 import { Reveal } from "@/components/ui/reveal";
 import { publicEnv } from "@/lib/env";
 import { FAQ_ITEMS } from "@/lib/faq";
@@ -18,7 +18,7 @@ const STEPS = [
   { title: "Decida", text: "Compare fornecedores e receba um aviso quando o preço ficar bom.", icon: Check },
 ];
 
-const STORES = ["mercadolivre", "shopee", "amazon"] as const;
+const STORES = ["mercadolivre", "shopee", "amazon", "tiktokshop"] as const;
 
 function SectionHead({ label, title, text, className }: { label?: string; title: string; text?: string; className?: string }) {
   return (
@@ -56,7 +56,7 @@ export default function HomePage() {
           <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[14px] text-muted">
             <span className="text-faint">Lojas:</span>
             {STORES.map((s) => (
-              <span key={s} className="inline-flex items-center gap-2"><SourceMark source={s} size={20} />{({ mercadolivre: "Mercado Livre", shopee: "Shopee", amazon: "Amazon" } as const)[s]}</span>
+              <span key={s} className="inline-flex items-center gap-2"><SourceMark source={s} size={20} />{sourceName(s)}</span>
             ))}
           </div>
         </div>

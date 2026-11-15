@@ -101,7 +101,8 @@ export default async function Dashboard() {
           <h2 id="uso" className="text-[18px] font-semibold tracking-tight">Seu plano</h2>
           <Link href="/app/configuracoes" className="text-[14px] text-brand-hi hover:underline">Ver planos</Link>
         </div>
-        <div className="card mt-5 grid divide-y divide-tint/[0.08] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {usage.plan === "ilimitado" ? <div className="card mt-5 p-6 text-[15px]"><span className="font-semibold">Plano Ilimitado</span><span className="text-muted"> · você é o dono do Worthwise: pesquisas, mensagens e monitoramentos sem limite.</span></div> : null}
+        <div className={cn("card mt-5 grid divide-y divide-tint/[0.08] sm:grid-cols-3 sm:divide-x sm:divide-y-0", usage.plan === "ilimitado" && "hidden")}>
           {shown.map((q) => {
             const pct = q.limit > 0 ? Math.min(100, (q.used / q.limit) * 100) : 0;
             return (
