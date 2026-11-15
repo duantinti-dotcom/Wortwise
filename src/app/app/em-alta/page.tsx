@@ -13,7 +13,7 @@ import { isStore, loadOverall, loadStoreTrending, STORES, trendingConfigured, ty
 import { loadHistories } from "@/lib/product";
 import { Trophy } from "lucide-react";
 import { supabaseAnon } from "@/lib/supabase/server";
-import { cn, relativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { TrendingGrid } from "./grid";
 
 export const metadata: Metadata = { title: "Mais vendidos" };
@@ -52,7 +52,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
   return (
     <>
       <PageHeader title="Mais vendidos" description="Os produtos que mais saem em cada loja, por categoria."
-        action={data.updatedAt ? <span className="badge"><TrendingUp size={13} />atualizado {relativeTime(data.updatedAt)}</span> : undefined} />
+/>
 
       <StoreTabs stores={["geral", ...STORES]} active={store} links={Object.fromEntries(["geral", ...STORES].map((s) => [s, qs(s)]))} />
 
@@ -140,7 +140,7 @@ async function Overall() {
   return (
     <>
       <PageHeader title="Mais vendidos" description="Os produtos que mais saem em cada loja, por categoria."
-        action={data.updatedAt ? <span className="badge"><TrendingUp size={13} />atualizado {relativeTime(data.updatedAt)}</span> : undefined} />
+/>
       <StoreTabs stores={["geral", ...STORES]} active="geral" links={Object.fromEntries(["geral", ...STORES].map((s) => [s, qs(s)]))} />
       <StoreSwitch store="geral">
         <div className="mt-8">

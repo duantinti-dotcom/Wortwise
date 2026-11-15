@@ -57,8 +57,8 @@ export async function runSearch(rawQuery: string, filters: SearchFilters): Promi
   const query = normalizeQuery(rawQuery);
   if (query.length < 2 || query.length > 120) return { status: "invalid" };
   const sources = (filters.sources?.filter(isSourceId) ?? []).sort();
-  // Economia de créditos da GeckoAPI: em "Todas as lojas" a Shopee e o TikTok Shop só entram quando escolhidos.
-  const selected: SourceId[] = sources.length ? sources : SOURCE_IDS.filter((id) => !(geckoBacked(id) && (id === "shopee" || id === "tiktokshop")));
+  // Economia de créditos da GeckoAPI: em "Todas as lojas" só entram lojas grátis; as da Gecko só quando escolhidas.
+  const selected: SourceId[] = sources.length ? sources : SOURCE_IDS.filter((id) => !geckoBacked(id));
   // O fingerprint identifica a consulta à fonte; filtros e ordenação são aplicados sobre o resultado salvo.
   const fingerprint = await sha256Hex(JSON.stringify({ q: query, s: selected }));
 

@@ -66,7 +66,7 @@ function waitUntil(p: Promise<unknown>) {
 
 /** Busca na Gecko com cache: resposta nova é guardada; resposta antiga é devolvida e atualizada em segundo plano. */
 /** Máximo de consultas pagas por dia (protege os créditos). Ajustável por GECKO_DAILY_MAX. */
-const dailyMax = () => Math.max(0, Number(process.env.GECKO_DAILY_MAX ?? 10) || 0);
+const dailyMax = () => Math.max(0, Number(process.env.GECKO_DAILY_MAX ?? 5) || 0);
 const keyOf = async (body: Json) => `v1:${String(body.target)}:${String(body.type)}:${await sha(JSON.stringify(body))}`;
 type Stored = { data: Json; at: string };
 
