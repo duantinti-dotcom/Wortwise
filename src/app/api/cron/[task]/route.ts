@@ -33,6 +33,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const i = t.indexOf('data-component-type="s-search-result"');
     return NextResponse.json({ status: r.status, size: t.length, count: t.split('data-component-type="s-search-result"').length - 1, robot: /captcha|robot/i.test(t.slice(0, 5000)), block: i >= 0 ? (t.split('data-component-type="s-search-result"')[2] ?? '').slice(0, 30000) : t.slice(0, 800) });
   }
+  if (task === "gecko-probe") {
+    // Descobre o que a GeckoAPI entrega (tipos e campos) para ligar o Mercado Livre. Só leitura.
+    const token = serverEnv().geckoToken;
+    if (!token) return NextResponse.json({ error: "GECKO_API_TOKEN ausente" }, { status: 503 });
+    const u = new URL(req.url);
+    const productUrl = "https://produto.mercadolivre.com.br/MLB-4997536398-acrilico-toque-de-seda-premium-leve-brilho-162l-suvinil-_JM";
+    const tries: Record<string, unknown>[] = (u.searchParams.get("types") ?? "product,search,bestsellers").split(",").map((type) => ({
+      target: "mercadolivre.com.br", type, region: "BR",
+      ...(type === "search" ? { query: "garrafa termica", url: "https://lista.mercadolivre.com.br/garrafa-termica" } : type === "bestsellers" ? { url: "https://www.mercadolivre.com.br/mais-vendidos/MLB1574" } : { url: productUrl }),
+      page: 0,
+    }));
+    const out = [];
+    for (const body of tries) {
+      const t = Date.now();
+      try {
+        const r = await fetch("https://api.geckoapi.com.br/v1/extract", { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(45000) });
+        out.push({ type: body.type, status: r.status, ms: Date.now() - t, body: (await r.text()).slice(0, 2500) });
+      } catch (e) { out.push({ type: body.type, error: String(e).slice(0, 120) }); }
+    }
+    return NextResponse.json(out);
+  }
   if (task === "img-check") {
     const u = "https://images-na.ssl-images-amazon.com/images/I/61Wa-avvnwL._AC_UL900_SR900,600_.jpg";
     const r = await fetch(u, { signal: AbortSignal.timeout(10000) });
