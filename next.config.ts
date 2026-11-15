@@ -9,6 +9,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Sem o botão "N" de desenvolvimento nas telas de teste.
+  devIndicators: false,
   poweredByHeader: false,
   // Imagens de marketplaces são servidas direto da origem (sem otimizador pago).
   images: { unoptimized: true },
