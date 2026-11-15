@@ -96,6 +96,22 @@ async function extract(source: SourceId, kind: Kind, body: Json, ctx: ConnectorC
   return { data, at: new Date().toISOString() };
 }
 
+/**
+ * Página do produto sem gastar crédito: usa a página do produto se já estiver guardada; senão,
+ * o produto como ele aparece nas listas guardadas (ranking/busca). Nunca chama a Gecko.
+ */
+async function offlineProduct(source: SourceId, target: string, pdpBody: Json, match: Json, toItem: (i: Json, at: string) => ProductResult | null, fix: (p: ProductResult) => ProductResult = (p) => p): Promise<ProductDetail> {
+  const pdp = await peek(pdpBody);
+  if (pdp) {
+    const p = toItem({ ...pdp.data, ...match }, pdp.at);
+    if (p) return detail(fix(p), pdp.data);
+  }
+  const found = await serverRpc<{ item: Json; at: string } | null>("server_gecko_find_item", { p_target: target, p_match: match }).catch(() => null);
+  const p = found ? toItem(found.item, found.at) : null;
+  if (!p) throw new ConnectorError(source, "not_found", "Este produto ainda não está guardado no Worthwise. Abra direto na loja.");
+  return detail(fix(p), {});
+}
+
 const SOURCE_OF: Record<string, SourceId> = { "mercadolivre.com.br": "mercadolivre", "shopee.com.br": "shopee", "tiktok.com": "tiktokshop" };
 
 /** Tarefa diária: atualiza os rankings guardados há mais de 3 dias (dentro do limite diário de consultas). */
@@ -215,7 +231,7 @@ function detail(p: ProductResult, d: Json): ProductDetail {
     available: d.availability === "InStock" ? true : d.availability === "OutOfStock" ? false : stock != null ? stock > 0 : p.available,
     freeShipping: typeof d.freeShipping === "boolean" ? d.freeShipping : p.freeShipping, condition: str(d.itemCondition) ?? p.condition,
     brand: str(obj(d.brand).name) ?? str(d.brand) ?? p.brand, soldQuantity: pos(d.soldCount) ?? p.soldQuantity,
-    attributes, description: str(d.description), features: [], images, offers: [], offersTotal: null,
+    attributes, description: str(d.description), features: [], images: images.length ? images : p.imageUrl ? [p.imageUrl] : [], offers: [], offersTotal: null,
   };
 }
 
@@ -274,11 +290,11 @@ export const geckoMercadoLivre: Connector = {
   async getProduct(externalId, ctx) {
     const [k, id] = [externalId.slice(0, 1), externalId.slice(2)];
     if (!ML_ID.test(id) || (k !== "p" && k !== "i")) throw new ConnectorError("mercadolivre", "not_found", "Identificador inválido");
+    void ctx;
     const url = k === "p" ? `https://www.mercadolivre.com.br/p/${id}` : `https://produto.mercadolivre.com.br/MLB-${id.slice(3)}`;
-    const { data, at } = await extract("mercadolivre", "product", { target: "mercadolivre.com.br", type: "pdp", region: "BR", url }, ctx);
-    const p = mlItem({ ...data, productId: k === "p" ? id : null, itemId: k === "i" ? id : str(data.itemId), soldCountReported: data.soldCount, imageUrl: imgUrl(data.mainImage) }, at);
-    if (!p) throw new ConnectorError("mercadolivre", "not_found", "Produto não encontrado no Mercado Livre");
-    return detail({ ...p, externalId }, data);
+    return offlineProduct("mercadolivre", "mercadolivre.com.br", { target: "mercadolivre.com.br", type: "pdp", region: "BR", url },
+      k === "p" ? { productId: id } : { itemId: id },
+      (i, at) => mlItem({ ...i, soldCountReported: i.soldCountReported ?? i.soldCount, imageUrl: i.imageUrl ?? imgUrl(i.mainImage) }, at), (p) => ({ ...p, externalId }));
   },
   async getCategories() { return availableCategories(FALLBACK_ML_CATEGORIES, mlRankBody); },
   async getTrends() { return []; },
@@ -303,10 +319,9 @@ export const geckoShopee: Connector = {
   async getProduct(externalId, ctx) {
     const m = /^s-(\d{1,20})x(\d{1,20})$/.exec(externalId);
     if (!m) throw new ConnectorError("shopee", "not_found", "Identificador inválido");
-    const { data, at } = await extract("shopee", "product", { target: "shopee.com.br", type: "pdp", region: "BR", url: `https://shopee.com.br/product/${m[1]}/${m[2]}` }, ctx);
-    const p = shopeeItem({ ...data, shopId: m[1], itemId: m[2] }, at);
-    if (!p) throw new ConnectorError("shopee", "not_found", "Produto não encontrado na Shopee");
-    return detail(p, data);
+    void ctx;
+    return offlineProduct("shopee", "shopee.com.br", { target: "shopee.com.br", type: "pdp", region: "BR", url: `https://shopee.com.br/product/${m[1]}/${m[2]}` },
+      { itemId: m[2] }, (i, at) => shopeeItem({ ...i, shopId: i.shopId ?? m[1] }, at));
   },
   async getCategories() { return availableCategories(shopeeCats, (id) => shopeeRankBody(SHOPEE_CATEGORIES.find((c) => c.id === id)!)); },
   /** Busca da categoria na ordenação "Mais vendidos" da própria Shopee: a posição é a da Shopee. */
@@ -344,10 +359,9 @@ export const geckoTikTok: Connector = {
   async getProduct(externalId, ctx) {
     const id = externalId.slice(2);
     if (!externalId.startsWith("t-") || !/^\d{6,25}$/.test(id)) throw new ConnectorError("tiktokshop", "not_found", "Identificador inválido");
-    const { data, at } = await extract("tiktokshop", "product", { target: "tiktok.com", type: "pdp", region: "BR", url: tiktokLink(id, null) }, ctx);
-    const p = tiktokItem({ ...data, productId: id, image: data.mainImage ?? arr(data.images)[0] }, at);
-    if (!p) throw new ConnectorError("tiktokshop", "not_found", "Produto não encontrado no TikTok Shop");
-    return detail(p, data);
+    void ctx;
+    return offlineProduct("tiktokshop", "tiktok.com", { target: "tiktok.com", type: "pdp", region: "BR", url: tiktokLink(id, null) },
+      { productId: id }, (i, at) => tiktokItem({ ...i, image: i.image ?? i.mainImage ?? arr(i.images)[0] }, at));
   },
   async getCategories() { return availableCategories(tiktokCats, (id) => tiktokBody(TIKTOK_CATEGORIES.find((c) => c.id === id)!.keyword)); },
   /** O TikTok Shop não tem página pública de ranking: mostramos a busca da categoria ordenada pela quantidade vendida que o próprio TikTok informa. */

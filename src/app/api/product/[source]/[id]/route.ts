@@ -23,7 +23,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ source:
   } catch (e) {
     if (e instanceof ConnectorError) {
       const code = e.code === "not_found" ? "not_found" : e.code === "timeout" ? "timeout" : e.code === "rate_limited" ? "rate_limited" : "source_unavailable";
-      return apiError(code, USER_MESSAGES[e.code], { source });
+      return apiError(code, e.code === "not_found" && e.message.includes("Worthwise") ? e.message : USER_MESSAGES[e.code], { source });
     }
     console.error("[product]", e instanceof Error ? e.message : e);
     return apiError("internal", "Não foi possível carregar o produto.");
