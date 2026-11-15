@@ -1,4 +1,5 @@
 "use client";
+import { Trophy } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -26,9 +27,9 @@ export function StoreTabs({ stores, active, links }: { stores: readonly string[]
                 className={cn("relative isolate flex h-10 items-center gap-2.5 rounded-[10px] px-3.5 text-[15px] font-medium transition-colors", on ? "text-fg" : "text-muted hover:text-fg")}>
                 {on ? <StorePill id="tabs" /> : null}
                 <motion.span animate={on ? { scale: [1, 1.18, 1], rotate: [0, -8, 0] } : { scale: 1, rotate: 0 }} transition={{ duration: 0.45 }} className="flex">
-                  <SourceMark source={s} size={22} />
+                  {s === "geral" ? <span className="flex size-[22px] items-center justify-center rounded-[6px] bg-gradient-to-br from-[#F59E0B] to-[#EF4444] text-white"><Trophy size={13} /></span> : <SourceMark source={s} size={22} />}
                 </motion.span>
-                {sourceName(s)}
+                {s === "geral" ? "Geral" : sourceName(s)}
               </Link>
             </li>
           );

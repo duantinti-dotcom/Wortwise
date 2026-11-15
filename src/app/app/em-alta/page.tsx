@@ -7,7 +7,9 @@ import { StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
 import { sourceName } from "@/components/source-mark";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { getUsage, isAdmin } from "@/lib/auth";
-import { isStore, loadStoreTrending, STORES, trendingConfigured, type StoreId } from "@/lib/trending";
+import { isStore, loadOverall, loadStoreTrending, STORES, trendingConfigured, type StoreId } from "@/lib/trending";
+import { loadHistories } from "@/lib/product";
+import { Trophy } from "lucide-react";
 import { supabaseAnon } from "@/lib/supabase/server";
 import { cn, relativeTime } from "@/lib/utils";
 import { TrendingGrid } from "./grid";
@@ -30,6 +32,7 @@ const SOURCE_NOTE: Record<StoreId, { text: string; link: string }> = {
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ categoria?: string; loja?: string }> }) {
   const { categoria, loja } = await searchParams;
+  if (loja === "geral") return <Overall />;
   // Sem o Mercado Livre conectado, a tela abre direto na Shopee (que tem conteúdo).
   const store: StoreId = isStore(loja) ? loja : trendingConfigured() ? "mercadolivre" : "shopee";
   const [data, usage, admin] = await Promise.all([loadStoreTrending(store, categoria), getUsage(), isAdmin()]);
@@ -45,7 +48,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
       <PageHeader title="Mais vendidos" description="Os produtos que mais saem em cada loja, por categoria."
         action={data.updatedAt ? <span className="badge"><TrendingUp size={13} />atualizado {relativeTime(data.updatedAt)}</span> : undefined} />
 
-      <StoreTabs stores={STORES} active={store} links={Object.fromEntries(STORES.map((s) => [s, qs(s)]))} />
+      <StoreTabs stores={["geral", ...STORES]} active={store} links={Object.fromEntries(["geral", ...STORES].map((s) => [s, qs(s)]))} />
 
       <StoreSwitch store={store}>
       {data.state.ok && data.categories.length ? (
@@ -96,7 +99,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
               </section>
             ) : null}
 
-            {shown.length ? <TrendingGrid products={shown} locked={locked} /> : (
+            {shown.length ? <TrendingGrid products={shown} locked={locked} histories={await loadHistories(shown)} /> : (
               <EmptyState icon={TrendingUp} title="Nenhum produto nesta categoria">Escolha outra categoria acima.</EmptyState>
             )}
 
@@ -107,6 +110,37 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
           </>
         )}
       </div>
+      </StoreSwitch>
+    </>
+  );
+}
+
+/** Aba "Geral": os destaques de todas as lojas com dados oficiais, num ranking só. */
+async function Overall() {
+  const [data, usage] = await Promise.all([loadOverall(), getUsage()]);
+  const visible = usage.plan === "free" ? await freeVisible() : data.products.length;
+  const shown = data.products.slice(0, visible);
+  const locked = Math.max(0, data.products.length - shown.length);
+  const qs = (s: string) => `/app/em-alta?loja=${s}`;
+  return (
+    <>
+      <PageHeader title="Mais vendidos" description="Os produtos que mais saem em cada loja, por categoria."
+        action={data.updatedAt ? <span className="badge"><TrendingUp size={13} />atualizado {relativeTime(data.updatedAt)}</span> : undefined} />
+      <StoreTabs stores={["geral", ...STORES]} active="geral" links={Object.fromEntries(["geral", ...STORES].map((s) => [s, qs(s)]))} />
+      <StoreSwitch store="geral">
+        <div className="mt-8">
+          {shown.length ? (
+            <>
+              <h2 className="mb-5 flex items-center gap-2 text-[19px] font-semibold tracking-tight"><Trophy size={18} className="text-brand-hi" />Os que mais se destacam em todas as lojas</h2>
+              <TrendingGrid products={shown} locked={locked} histories={await loadHistories(shown)} />
+              <p className="mt-8 text-[13px] text-faint">Junta o top 10 oficial de cada loja conectada: primeiro os 1º colocados, depois os 2º, e assim por diante.</p>
+            </>
+          ) : (
+            <EmptyState icon={Trophy} title="Ranking geral chegando">
+              Aqui aparecem os produtos que mais vendem em todas as lojas juntas, com foto, preço e link reais. Ele liga assim que o Mercado Livre ou a Shopee estiverem com os dados oficiais.
+            </EmptyState>
+          )}
+        </div>
       </StoreSwitch>
     </>
   );

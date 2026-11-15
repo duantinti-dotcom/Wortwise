@@ -30,6 +30,8 @@ export interface ProductResult {
   sourceUpdatedAt: string | null;
   /** Posição no ranking de vendas da própria fonte (ex.: Amazon), quando informada. */
   salesRank?: { rank: number; category: string | null } | null;
+  /** Quantidade vendida informada pela própria fonte (quando ela informa). */
+  soldQuantity?: number | null;
   /** Selo de entrega rápida da fonte (ex.: Prime). */
   fastDelivery?: boolean | null;
 }

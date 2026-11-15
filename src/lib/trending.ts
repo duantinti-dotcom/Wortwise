@@ -3,7 +3,8 @@ import { amazon } from "@/lib/connectors/amazon";
 import { mercadoLivre } from "@/lib/connectors/mercadolivre";
 import { shopee, SHOPEE_CATEGORIES } from "@/lib/connectors/shopee";
 import { ConnectorError, USER_MESSAGES, type Category, type ConnectorContext, type RankedProduct, type TrendKeyword } from "@/lib/connectors/types";
-import { flushLogs } from "@/lib/search/service";
+import { flushLogs, toMarketItem } from "@/lib/search/service";
+import { serverRpcSafe } from "@/lib/supabase/server";
 
 /**
  * Vitrine "Em alta": ranking oficial de mais vendidos por categoria e buscas em alta do Mercado Livre.
@@ -35,6 +36,16 @@ export const FALLBACK_CATEGORIES: Category[] = [
   { id: "MLB3937", name: "Joias e Relógios" }, { id: "MLB264586", name: "Saúde" },
 ];
 export const DEFAULT_CATEGORY = "MLB1000";
+
+/** Quantos produtos mostrar por ranking. */
+export const TOP = 10;
+
+/** Guarda o preço real de cada produto do ranking: é assim que o gráfico de preço vai se formando. */
+async function record<T extends RankedProduct[]>(products: T): Promise<T> {
+  const items = products.filter((p) => p.price != null).map(toMarketItem);
+  if (items.length) await serverRpcSafe("server_upsert_market_data", { p_items: items });
+  return products;
+}
 
 export type TrendingState = { ok: true } | { ok: false; reason: "not_configured" | "error"; message: string };
 
@@ -69,10 +80,10 @@ export async function loadTrending(categoryId: string | null | undefined): Promi
   const category = list.find((c) => c.id === categoryId) ?? list.find((c) => c.id === DEFAULT_CATEGORY) ?? list[0]!;
   try {
     const [products, trends] = await Promise.all([
-      cached(`best:${category.id}`, () => mercadoLivre.getBestsellers!(category.id, ctx)),
+      cached(`best:${category.id}`, () => mercadoLivre.getBestsellers!(category.id, ctx).then(record)),
       cached(`trends:${category.id}`, () => mercadoLivre.getTrends!(category.id, ctx)).catch(() => ({ value: [] as TrendKeyword[], at: Date.now() })),
     ]);
-    return { state: { ok: true }, categories: list, category, products: products.value, trends: trends.value, updatedAt: new Date(products.at).toISOString() };
+    return { state: { ok: true }, categories: list, category, products: products.value.slice(0, TOP), trends: trends.value, updatedAt: new Date(products.at).toISOString() };
   } catch (e) {
     return { ...empty(failure(e)), categories: list, category };
   } finally {
@@ -109,11 +120,29 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
   if (shopee.state().state !== "connected") return { ...base, state: { ok: false, reason: "not_configured", message: USER_MESSAGES.not_configured }, storeState: "not_configured" };
   const ctx: ConnectorContext = { logs: [] };
   try {
-    const r = await cached(`shopee:${category.id}`, () => shopee.getBestsellers!(category.id, ctx));
-    return { ...base, state: { ok: true }, products: r.value, updatedAt: new Date(r.at).toISOString(), storeState: "connected" };
+    const r = await cached(`shopee:${category.id}`, () => shopee.getBestsellers!(category.id, ctx).then(record));
+    return { ...base, state: { ok: true }, products: r.value.slice(0, TOP), updatedAt: new Date(r.at).toISOString(), storeState: "connected" };
   } catch (e) {
     return { ...base, state: failure(e), storeState: "connected" };
   } finally {
     if (ctx.logs.length) await flushLogs(ctx.logs).catch(() => {});
   }
+}
+
+/** "Geral": os destaques de todas as lojas com dados oficiais, num ranking só. */
+export async function loadOverall(): Promise<{ products: RankedProduct[]; stores: string[]; updatedAt: string | null }> {
+  const parts = await Promise.all([
+    trendingConfigured() ? loadTrending(DEFAULT_CATEGORY) : null,
+    shopee.state().state === "connected" ? loadStoreTrending("shopee", SHOPEE_CATEGORIES[0]!.id) : null,
+  ]);
+  const lists = parts.filter((p): p is TrendingData => Boolean(p?.state.ok && p.products.length));
+  // Intercala por posição (1º de cada loja, depois 2º...); empate: quem informa mais vendas vem antes.
+  const merged: RankedProduct[] = [];
+  for (let i = 0; i < TOP; i++) {
+    const round = lists.map((l) => l.products[i]).filter((p): p is RankedProduct => Boolean(p))
+      .sort((a, b) => (b.soldQuantity ?? 0) - (a.soldQuantity ?? 0));
+    merged.push(...round);
+  }
+  const top = merged.slice(0, TOP).map((p, i) => ({ ...p, rank: i + 1 }));
+  return { products: top, stores: [...new Set(lists.flatMap((l) => l.products.map((p) => p.source)))], updatedAt: lists[0]?.updatedAt ?? null };
 }

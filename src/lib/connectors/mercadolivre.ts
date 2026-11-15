@@ -35,7 +35,7 @@ const shippingSchema = z.object({ free_shipping: z.boolean().nullish() }).loose(
 
 const listingSchema = z.object({
   id: z.string(), title: z.string(), price: num, original_price: num, currency_id: str, thumbnail: str,
-  permalink: str, condition: str, available_quantity: num, category_id: str, catalog_product_id: str,
+  permalink: str, condition: str, available_quantity: num, sold_quantity: num, category_id: str, catalog_product_id: str,
   seller: z.object({ id: z.union([z.number(), z.string()]).nullish(), nickname: str }).loose().nullish(),
   shipping: shippingSchema, attributes: z.array(attrSchema).nullish(), official_store_name: str,
 }).loose();
@@ -137,6 +137,7 @@ function fromListing(l: z.infer<typeof listingSchema>, now: string): ProductResu
     freeShipping: l.shipping?.free_shipping ?? null, condition: l.condition ?? null,
     brand: attr(l.attributes, "BRAND"), model: attr(l.attributes, "MODEL"), gtin: attr(l.attributes, "GTIN"),
     categoryId: l.category_id ?? null, offersCount: null, attributes: attrList(l.attributes), collectedAt: now, sourceUpdatedAt: null,
+    soldQuantity: l.sold_quantity != null && l.sold_quantity > 0 ? l.sold_quantity : null,
   };
 }
 

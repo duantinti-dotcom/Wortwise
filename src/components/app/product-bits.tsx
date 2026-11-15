@@ -62,7 +62,29 @@ export function FavoriteButton({ product, initial, onChange, className }: { prod
  * Cartão de produto: foto grande, preço, sinais da fonte e acesso direto ao anúncio.
  * O cartão inteiro abre a análise no Worthwise; o botão da fonte abre o anúncio original em nova aba.
  */
-export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void; rank?: number }) {
+/** Mini gráfico do preço (observações reais guardadas pelo Worthwise). */
+export function Sparkline({ points }: { points: { date: string; price: number }[] }) {
+  const ps = points.map((x) => x.price);
+  const min = Math.min(...ps), max = Math.max(...ps), span = max - min || 1;
+  const w = 120, h = 32;
+  const d = ps.map((v, i) => `${i ? "L" : "M"}${((i / (ps.length - 1)) * w).toFixed(1)},${(h - 3 - ((v - min) / span) * (h - 6)).toFixed(1)}`).join(" ");
+  const first = ps[0]!, last = ps.at(-1)!;
+  const pct = first ? ((last - first) / first) * 100 : 0;
+  const up = pct > 0.5, down = pct < -0.5;
+  const color = up ? "#F87171" : down ? "#4ADE80" : "#A1A1AA";
+  return (
+    <div className="flex items-center gap-3">
+      <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h} className="h-8 w-full max-w-[120px]" aria-hidden><path d={d} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      <span className={cn("tabular shrink-0 text-[12.5px] font-semibold", up ? "text-neg" : down ? "text-pos" : "text-muted")} title={`Desde ${relativeTime(points[0]!.date)}`}>
+        {up ? "▲" : down ? "▼" : "="} {Math.abs(pct).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%
+      </span>
+    </div>
+  );
+}
+
+const CALC_PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classico", shopee: "shopee", amazon: "amazon", tiktokshop: "tiktokshop" };
+
+export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void; rank?: number; history?: { date: string; price: number }[] }) {
   const discount = p.originalPrice && p.price && p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
   const source = SOURCE_LABELS[p.source] ?? p.source;
   return (
@@ -90,6 +112,13 @@ export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResul
           {p.originalPrice && discount ? <span className="tabular text-xs text-faint line-through">{formatMoney(p.originalPrice, p.currency ?? "BRL")}</span> : null}
           {rank != null && discount ? <span className="badge badge-pos !h-5 !px-1.5 !text-[11px]">−{discount}%</span> : null}
         </div>
+        {p.soldQuantity ? <div className="mt-1.5 text-[13px] font-medium text-soft">+{p.soldQuantity.toLocaleString("pt-BR")} vendidos</div> : null}
+        {history ? (
+          <div className="mt-3">
+            <div className="text-[11.5px] text-faint">Preço nos últimos dias</div>
+            {history.length >= 2 ? <Sparkline points={history} /> : <div className="text-[12.5px] text-muted">Acompanhando desde hoje</div>}
+          </div>
+        ) : null}
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
           {p.rating != null ? <span className="flex items-center gap-1"><Star size={12} className="fill-brand text-brand" />{p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{p.reviewsCount != null ? ` (${p.reviewsCount.toLocaleString("pt-BR")})` : ""}</span> : null}
           <span className="truncate">{p.sellerName ?? (p.kind === "catalog_product" ? "Ficha de catálogo" : "Vendedor não informado")}</span>
@@ -102,7 +131,8 @@ export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResul
             </a>
           ) : null}
         </div>
-        <div className="mt-3 text-[11.5px] text-faint">coletado {relativeTime(p.collectedAt)}</div>
+        {p.price != null ? <Link href={`/app/calculadora?canal=${CALC_PRESET[p.source] ?? ""}&preco=${p.price}`} className="relative z-10 mt-2.5 text-[12.5px] font-medium text-brand-hi hover:underline">Calcular lucro e preço recomendado</Link> : null}
+        <div className="mt-2 text-[11.5px] text-faint">coletado {relativeTime(p.collectedAt)}</div>
       </div>
     </article>
   );

@@ -46,3 +46,21 @@ export async function loadHistory(source: string, externalId: string): Promise<P
   return all.map((o) => ({ date: o.collected_at as string, price: Number(o.price), metric: o.metric_type as string,
     offersCount: (o.offers_count as number | null) ?? null }));
 }
+
+/** Histórico de preço (últimos 90 dias) de vários produtos de uma vez, para os mini gráficos do ranking. */
+export async function loadHistories(items: { source: string; externalId: string }[]): Promise<Record<string, { date: string; price: number }[]>> {
+  if (!items.length) return {};
+  const supabase = await supabaseServer();
+  const { data: rows } = await supabase.from("products").select("id, source, external_id").in("external_id", items.map((i) => i.externalId));
+  const byId = new Map((rows ?? []).map((r) => [r.id as string, `${r.source}:${r.external_id}`]));
+  if (!byId.size) return {};
+  const since = new Date(Date.now() - 90 * 86400000).toISOString();
+  const { data: obs } = await supabase.from("price_observations").select("product_id, price, collected_at")
+    .in("product_id", [...byId.keys()]).gte("collected_at", since).order("collected_at", { ascending: true }).limit(3000);
+  const out: Record<string, { date: string; price: number }[]> = {};
+  for (const o of obs ?? []) {
+    const k = byId.get(o.product_id as string);
+    if (k) (out[k] ??= []).push({ date: o.collected_at as string, price: Number(o.price) });
+  }
+  return out;
+}

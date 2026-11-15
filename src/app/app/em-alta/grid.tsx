@@ -7,7 +7,7 @@ import type { RankedProduct } from "@/lib/connectors/types";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 /** Grade de produtos em alta, com entrada em cascata e espaços bloqueados para o plano grátis. */
-export function TrendingGrid({ products, locked }: { products: RankedProduct[]; locked: number }) {
+export function TrendingGrid({ products, locked, histories }: { products: RankedProduct[]; locked: number; histories?: Record<string, { date: string; price: number }[]> }) {
   const [favs, setFavs] = useState<Set<string>>(new Set());
   const { openUpgrade } = useUpgrade();
   const reduce = useReducedMotion();
@@ -17,7 +17,7 @@ export function TrendingGrid({ products, locked }: { products: RankedProduct[]; 
     });
   }, []);
   const cells = [
-    ...products.map((p) => ({ key: `${p.source}:${p.externalId}`, node: <ProductCard p={p} rank={p.rank} favorite={favs.has(`${p.source}:${p.externalId}`)} /> })),
+    ...products.map((p) => ({ key: `${p.source}:${p.externalId}`, node: <ProductCard p={p} rank={p.rank} history={histories?.[`${p.source}:${p.externalId}`] ?? []} favorite={favs.has(`${p.source}:${p.externalId}`)} /> })),
     ...Array.from({ length: locked }, (_, i) => ({ key: `locked-${i}`, node: <LockedCard onUnlock={() => openUpgrade("Veja o ranking completo de mais vendidos")} /> })),
   ];
   return (

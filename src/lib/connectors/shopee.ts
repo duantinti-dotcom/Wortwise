@@ -113,7 +113,7 @@ export function toResult(n: Node, now: string): ProductResult {
     available: null, freeShipping: null, condition: "new", brand: null, model: null, gtin: null,
     categoryId: n.productCatIds?.length ? String(n.productCatIds.at(-1)) : null, offersCount: null,
     attributes: sold != null ? [{ name: "Vendidos (segundo a Shopee)", value: sold.toLocaleString("pt-BR") }] : [],
-    collectedAt: now, sourceUpdatedAt: null,
+    collectedAt: now, sourceUpdatedAt: null, soldQuantity: sold != null && sold > 0 ? sold : null,
   };
 }
 
