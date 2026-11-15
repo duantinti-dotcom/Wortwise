@@ -4,7 +4,9 @@ import Link from "next/link";
 import { AiIdeas } from "@/components/app/ai-ideas";
 import { StoreGuide } from "@/components/app/store-guide";
 import { StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
-import { sourceName } from "@/components/source-mark";
+import { inStore, sourceName } from "@/components/source-mark";
+import { CuratedGrid } from "@/components/app/curated-grid";
+import { loadCurated } from "@/lib/curated";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { getUsage, isAdmin } from "@/lib/auth";
 import { isStore, loadOverall, loadStoreTrending, STORES, trendingConfigured, type StoreId } from "@/lib/trending";
@@ -35,7 +37,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
   if (loja === "geral") return <Overall />;
   // Sem o Mercado Livre conectado, a tela abre direto na Shopee (que tem conteúdo).
   const store: StoreId = isStore(loja) ? loja : trendingConfigured() ? "mercadolivre" : "shopee";
-  const [data, usage, admin] = await Promise.all([loadStoreTrending(store, categoria), getUsage(), isAdmin()]);
+  const [data, usage, admin, curated] = await Promise.all([loadStoreTrending(store, categoria), getUsage(), isAdmin(), loadCurated(store)]);
   const free = usage.plan === "free";
   const visible = free ? await freeVisible() : data.products.length;
   const shown = data.products.slice(0, visible);
@@ -68,7 +70,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
       ) : null}
 
       <div className="mt-8">
-        {!data.state.ok ? (
+        {!data.state.ok && curated.length ? (
+          <div className="space-y-16">
+            <section>
+              <h2 className="mb-5 text-[19px] font-semibold tracking-tight">Top {curated.length} {inStore(store)}</h2>
+              <CuratedGrid items={curated} />
+            </section>
+            {store !== "mercadolivre" ? <AiIdeas store={store} /> : null}
+          </div>
+        ) : !data.state.ok ? (
           store === "mercadolivre" ? (
             <div className="space-y-16">
               <EmptyState icon={Flame} title="Ranking do Mercado Livre chegando">
@@ -117,7 +127,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
 
 /** Aba "Geral": os destaques de todas as lojas com dados oficiais, num ranking só. */
 async function Overall() {
-  const [data, usage] = await Promise.all([loadOverall(), getUsage()]);
+  const [data, usage, curated] = await Promise.all([loadOverall(), getUsage(), loadCurated()]);
+  const topCurated = curated.slice(0, 10);
   const visible = usage.plan === "free" ? await freeVisible() : data.products.length;
   const shown = data.products.slice(0, visible);
   const locked = Math.max(0, data.products.length - shown.length);
@@ -129,7 +140,12 @@ async function Overall() {
       <StoreTabs stores={["geral", ...STORES]} active="geral" links={Object.fromEntries(["geral", ...STORES].map((s) => [s, qs(s)]))} />
       <StoreSwitch store="geral">
         <div className="mt-8">
-          {shown.length ? (
+          {topCurated.length && !shown.length ? (
+            <>
+              <h2 className="mb-5 flex items-center gap-2 text-[19px] font-semibold tracking-tight"><Trophy size={18} className="text-brand-hi" />Os que mais se destacam em todas as lojas</h2>
+              <CuratedGrid items={topCurated} showStore />
+            </>
+          ) : shown.length ? (
             <>
               <h2 className="mb-5 flex items-center gap-2 text-[19px] font-semibold tracking-tight"><Trophy size={18} className="text-brand-hi" />Os que mais se destacam em todas as lojas</h2>
               <TrendingGrid products={shown} locked={locked} histories={await loadHistories(shown)} />

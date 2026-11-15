@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [["/admin", "Visão geral"], ["/admin/usuarios", "Usuários"], ["/admin/integracoes", "Integrações"], ["/admin/planos", "Planos e cotas"],
-  ["/admin/fornecedores", "Fornecedores"], ["/admin/blog", "Blog"], ["/admin/logs", "Logs"], ["/admin/saude-do-banco", "Saúde do Banco"], ["/admin/configuracoes", "Configurações"]] as const;
+  ["/admin/vitrine", "Vitrine"], ["/admin/fornecedores", "Fornecedores"], ["/admin/blog", "Blog"], ["/admin/logs", "Logs"], ["/admin/saude-do-banco", "Saúde do Banco"], ["/admin/configuracoes", "Configurações"]] as const;
 
 export function AdminNav() {
   const path = usePathname();
