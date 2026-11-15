@@ -14,8 +14,8 @@
     "crons": ["*/30 * * * *", "17 6 * * *"]
   },
   "vars": {
-    "APP_URL": "https://worthwise.duantinti.workers.dev",
-    "NEXT_PUBLIC_APP_URL": "https://worthwise.duantinti.workers.dev",
+    "APP_URL": "https://worthwise.site",
+    "NEXT_PUBLIC_APP_URL": "https://worthwise.site",
     "NEXT_PUBLIC_SUPABASE_URL": "https://uahetwewcuhcmpikvnzp.supabase.co",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_MsdNjCNByK2ngy0Tymxa8w_SRPiM1u5",
     "HEROPAY_API_URL": "https://api.beta.heropay.tech",
