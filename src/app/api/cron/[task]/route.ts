@@ -29,6 +29,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (task === "meli-probe") {
     // Testa quais fontes públicas respondem sem credenciais.
     const urls = [
+      "https://www.mercadolivre.com.br/mais-vendidos/MLB1574",
+      "https://lista.mercadolivre.com.br/garrafa-termica",
+      "https://www.amazon.com.br/gp/bestsellers/kitchen",
+      "https://shopee.com.br/search?keyword=garrafa%20termica",
       "https://www.amazon.com.br/gp/rss/bestsellers/electronics",
       "https://www.amazon.com.br/gp/rss/bestsellers/kitchen",
       "https://www.amazon.com/gp/rss/bestsellers/electronics",
@@ -41,7 +45,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const out = [];
     for (const u of urls) {
       const t = Date.now();
-      try { const r = await fetch(u, { headers: { accept: "application/json, application/rss+xml, */*" }, signal: AbortSignal.timeout(10000) }); out.push({ u, status: r.status, type: r.headers.get("content-type"), ms: Date.now() - t, body: (await r.text()).slice(0, 400) }); }
+      try {
+        const r = await fetch(u, { headers: { accept: "text/html,application/json;q=0.9,*/*;q=0.8", "accept-language": "pt-BR,pt;q=0.9", "user-agent": "Mozilla/5.0 (compatible; WorthwiseBot/1.0; +https://worthwise.site)" }, signal: AbortSignal.timeout(12000) });
+        const body = await r.text();
+        out.push({ u, status: r.status, type: r.headers.get("content-type"), ms: Date.now() - t, size: body.length,
+          prices: (body.match(/R\$\s?\d[\d.]*,\d{2}|"price":\s?\d+/g) ?? []).length, title: (/<title>([^<]{0,90})/i.exec(body)?.[1] ?? "").trim(), robot: /captcha|robot|verifica|unusual traffic|access denied/i.test(body) });
+      }
       catch (err) { out.push({ u, error: String(err).slice(0, 100) }); }
     }
     return NextResponse.json(out);
