@@ -69,6 +69,7 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
   useEffect(mountTurnstile);
 
   async function google() {
+    if (!googleOn) { setError("O login com Google ainda está sendo ativado. Por enquanto, entre com e-mail e senha."); return; }
     setBusy("google");
     setError(null);
     const { error: e } = await supabaseBrowser().auth.signInWithOAuth({
@@ -147,7 +148,7 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
 
       {!configured ? <div role="alert" className="mt-6 rounded-xl border border-neg/30 bg-neg/8 px-4 py-3 text-sm text-danger">A autenticação ainda não está configurada neste ambiente.</div> : null}
 
-      {(mode === "login" || mode === "signup") && googleOn ? (
+      {mode === "login" || mode === "signup" ? (
         <>
           <button type="button" onClick={google} disabled={Boolean(busy) || !configured} className="btn btn-secondary btn-lg mt-8 w-full">
             {busy === "google" ? <Loader2 size={18} className="animate-spin" /> : <GoogleIcon />} Continuar com Google

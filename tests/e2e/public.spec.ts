@@ -106,13 +106,12 @@ test.describe("proteção de rotas e APIs", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   });
 
-  test("login não mostra o botão do Google enquanto o provedor estiver desligado no Supabase", async ({ page }) => {
+  test("login mostra o botão do Google e avisa com clareza enquanto ele não estiver ativado", async ({ page }) => {
     await page.goto("/entrar");
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    const res = await page.request.get("/api/health");
-    expect(res.ok()).toBeTruthy();
-    // O botão só aparece quando /auth/v1/settings informa external.google = true.
-    const shown = await page.getByRole("button", { name: "Continuar com Google" }).count();
-    expect(shown === 0 || shown === 1).toBeTruthy();
+    await page.locator("form[data-hydrated]").waitFor();
+    const btn = page.getByRole("button", { name: "Continuar com Google" });
+    await expect(btn).toBeVisible();
+    await btn.click();
+    await expect(page.getByText("O login com Google ainda está sendo ativado")).toBeVisible();
   });
 });
