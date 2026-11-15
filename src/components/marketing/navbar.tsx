@@ -29,20 +29,20 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-3 pt-3 md:pt-4">
       <nav aria-label="Principal"
-        className={cn("flex h-[60px] w-full items-center justify-between rounded-full border px-2.5 pl-5 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          scrolled ? "glass glass-lens max-w-[1060px]" : "max-w-[1280px] border-transparent bg-transparent")}>
-        <Link href="/" aria-label="Worthwise — página inicial"><Logo /></Link>
-        <ul className="hidden items-center gap-0.5 lg:flex">
+        className={cn("nav-bar grid h-[60px] w-full grid-cols-[1fr_auto_1fr] items-center rounded-full border px-2.5 pl-5 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          scrolled ? "glass glass-lens max-w-[1180px]" : "max-w-[1280px] border-transparent bg-transparent")}>
+        <Link href="/" aria-label="Worthwise — página inicial" className="justify-self-start"><Logo /></Link>
+        <ul className="hidden items-center justify-center gap-0.5 xl:flex">
           {LINKS.map((l) => (
             <li key={l.href}><Link href={l.href} className="rounded-lg px-3 py-2 text-[14px] text-muted transition-colors hover:bg-tint/[0.06] hover:text-fg">{l.label}</Link></li>
           ))}
         </ul>
-        <div className="flex items-center gap-1.5">
+        <div className="col-start-3 flex items-center justify-self-end gap-1.5">
           <ThemeToggle size="sm" className="mr-1 hidden sm:inline-flex" />
-          <Link href="/entrar" className="btn btn-secondary hidden sm:inline-flex">Entrar</Link>
+          <Link href="/entrar" className="hidden rounded-full px-3 py-2 text-[14px] font-medium text-soft transition-colors hover:text-fg sm:inline-flex">Entrar</Link>
           <Link href="/cadastro" className="btn btn-contrast max-sm:!h-9 max-sm:!px-4 max-sm:!text-[13px]">Começar grátis <ArrowRight size={15} className="btn-arrow hidden sm:block" /></Link>
           <D.Root open={open} onOpenChange={setOpen}>
-            <D.Trigger className="btn btn-ghost !px-2.5 lg:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>
+            <D.Trigger className="btn btn-ghost !px-2.5 xl:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>
             <D.Portal>
               <D.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm data-[state=open]:animate-overlay-in data-[state=closed]:animate-overlay-out" />
               <D.Content className="lg glass-strong fixed inset-x-3 top-3 z-50 origin-top rounded-2xl p-3 outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out">
