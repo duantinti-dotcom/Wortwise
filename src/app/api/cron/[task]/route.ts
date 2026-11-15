@@ -27,6 +27,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
   }
+  if (task === "img-check") {
+    const u = "https://images-na.ssl-images-amazon.com/images/I/61Wa-avvnwL._AC_UL900_SR900,600_.jpg";
+    const r = await fetch(u, { signal: AbortSignal.timeout(10000) });
+    return NextResponse.json({ status: r.status, type: r.headers.get("content-type"), bytes: (await r.arrayBuffer()).byteLength });
+  }
   if (task === "amz-check") {
     const out = [];
     for (const c of AMAZON_CATEGORIES) {
