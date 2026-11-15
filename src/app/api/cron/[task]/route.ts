@@ -27,8 +27,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
   }
   if (task === "meli-probe") {
-    // Testa quais endpoints públicos do Mercado Livre respondem sem credenciais.
+    // Testa quais fontes públicas respondem sem credenciais.
     const urls = [
+      "https://www.amazon.com.br/gp/rss/bestsellers/electronics",
+      "https://www.amazon.com.br/gp/rss/bestsellers/kitchen",
+      "https://www.amazon.com/gp/rss/bestsellers/electronics",
       "https://api.mercadolibre.com/sites/MLB/search?q=garrafa%20termica&limit=3",
       "https://api.mercadolibre.com/highlights/MLB/category/MLB1574",
       "https://api.mercadolibre.com/products/search?status=active&site_id=MLB&q=garrafa%20termica&limit=3",
@@ -38,7 +41,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const out = [];
     for (const u of urls) {
       const t = Date.now();
-      try { const r = await fetch(u, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(10000) }); out.push({ u, status: r.status, ms: Date.now() - t, body: (await r.text()).slice(0, 220) }); }
+      try { const r = await fetch(u, { headers: { accept: "application/json, application/rss+xml, */*" }, signal: AbortSignal.timeout(10000) }); out.push({ u, status: r.status, type: r.headers.get("content-type"), ms: Date.now() - t, body: (await r.text()).slice(0, 400) }); }
       catch (err) { out.push({ u, error: String(err).slice(0, 100) }); }
     }
     return NextResponse.json(out);
