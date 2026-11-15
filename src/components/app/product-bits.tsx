@@ -87,6 +87,9 @@ const CALC_PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classi
 export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void; rank?: number; history?: { date: string; price: number }[] }) {
   const discount = p.originalPrice && p.price && p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
   const source = SOURCE_LABELS[p.source] ?? p.source;
+  // Amazon (mais vendidos da página pública): a análise detalhada fica na própria Amazon.
+  const external = p.source === "amazon" && Boolean(p.permalink);
+  const analyzeHref = external ? p.permalink! : `/app/produto/${p.source}/${p.externalId}`;
   return (
     <article className="card card-hover group relative flex flex-col overflow-hidden">
       <div className="relative m-2 overflow-hidden rounded-[10px]">
@@ -105,7 +108,7 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           {p.salesRank ? <span className="ml-auto text-brand-hi" title={p.salesRank.category ? `Ranking de vendas em ${p.salesRank.category}` : "Ranking de vendas"}>#{p.salesRank.rank.toLocaleString("pt-BR")} em vendas</span> : null}
         </div>
         <h3 className="mt-2.5 line-clamp-2 text-[14.5px] font-medium leading-snug">
-          <Link href={`/app/produto/${p.source}/${p.externalId}`} className="outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-brand-hi">{p.title}</Link>
+          <Link href={analyzeHref} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer nofollow" : undefined} className="outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-brand-hi">{p.title}</Link>
         </h3>
         <div className="mt-3 flex flex-wrap items-baseline gap-x-2">
           <span className={cn("tabular text-[20px] font-semibold tracking-tight", p.price == null && "text-sm font-normal text-faint")}>{formatMoney(p.price, p.currency ?? "BRL")}</span>
@@ -124,7 +127,7 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           <span className="truncate">{p.sellerName ?? (p.kind === "catalog_product" ? "Ficha de catálogo" : "Vendedor não informado")}</span>
         </div>
         <div className="relative z-10 mt-auto grid grid-cols-[1fr_auto] gap-2 pt-4">
-          <Link href={`/app/produto/${p.source}/${p.externalId}`} className="btn btn-primary btn-sm">Analisar</Link>
+          <Link href={analyzeHref} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer nofollow" : undefined} className="btn btn-primary btn-sm">{external ? "Ver na Amazon" : "Analisar"}</Link>
           {p.permalink ? (
             <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !w-9 !px-0" aria-label={`Abrir no ${source}`} title={`Abrir no ${source}`}>
               <ExternalLink size={15} />

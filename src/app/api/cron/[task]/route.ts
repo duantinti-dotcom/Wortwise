@@ -5,6 +5,7 @@ import { publicEnv, serverEnv } from "@/lib/env";
 import { createSubscriptionLink, deleteWebhook, getPaymentLink, HANDLED_TRIGGERS, listWebhooks, registerWebhook } from "@/lib/billing/heropay";
 import { runMaintenance } from "@/lib/maintenance";
 import { warmAllIdeas } from "@/lib/ai/ideas";
+import { AMAZON_CATEGORIES, getAmazonBestsellers } from "@/lib/connectors/amazon-bestsellers";
 import { aiProviders } from "@/lib/ai/provider";
 import { flushLogs, toMarketItem } from "@/lib/search/service";
 import { serverRpc, serverRpcSafe, supabaseAnon } from "@/lib/supabase/server";
@@ -25,6 +26,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   // "purge" (nome antigo do agendamento) e "maintenance" executam a mesma rotina.
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
+  }
+  if (task === "amz-check") {
+    const out = [];
+    for (const c of AMAZON_CATEGORIES) {
+      try { const r = await getAmazonBestsellers(c.id); out.push({ c: c.id, n: r.products.length, first: r.products[0] && { t: r.products[0].title.slice(0, 50), price: r.products[0].price, rating: r.products[0].rating, img: Boolean(r.products[0].imageUrl) } }); }
+      catch (e) { out.push({ c: c.id, error: e instanceof Error ? e.message : "erro" }); }
+    }
+    return NextResponse.json(out);
   }
   if (task === "amz-sample") {
     const r = await fetch("https://www.amazon.com.br/gp/bestsellers/kitchen", { headers: { accept: "text/html", "accept-language": "pt-BR,pt;q=0.9", "user-agent": "Mozilla/5.0 (compatible; WorthwiseBot/1.0; +https://worthwise.site)" }, signal: AbortSignal.timeout(12000) });

@@ -34,7 +34,7 @@ const SOURCE_NOTE: Record<StoreId, { text: string; link: string }> = {
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ categoria?: string; loja?: string }> }) {
   const { categoria, loja } = await searchParams;
-  if (loja === "geral") return <Overall />;
+  if (loja === "geral" || (!loja && !trendingConfigured())) return <Overall />;
   // Sem o Mercado Livre conectado, a tela abre direto na Shopee (que tem conteúdo).
   const store: StoreId = isStore(loja) ? loja : trendingConfigured() ? "mercadolivre" : "shopee";
   const [data, usage, admin, curated] = await Promise.all([loadStoreTrending(store, categoria), getUsage(), isAdmin(), loadCurated(store)]);

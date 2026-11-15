@@ -1,5 +1,5 @@
 import "server-only";
-import { amazon } from "@/lib/connectors/amazon";
+import { AMAZON_CATEGORIES, getAmazonBestsellers } from "@/lib/connectors/amazon-bestsellers";
 import { mercadoLivre } from "@/lib/connectors/mercadolivre";
 import { shopee, SHOPEE_CATEGORIES } from "@/lib/connectors/shopee";
 import { ConnectorError, USER_MESSAGES, type Category, type ConnectorContext, type RankedProduct, type TrendKeyword } from "@/lib/connectors/types";
@@ -110,9 +110,16 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
       categories: [], category: { id: "tiktokshop", name: "TikTok Shop" }, products: [], trends: [], updatedAt: null, store, storeState: "not_configured" };
   }
   if (store === "amazon") {
-    const cat = { id: "amazon", name: "Amazon" };
-    return { state: { ok: false, reason: "error", message: "A API da Amazon não oferece um ranking de mais vendidos. Use Pesquisar para ver produtos da Amazon." },
-      categories: [], category: cat, products: [], trends: [], updatedAt: null, store, storeState: amazon.state().state === "connected" ? "unsupported" : "not_configured" };
+    const categories = AMAZON_CATEGORIES.map(({ id, name }) => ({ id, name }));
+    const category = categories.find((c) => c.id === categoryId) ?? categories[0]!;
+    const base = { categories, category, trends: [] as TrendKeyword[], store, products: [] as RankedProduct[], updatedAt: null };
+    try {
+      const r = await getAmazonBestsellers(category.id);
+      if (r.fresh) await record(r.products);
+      return { ...base, state: { ok: true }, products: r.products.slice(0, TOP), updatedAt: r.at, storeState: "connected" };
+    } catch (e) {
+      return { ...base, state: { ok: false, reason: "error", message: e instanceof Error ? e.message : USER_MESSAGES.unavailable }, storeState: "connected" };
+    }
   }
   const categories = SHOPEE_CATEGORIES.map(({ id, name }) => ({ id, name }));
   const category = categories.find((c) => c.id === categoryId) ?? categories[0]!;
@@ -134,6 +141,7 @@ export async function loadOverall(): Promise<{ products: RankedProduct[]; stores
   const parts = await Promise.all([
     trendingConfigured() ? loadTrending(DEFAULT_CATEGORY) : null,
     shopee.state().state === "connected" ? loadStoreTrending("shopee", SHOPEE_CATEGORIES[0]!.id) : null,
+    loadStoreTrending("amazon", "electronics"),
   ]);
   const lists = parts.filter((p): p is TrendingData => Boolean(p?.state.ok && p.products.length));
   // Intercala por posição (1º de cada loja, depois 2º...); empate: quem informa mais vendas vem antes.
