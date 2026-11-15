@@ -41,6 +41,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const actor = (u.searchParams.get("actor") ?? "pratikdani~tiktok-shop-scraper").replace("/", "~");
     const t = Date.now();
     const info = await fetch(`https://api.apify.com/v2/acts/${actor}?token=${encodeURIComponent(token)}`).then((r) => r.json()).catch(() => null) as { data?: { name?: string; stats?: unknown; defaultRunOptions?: unknown; exampleRunInput?: { body?: string } } } | null;
+    if (u.searchParams.get("schema") === "1") {
+      const b = await fetch(`https://api.apify.com/v2/acts/${actor}/builds/default?token=${encodeURIComponent(token)}`).then((r) => r.json()).catch(() => null) as { data?: { inputSchema?: string; actorDefinition?: { input?: unknown; readme?: string } } } | null;
+      const schema = b?.data?.inputSchema ?? JSON.stringify(b?.data?.actorDefinition?.input ?? null);
+      return NextResponse.json({ actor, schema: String(schema).slice(0, 6000), readme: (b?.data?.actorDefinition?.readme ?? "").slice(0, 3000) });
+    }
+    if (u.searchParams.get("search")) {
+      const q = u.searchParams.get("search")!;
+      const r = await fetch(`https://api.apify.com/v2/store?search=${encodeURIComponent(q)}&limit=12&token=${encodeURIComponent(token)}`).then((x) => x.json()).catch(() => null) as { data?: { items?: { username: string; name: string; title?: string; stats?: { totalUsers?: number }; currentPricingInfo?: { pricingModel?: string; pricePerUnitUsd?: number } }[] } } | null;
+      return NextResponse.json((r?.data?.items ?? []).map((a) => ({ id: `${a.username}/${a.name}`, title: a.title, users: a.stats?.totalUsers, pricing: a.currentPricingInfo })));
+    }
     const input = u.searchParams.get("input") ? JSON.parse(u.searchParams.get("input")!) : null;
     if (!input) return NextResponse.json({ actor, ms: Date.now() - t, exampleInput: info?.data?.exampleRunInput?.body ?? null, name: info?.data?.name ?? null });
     const r = await fetch(`https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?token=${encodeURIComponent(token)}&limit=5&timeout=120`, {
