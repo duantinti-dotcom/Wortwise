@@ -1,5 +1,7 @@
 import "server-only";
+import { amazon } from "@/lib/connectors/amazon";
 import { mercadoLivre } from "@/lib/connectors/mercadolivre";
+import { shopee, SHOPEE_CATEGORIES } from "@/lib/connectors/shopee";
 import { ConnectorError, USER_MESSAGES, type Category, type ConnectorContext, type RankedProduct, type TrendKeyword } from "@/lib/connectors/types";
 import { flushLogs } from "@/lib/search/service";
 
@@ -73,6 +75,40 @@ export async function loadTrending(categoryId: string | null | undefined): Promi
     return { state: { ok: true }, categories: list, category, products: products.value, trends: trends.value, updatedAt: new Date(products.at).toISOString() };
   } catch (e) {
     return { ...empty(failure(e)), categories: list, category };
+  } finally {
+    if (ctx.logs.length) await flushLogs(ctx.logs).catch(() => {});
+  }
+}
+
+/* ───────────── Outras lojas ───────────── */
+
+export const STORES = ["mercadolivre", "shopee", "amazon"] as const;
+export type StoreId = (typeof STORES)[number];
+export const isStore = (v: string | undefined | null): v is StoreId => !!v && (STORES as readonly string[]).includes(v);
+
+export type StoreTrending = TrendingData & { store: StoreId; storeState: "connected" | "not_configured" | "unsupported" };
+
+/** Ranking de mais vendidos por loja. Lojas sem ranking oficial na API mostram o aviso, nunca dados inventados. */
+export async function loadStoreTrending(store: StoreId, categoryId: string | null | undefined): Promise<StoreTrending> {
+  if (store === "mercadolivre") {
+    const d = await loadTrending(categoryId);
+    return { ...d, store, storeState: trendingConfigured() ? "connected" : "not_configured" };
+  }
+  if (store === "amazon") {
+    const cat = { id: "amazon", name: "Amazon" };
+    return { state: { ok: false, reason: "error", message: "A API da Amazon não oferece um ranking de mais vendidos. Use Pesquisar para ver produtos da Amazon." },
+      categories: [], category: cat, products: [], trends: [], updatedAt: null, store, storeState: amazon.state().state === "connected" ? "unsupported" : "not_configured" };
+  }
+  const categories = SHOPEE_CATEGORIES.map(({ id, name }) => ({ id, name }));
+  const category = categories.find((c) => c.id === categoryId) ?? categories[0]!;
+  const base = { categories, category, trends: [] as TrendKeyword[], store, products: [] as RankedProduct[], updatedAt: null };
+  if (shopee.state().state !== "connected") return { ...base, state: { ok: false, reason: "not_configured", message: USER_MESSAGES.not_configured }, storeState: "not_configured" };
+  const ctx: ConnectorContext = { logs: [] };
+  try {
+    const r = await cached(`shopee:${category.id}`, () => shopee.getBestsellers!(category.id, ctx));
+    return { ...base, state: { ok: true }, products: r.value, updatedAt: new Date(r.at).toISOString(), storeState: "connected" };
+  } catch (e) {
+    return { ...base, state: failure(e), storeState: "connected" };
   } finally {
     if (ctx.logs.length) await flushLogs(ctx.logs).catch(() => {});
   }

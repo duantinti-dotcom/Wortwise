@@ -186,7 +186,7 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
       </p>
       {mode === "signup" ? (
         <p className="mt-5 text-center text-xs leading-relaxed text-faint">Ao criar a conta você concorda com os <Link href="/termos" className="underline">Termos de uso</Link> e a <Link href="/privacidade" className="underline">Política de privacidade</Link>.
-          Para proteger o teste gratuito contra abuso, registramos um identificador derivado do seu IP por até 90 dias.</p>
+          O teste grátis vale para uma conta por aparelho e por internet: para isso guardamos, por até 90 dias, um código derivado do seu IP e do navegador (nunca o IP em si).</p>
       ) : null}
     </div>
   );

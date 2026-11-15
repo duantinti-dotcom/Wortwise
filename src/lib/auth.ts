@@ -52,6 +52,8 @@ export async function requireAdmin(): Promise<SessionUser> {
 
 export interface Usage {
   plan: string;
+  /** Motivo de a conta não ter recebido as cotas grátis (outra conta grátis no mesmo aparelho/rede). */
+  trial_denied?: string | null;
   quotas: { resource: string; limit: number; used: number; period: "total" | "month" | "count" }[];
 }
 

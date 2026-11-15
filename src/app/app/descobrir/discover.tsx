@@ -1,5 +1,6 @@
 "use client";
-import { ArrowUpLeft, CircleAlert, Clock, Database, Lock, Search, SlidersHorizontal, Sparkles, X } from "lucide-react";
+import { CircleAlert, Clock, Lock, Search, SlidersHorizontal, X } from "lucide-react";
+import { SourceMark } from "@/components/source-mark";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { activeCount, applyFilters, type SearchFilters, type SortKey } from "@/lib/search/filters";
 import { ActiveChips, RefinePanel, SORTS } from "./refine";
@@ -24,7 +25,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
   const router = useRouter();
   const { openUpgrade } = useUpgrade();
   const [query, setQuery] = useState(params.get("q") ?? "");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(() => { const l = params.get("loja"); return l ? [l] : []; });
   const [refine, setRefineState] = useState<SearchFilters>({ sort: "relevance" });
   const setRefine = useCallback((patch: Partial<SearchFilters>) => setRefineState((f) => ({ ...f, ...patch })), []);
   const resetRefine = useCallback(() => setRefineState((f) => ({ sort: f.sort })), []);
@@ -44,6 +45,8 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
   const run = useCallback(async (q: string) => {
     const term = q.trim();
     if (term.length < 2) { setError({ code: "invalid_input", message: "Digite pelo menos 2 caracteres." }); return; }
+    const blocked = selected.length === 1 ? sources.find((x) => x.id === selected[0] && x.state !== "connected") : null;
+    if (blocked) { setResult(null); setError({ code: "not_configured", message: `${blocked.name} ainda não está conectado. Escolha outra loja ou "Todas".` }); return; }
     setLoading(true);
     setError(null);
     // Só a escolha de fontes vai para o servidor; o refinamento é feito na tela, sem custo.
@@ -53,7 +56,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     setResult(null);
     if (r.error.code === "quota_exceeded") openUpgrade(r.error.message);
     setError({ code: r.error.code, message: r.error.message, sources: r.error.sources as SourceReport[] | undefined });
-  }, [selected, openUpgrade, router]);
+  }, [selected, sources, openUpgrade, router]);
 
   // Abertura por URL: ?q= executa a pesquisa (repetir a mesma pesquisa não consome crédito); ?s= reabre uma salva.
   useEffect(() => {
@@ -88,33 +91,32 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     <>
       <PageHeader title="Pesquisar produtos" description="Digite o nome de um produto e veja preço, avaliações e quem vende — com foto e link para o anúncio." help={{ id: "pesquisar", steps: ["Digite o produto, por exemplo “fone bluetooth”, e toque em Pesquisar", "Use os filtros para ficar só com os melhores (preço, nota, frete grátis)", "Toque em Analisar para saber se vale a pena e quanto você lucra"] }} />
 
-      <form onSubmit={(e) => { e.preventDefault(); void run(query); }} className="glass relative z-10 rounded-[22px] p-2" role="search">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} aria-label="Termo de pesquisa" placeholder="O que você quer vender?" enterKeyHint="search"
-              className="h-12 w-full rounded-xl bg-transparent pl-12 pr-3 text-base outline-none placeholder:text-faint" />
-          </div>
-          <button type="submit" disabled={loading} aria-label="Pesquisar" className="btn btn-primary !h-12 !px-4 sm:!px-5"><Search size={17} className="sm:hidden" /><span className="hidden sm:inline">{loading ? "Pesquisando…" : "Pesquisar"}</span></button>
-        </div>
-        <div className="flex items-center gap-1.5 overflow-x-auto border-t border-tint/8 px-2 pb-1 pt-2.5 [scrollbar-width:none] md:flex-wrap [&::-webkit-scrollbar]:hidden">
-          <span className="mr-1 shrink-0 text-[12px] text-faint">Pesquisar em</span>
-          {sources.map((src) => {
-            const on = selected.length === 0 ? src.state === "connected" : selected.includes(src.id);
-            const ready = src.state === "connected";
+      <div role="tablist" aria-label="Lojas" className="-mx-5 mb-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+        <div className="flex w-max gap-2 border-b border-tint/[0.08] lg:w-full">
+          {[{ id: "", name: "Todas as lojas", state: "connected" }, ...sources.filter((x) => x.id !== "tiktokshop")].map((src) => {
+            const on = src.id ? selected.length === 1 && selected[0] === src.id : selected.length !== 1;
             return (
-              <button key={src.id} type="button" title={src.detail} aria-pressed={on} disabled={!ready}
-                onClick={() => setSelected((x) => { const base = x.length ? x : sources.filter((q) => q.state === "connected").map((q) => q.id); const next = base.includes(src.id) ? base.filter((i) => i !== src.id) : [...base, src.id]; return next; })}
-                className={cn("chip !h-8 shrink-0 !px-3 !text-[12.5px] disabled:cursor-not-allowed disabled:opacity-55", on && ready && "!bg-fg !text-ink")}>
-                <span className={cn("size-1.5 rounded-full", ready ? "bg-pos" : "bg-faint")} />{src.name}
-                {!ready ? <span className="text-faint">· {src.state === "pending_approval" ? "em credenciamento" : "aguardando credenciais"}</span> : null}
+              <button key={src.id || "all"} type="button" role="tab" aria-selected={on} title={"detail" in src ? (src as SourceInfo).detail : undefined}
+                onClick={() => { setSelected(src.id ? [src.id] : []); setError(null); }}
+                className={cn("-mb-px flex h-12 shrink-0 items-center gap-2.5 border-b-2 px-3 text-[15px] font-medium transition-colors", on ? "border-[#3B82F6] text-fg" : "border-transparent text-muted hover:text-fg")}>
+                {src.id ? <SourceMark source={src.id} size={20} /> : null}{src.name}
+                {src.state !== "connected" ? <span className="rounded-full bg-tint/[0.07] px-2 py-0.5 text-[11.5px] font-normal text-faint">em breve</span> : null}
               </button>
             );
           })}
         </div>
+      </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); void run(query); }} className="flex flex-col gap-3 sm:flex-row" role="search">
+        <div className="relative min-w-0 flex-1">
+          <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} aria-label="Termo de pesquisa" placeholder="Ex.: fone bluetooth" enterKeyHint="search"
+            className="input !h-12 !pl-11 !text-[16px]" />
+        </div>
+        <button type="submit" disabled={loading} className="btn btn-primary btn-lg shrink-0">{loading ? "Pesquisando…" : "Pesquisar"}</button>
       </form>
 
-      <div className="mt-6" aria-live="polite">
+      <div className="mt-10" aria-live="polite">
         {error && error.code !== "quota_exceeded" ? (
           <div role="alert" className="card flex flex-col gap-3 border-neg/25 p-5">
             <div className="flex items-start gap-3"><CircleAlert size={18} className="mt-0.5 shrink-0 text-neg" /><div><p className="font-medium">{error.message}</p>
@@ -161,14 +163,14 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
                   </div>
                   <ActiveChips f={refine} set={setRefine} reset={resetRefine} />
                   {stats ? (
-                    <div className="glass-cells mb-4 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line text-center">
+                    <div className="card mb-6 grid grid-cols-3 divide-x divide-tint/[0.08] text-center">
                       {[["Menor preço", stats.min], ["Mediana", stats.median], ["Maior preço", stats.max]].map(([l, v]) => (
-                        <div key={l as string} className="px-3 py-2.5"><div className="font-mono text-[10.5px] uppercase tracking-wider text-faint">{l}</div><div className="tabular mt-0.5 text-[15px] font-semibold">{formatMoney(v as number)}</div></div>
+                        <div key={l as string} className="px-3 py-4"><div className="text-[12.5px] text-faint">{l}</div><div className="tabular mt-1 text-[16px] font-semibold">{formatMoney(v as number)}</div></div>
                       ))}
                     </div>
                   ) : null}
                   {filtered.length ? (
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 2xl:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-4 md:gap-5 md:grid-cols-3 2xl:grid-cols-4">
                       {filtered.map((p) => <ProductCard key={`${p.source}:${p.externalId}`} p={p} favorite={favs.has(`${p.source}:${p.externalId}`)} />)}
                     </div>
                   ) : (
@@ -198,37 +200,26 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
         ) : null}
 
         {!loading && !result && !error ? (
-          <div className="grid gap-5 lg:grid-cols-3">
-            <div className="card !rounded-2xl p-6 lg:col-span-2">
-              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Sparkles size={14} className="text-brand-hi" /></span>Sugestões para começar</h2>
-              <p className="mt-2 text-sm text-muted">Clique para preencher a busca — a pesquisa só acontece quando você confirmar.</p>
-              <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{SUGGESTIONS.map((s) => (
-                <button key={s} onClick={() => setQuery(s)} className="group flex items-center justify-between gap-2 rounded-xl border border-tint/[0.07] bg-tint/[0.02] px-3.5 py-3 text-left text-sm transition-all hover:border-brand/40 hover:bg-brand/[0.05]">
-                  <span className="flex items-center gap-2.5"><Search size={14} className="text-faint group-hover:text-brand" />{s}</span><ArrowUpLeft size={14} className="text-faint opacity-0 transition-opacity group-hover:opacity-100" /></button>))}</div>
-            </div>
-            <div className="card !rounded-2xl p-6">
-              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Database size={14} className="text-brand-hi" /></span>Fontes de dados</h2>
-              <ul className="mt-4 space-y-2.5">
-                {sources.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between gap-3 text-sm" title={s.detail}>
-                    <span className="flex items-center gap-2.5"><span className={cn("size-2 rounded-full", s.state === "connected" ? "bg-pos animate-pulse-ring" : s.state === "pending_approval" ? "bg-tint/25" : "bg-brand")} />{s.name}</span>
-                    <span className="text-xs text-faint">{s.state === "connected" ? "conectada" : s.state === "pending_approval" ? "em credenciamento" : "não configurada"}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="card !rounded-2xl p-6 lg:col-span-3">
-              <h2 className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Clock size={14} className="text-brand-hi" /></span>Pesquisas recentes</h2>
-              {recent.length ? (
-                <ul className="mt-3 divide-y divide-line">
+          <div className="space-y-10">
+            <section>
+              <h2 className="text-[16px] font-semibold tracking-tight">Ideias para começar</h2>
+              <p className="mt-1.5 text-[14px] text-muted">Toque para preencher a busca. A pesquisa só acontece quando você confirmar.</p>
+              <div className="mt-5 flex flex-wrap gap-2">{SUGGESTIONS.map((x) => (
+                <button key={x} onClick={() => setQuery(x)} className="chip"><Search size={14} className="text-faint" />{x}</button>))}</div>
+            </section>
+            {recent.length ? (
+              <section>
+                <h2 className="text-[16px] font-semibold tracking-tight">Pesquisas recentes</h2>
+                <p className="mt-1.5 text-[14px] text-muted">Abrir de novo não gasta pesquisa.</p>
+                <ul className="card mt-5 divide-y divide-tint/[0.07] px-5">
                   {recent.map((r) => (
-                    <li key={r.id}><button onClick={() => router.push(`/app/descobrir?s=${r.id}`)} className="flex w-full items-center justify-between gap-3 py-2.5 text-left text-sm transition-colors hover:text-brand-hi">
-                      <span className="flex min-w-0 items-center gap-2.5"><Clock size={14} className="shrink-0 text-faint" /><span className="truncate">{r.query}</span></span>
-                      <span className="shrink-0 text-xs text-faint">{r.result_count} resultados · {relativeTime(r.created_at)}</span></button></li>
+                    <li key={r.id}><button onClick={() => router.push(`/app/descobrir?s=${r.id}`)} className="flex w-full items-center justify-between gap-3 py-3.5 text-left text-[14.5px] transition-colors hover:text-brand-hi">
+                      <span className="flex min-w-0 items-center gap-3"><Clock size={15} className="shrink-0 text-faint" /><span className="truncate">{r.query}</span></span>
+                      <span className="shrink-0 text-[13px] text-faint">{relativeTime(r.created_at)}</span></button></li>
                   ))}
                 </ul>
-              ) : <p className="mt-3 text-sm text-muted">Suas pesquisas aparecerão aqui. Reabrir uma pesquisa já feita não consome crédito.</p>}
-            </div>
+              </section>
+            ) : null}
           </div>
         ) : null}
       </div>

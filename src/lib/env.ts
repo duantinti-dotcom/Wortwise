@@ -19,6 +19,8 @@ export function serverEnv() {
     amazonPartnerTag: e.AMAZON_PARTNER_TAG ?? "",
     amazonHost: e.AMAZON_PAAPI_HOST ?? "webservices.amazon.com.br",
     amazonMarketplace: e.AMAZON_MARKETPLACE ?? "www.amazon.com.br",
+    shopeeAppId: e.SHOPEE_AFFILIATE_APP_ID ?? "",
+    shopeeSecret: e.SHOPEE_AFFILIATE_SECRET ?? "",
     heropayUrl: (e.HEROPAY_API_URL ?? "https://api.beta.heropay.tech").replace(/\/$/, ""),
     heropayToken: e.HEROPAY_JWT_TOKEN ?? "",
     heropayWebhookSecret: e.HEROPAY_WEBHOOK_SECRET ?? "",

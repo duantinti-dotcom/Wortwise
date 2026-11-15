@@ -1,5 +1,6 @@
 import { amazon } from "./amazon";
 import { mercadoLivre } from "./mercadolivre";
+import { shopee } from "./shopee";
 import { ConnectorError, type Connector, type SourceId, type SourceState } from "./types";
 
 /**
@@ -19,8 +20,7 @@ function pending(id: SourceId, name: string, detail: string): Connector {
 
 export const CONNECTORS: Record<SourceId, Connector> = {
   mercadolivre: mercadoLivre,
-  shopee: pending("shopee", "Shopee",
-    "A Shopee Open Platform libera dados apenas para parceiros credenciados e lojas que autorizam o aplicativo; a API de afiliados exige conta aprovada."),
+  shopee,
   amazon,
   tiktokshop: pending("tiktokshop", "TikTok Shop",
     "A API do TikTok Shop só dá acesso à loja que autorizou o aplicativo; a busca de produtos de outras lojas depende de aplicativo de afiliado aprovado pelo TikTok."),

@@ -1,5 +1,5 @@
 "use client";
-import { ArrowRight, Bell, Bookmark, ExternalLink, ImageOff, Loader2, Lock, Star, Truck } from "lucide-react";
+import { Bell, Bookmark, ExternalLink, ImageOff, Loader2, Lock, Star, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import { dbMessage } from "@/lib/hooks";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { cn, formatMoney, relativeTime, SOURCE_LABELS } from "@/lib/utils";
 import { useUpgrade } from "./upgrade";
+import { SourceMark } from "@/components/source-mark";
 
 export interface ProductRef { source: string; externalId: string; title: string; imageUrl: string | null; price: number | null; currency: string | null; permalink: string | null }
 
@@ -65,26 +66,26 @@ export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResul
   const discount = p.originalPrice && p.price && p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
   const source = SOURCE_LABELS[p.source] ?? p.source;
   return (
-    <article className="card card-hover group relative flex flex-col overflow-hidden !rounded-[14px]">
+    <article className="card card-hover group relative flex flex-col overflow-hidden">
       <div className="relative m-2 overflow-hidden rounded-[10px]">
         <ProductImage src={p.imageUrl} alt={p.title} className="aspect-square w-full transition-transform duration-700 [transition-timing-function:var(--ease-out)] group-hover:scale-[1.05]" />
         {rank != null ? (
           <span className={cn("tabular absolute left-2.5 top-2.5 z-10 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11.5px] font-semibold shadow-sm",
-            rank === 1 ? "bg-brand text-[#FFFFFF]" : "bg-[#0B1120] text-white")}>#{rank}</span>
+            "bg-[#18181B] text-white")}>{rank}º</span>
         ) : discount ? <span className="absolute left-2.5 top-2.5 z-10 rounded-md bg-pos px-1.5 py-0.5 text-[11.5px] font-semibold text-white">−{discount}%</span> : null}
         <FavoriteButton key={String(favorite)} product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5 z-10" />
         {p.fastDelivery ? <span className="absolute bottom-2.5 right-2.5 z-10 rounded-md bg-[#00a8e1] px-1.5 py-0.5 text-[11px] font-semibold text-white">Prime</span> : null}
         {p.freeShipping ? <span className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-1 rounded-md bg-[#00a650] px-1.5 py-0.5 text-[11px] font-semibold text-white"><Truck size={12} /> Frete grátis</span> : null}
       </div>
-      <div className="flex flex-1 flex-col px-4 pb-4 pt-2">
-        <div className="flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-wider text-faint">
-          {rank != null ? <span>Mais vendido · {source}</span> : <span>{source}</span>}
-          {p.salesRank ? <span className="ml-auto normal-case tracking-normal text-brand-hi" title={p.salesRank.category ? `Ranking de vendas em ${p.salesRank.category}` : "Ranking de vendas"}>#{p.salesRank.rank.toLocaleString("pt-BR")} em vendas</span> : null}
+      <div className="flex flex-1 flex-col px-4 pb-4 pt-3">
+        <div className="flex items-center gap-2 text-[12.5px] text-muted">
+          <SourceMark source={p.source} size={16} /><span>{source}</span>
+          {p.salesRank ? <span className="ml-auto text-brand-hi" title={p.salesRank.category ? `Ranking de vendas em ${p.salesRank.category}` : "Ranking de vendas"}>#{p.salesRank.rank.toLocaleString("pt-BR")} em vendas</span> : null}
         </div>
-        <h3 className="mt-1.5 line-clamp-2 text-[14px] font-medium leading-snug">
+        <h3 className="mt-2.5 line-clamp-2 text-[14.5px] font-medium leading-snug">
           <Link href={`/app/produto/${p.source}/${p.externalId}`} className="outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-brand-hi">{p.title}</Link>
         </h3>
-        <div className="mt-2.5 flex flex-wrap items-baseline gap-x-2">
+        <div className="mt-3 flex flex-wrap items-baseline gap-x-2">
           <span className={cn("tabular text-[20px] font-semibold tracking-tight", p.price == null && "text-sm font-normal text-faint")}>{formatMoney(p.price, p.currency ?? "BRL")}</span>
           {p.originalPrice && discount ? <span className="tabular text-xs text-faint line-through">{formatMoney(p.originalPrice, p.currency ?? "BRL")}</span> : null}
           {rank != null && discount ? <span className="badge badge-pos !h-5 !px-1.5 !text-[11px]">−{discount}%</span> : null}
@@ -94,14 +95,14 @@ export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResul
           <span className="truncate">{p.sellerName ?? (p.kind === "catalog_product" ? "Ficha de catálogo" : "Vendedor não informado")}</span>
         </div>
         <div className="relative z-10 mt-auto grid grid-cols-[1fr_auto] gap-2 pt-4">
-          <Link href={`/app/produto/${p.source}/${p.externalId}`} className="btn btn-contrast btn-sm">Analisar <ArrowRight className="btn-arrow" size={14} /></Link>
+          <Link href={`/app/produto/${p.source}/${p.externalId}`} className="btn btn-primary btn-sm">Analisar</Link>
           {p.permalink ? (
-            <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !px-3" aria-label={`Abrir no ${source}`} title={`Abrir no ${source}`}>
-              <ExternalLink size={14} /><span className="hidden sm:inline">{p.source === "mercadolivre" ? "Ver no ML" : "Abrir"}</span>
+            <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !w-9 !px-0" aria-label={`Abrir no ${source}`} title={`Abrir no ${source}`}>
+              <ExternalLink size={15} />
             </a>
           ) : null}
         </div>
-        <div className="mt-2.5 text-[10.5px] text-faint">coletado {relativeTime(p.collectedAt)}</div>
+        <div className="mt-3 text-[11.5px] text-faint">coletado {relativeTime(p.collectedAt)}</div>
       </div>
     </article>
   );

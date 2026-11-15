@@ -1,11 +1,10 @@
 "use client";
-import { BarChart3, Bell, Flame, Bookmark, Calculator, FileText, Home, LogOut, Menu as MenuIcon, MessagesSquare, Scale, Search, Settings, ShieldCheck, Sparkles, Store, TrendingUp, X } from "lucide-react";
+import { BarChart3, Bell, Flame, Bookmark, Calculator, FileText, Home, LogOut, Menu as MenuIcon, MessagesSquare, Scale, Search, Settings, ShieldCheck, Store, TrendingUp, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Dialog as D } from "radix-ui";
 import { useEffect, useState, type ReactNode } from "react";
-import { Ambient } from "@/components/ambient";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
@@ -56,23 +55,22 @@ function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNa
   const path = usePathname();
   const active = (href: string) => (href === "/app" ? path === "/app" : path.startsWith(href));
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {GROUPS.map((g) => (
         <div key={g.label || "home"}>
-          {g.label ? <div className="mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-faint">{g.label}</div> : null}
+          {g.label ? <div className="mb-2 px-3 text-[12px] font-medium text-faint">{g.label}</div> : null}
           <ul className="space-y-0.5">
             {NAV.filter((n) => g.items.includes(n.href)).map((n) => {
               const on = active(n.href);
               return (
                 <li key={n.href}>
                   <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined} title={n.hint}
-                    className={cn("group relative isolate flex h-9 items-center gap-3 rounded-[9px] px-3 text-[13.5px] transition-colors duration-200",
+                    className={cn("group relative isolate flex h-10 items-center gap-3 rounded-[9px] px-3 text-[14px] transition-colors duration-200",
                       on ? "font-semibold text-fg" : "text-muted hover:bg-tint/[0.05] hover:text-fg")}>
                     {on ? <motion.span layoutId={`nav-pill-${layoutKey}`} aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                      className="absolute inset-0 -z-10 rounded-[9px] border border-tint/10 bg-tint/[0.07]" /> : null}
+                      className="absolute inset-0 -z-10 rounded-[9px] bg-tint/[0.07]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
-                    {n.href === "/app/em-alta" ? <span aria-hidden className="ml-auto size-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(59,130,246,0.9)]" /> : null}
                     {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#FFFFFF]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
                   </Link>
                 </li>
@@ -92,11 +90,11 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
   const { openUpgrade } = useUpgrade();
   const pct = search && search.limit > 0 ? Math.min(100, (search.used / search.limit) * 100) : 0;
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "edge-grad edge-brand bg-[linear-gradient(180deg,rgba(59,130,246,0.10),rgba(59,130,246,0.02))]" : "border-tint/8 bg-tint/[0.03]")}>
-      <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold"><Sparkles size={13} className="text-brand" />Plano {planName}</span>
+    <div className={cn("relative overflow-hidden rounded-2xl border p-4", "border-tint/[0.08] bg-tint/[0.03]")}>
+      <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold">Plano {planName}</span>
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-tint/10"><div className={cn("h-full rounded-full transition-[width] duration-700", pct >= 100 ? "bg-neg" : "bg-gradient-to-r from-brand to-brand-hi")} style={{ width: `${Math.max(pct, 2)}%` }} /></div>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-tint/10"><div className={cn("h-full rounded-full transition-[width] duration-700", pct >= 100 ? "bg-neg" : "bg-brand")} style={{ width: `${Math.max(pct, 2)}%` }} /></div>
         <div className="mt-2 text-[11px] text-muted">pesquisas {search.period === "total" ? "gratuitas usadas" : "usadas neste mês"}</div>
       </>) : null}
       {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-primary btn-sm mt-3.5 w-full">Fazer upgrade</button> : null}
@@ -140,17 +138,16 @@ export function AppShell(props: ShellProps) {
   return (
     <ToastProvider>
       <UpgradeProvider plans={props.plans} currentPlan={props.plan}>
-        <div className="min-h-dvh lg:pl-[276px]">
-          <Ambient variant="calm" />
+        <div className="min-h-dvh lg:pl-[260px]">
           {/* Sidebar — desktop */}
-          <aside className="glass fixed bottom-3 left-3 top-3 z-30 hidden w-[252px] flex-col overflow-hidden rounded-[24px] lg:flex">
+          <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-tint/[0.08] bg-[var(--bg-raised)] lg:flex">
             <Link href="/app" className="relative flex h-16 shrink-0 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
             <nav aria-label="Aplicação" className="relative min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
             <div className="shrink-0 p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
           </aside>
 
           {/* Barra superior */}
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-tint/[0.07] bg-ink/70 px-4 backdrop-blur-2xl backdrop-saturate-150 lg:h-[72px] lg:border-0 lg:bg-transparent lg:bg-gradient-to-b lg:from-ink lg:via-ink/85 lg:to-transparent lg:px-10 lg:backdrop-blur-none">
+          <header className="glass sticky top-0 z-20 flex h-16 items-center gap-3 !border-x-0 !border-t-0 px-4 lg:px-10">
             <D.Root open={drawer} onOpenChange={setDrawer}>
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>
@@ -168,31 +165,30 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="liquid glass-lens h-10 w-full rounded-full pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.14)] " />
+                className="input !h-10 pl-10 pr-12 text-sm" />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
               <ThemeToggle size="sm" className="mr-1" />
               <Link href="/app/monitoramento" className="icon-btn relative" aria-label={`Alertas${props.unreadAlerts ? ` (${props.unreadAlerts} não lidos)` : ""}`}>
-                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1 top-1 size-2.5 rounded-full bg-brand shadow-[0_0_8px_rgba(59,130,246,0.9)] ring-2 ring-[var(--bg)]" /> : null}
+                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1 top-1 size-2.5 rounded-full bg-brand ring-2 ring-[var(--bg)]" /> : null}
               </Link>
               <Profile user={props.user} />
             </div>
           </header>
 
-          <main id="conteudo" key={path} className="relative animate-[page-in_0.45s_cubic-bezier(0.16,1,0.3,1)] px-4 pb-28 pt-7 lg:px-10 lg:pb-16 lg:pt-10">
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(45%_100%_at_70%_0%,rgba(59,130,246,0.06),transparent)]" />
-            <div className="page-stagger mx-auto max-w-[1240px]">{props.children}</div>
+          <main id="conteudo" key={path} className="relative animate-[page-in_0.45s_cubic-bezier(0.16,1,0.3,1)] px-5 pb-32 pt-8 lg:px-12 lg:pb-20 lg:pt-12">
+                        <div className="page-stagger mx-auto max-w-[1120px]">{props.children}</div>
           </main>
 
           {/* Navegação inferior — mobile */}
-          <nav aria-label="Atalhos" className="glass glass-lens fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-full p-1.5 lg:hidden">
+          <nav aria-label="Atalhos" className="glass fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 !border-x-0 !border-b-0 px-2 pb-[max(6px,env(safe-area-inset-bottom))] pt-1.5 lg:hidden">
             {TABS.map((t) => {
               const on = t.href === "/app" ? path === "/app" : path.startsWith(t.href);
               return (
                 <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
                   className={cn("relative isolate flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:scale-95", on ? "font-semibold text-fg" : "text-muted")}>
-                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-full bg-tint/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]" /> : null}
+                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-x-3 inset-y-1 -z-10 rounded-xl bg-tint/[0.08]" /> : null}
                   <t.icon size={19} className={on ? "text-brand" : undefined} />{({ "/app": "Início", "/app/em-alta": "Em alta", "/app/descobrir": "Pesquisar", "/app/calculadora": "Lucro" } as Record<string, string>)[t.href] ?? t.label}
                 </Link>
               );

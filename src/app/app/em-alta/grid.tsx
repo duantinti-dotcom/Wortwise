@@ -21,7 +21,7 @@ export function TrendingGrid({ products, locked }: { products: RankedProduct[]; 
     ...Array.from({ length: locked }, (_, i) => ({ key: `locked-${i}`, node: <LockedCard onUnlock={() => openUpgrade("Veja o ranking completo de mais vendidos")} /> })),
   ];
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 md:gap-5 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {cells.map((c, i) => (
         <motion.div key={c.key} className="flex [&>*]:flex-1"
           initial={reduce ? false : { opacity: 0, y: 24, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}

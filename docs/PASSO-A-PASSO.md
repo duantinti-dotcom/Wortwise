@@ -33,6 +33,14 @@ Sem isso, só e-mails de teste conseguem entrar com Google.
    - `MELI_CLIENT_SECRET`
 3. Clique em **Deploy**.
 
+## 3b. Shopee (quando quiser) · 10 min
+1. Entre em **affiliate.shopee.com.br** e crie uma conta de afiliado. Espere ela ser aprovada.
+2. No painel de afiliado, abra **Open API** e copie o **App ID** e a **Secret**.
+3. Na Cloudflare, no mesmo lugar do passo 3, adicione duas chaves, ambas como **Secret**:
+   - `SHOPEE_AFFILIATE_APP_ID`
+   - `SHOPEE_AFFILIATE_SECRET`
+4. Clique em **Deploy**. A aba Shopee passa a mostrar produtos.
+
 ## 4. Segurança (5 min). Faça hoje
 - Cloudflare → **My Profile** → **API Tokens**:
   - *Global API Key* → **Change**;
@@ -43,7 +51,7 @@ Sem isso, só e-mails de teste conseguem entrar com Google.
 - Apague o arquivo `client_secret...json` do iPad.
 
 ## 5. Numa próxima conversa com o Claude, diga:
-> "pode aplicar a migração de otimização do banco e a de remover SHEIN"
+> "pode aplicar as 3 atualizações do banco (otimização, SHEIN e conta grátis única)"
 
 Isso liga:
 - a limpeza automática do banco;

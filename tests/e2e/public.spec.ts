@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("site público", () => {
   test("landing apresenta a proposta e não tem rolagem horizontal", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Encontre o produto");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Descubra o que vender");
     await expect(page.getByRole("link", { name: /Começar grátis/ }).first()).toBeVisible();
     await expect(page.getByText("Demonstração · dados ilustrativos").filter({ visible: true }).first()).toBeVisible();
     for (const id of ["funcionalidades", "como-funciona", "demonstracao", "planos", "perguntas"]) await expect(page.locator(`#${id}`)).toBeAttached();
@@ -101,7 +101,7 @@ test.describe("proteção de rotas e APIs", () => {
     await page.getByRole("switch", { name: "Mudar para o modo claro" }).filter({ visible: true }).first().click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     const bg = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
-    expect(bg).toBe("rgb(245, 247, 251)");
+    expect(bg).toBe("rgb(247, 247, 245)");
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   });

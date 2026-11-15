@@ -2,7 +2,6 @@ import { Ambient } from "@/components/ambient";
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
-import { ScrollProgress } from "@/components/ui/scroll-progress";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +9,6 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-brand focus:px-3 focus:py-2 focus:text-sm focus:text-black">Pular para o conteúdo</a>
       <Ambient />
       <SmoothScroll />
-      <ScrollProgress />
       <Navbar />
       <main id="conteudo">{children}</main>
       <Footer />

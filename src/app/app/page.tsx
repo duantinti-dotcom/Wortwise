@@ -40,103 +40,143 @@ export default async function Dashboard() {
   const today = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "America/Sao_Paulo" }).format(new Date());
   const ICONS: Record<string, typeof Search> = { search: Search, ai_message: MessagesSquare, watch: Bell };
 
+  const recentEmpty = !(searches.data?.length || alerts.data?.length || watches.data?.length || comparisons.length || sims.data?.length);
+  void ICONS;
+
   return (
-    <div className="space-y-6">
-      <section className="relative text-center">
-        <div className="text-sm text-muted first-letter:uppercase">{today}</div>
-        <h1 className="display mt-2 text-[34px] md:text-[48px]">{greeting}{name ? `, ${name}` : ""}.</h1>
-        <p className="mx-auto mt-2 max-w-2xl text-[15.5px] leading-relaxed text-muted">O Worthwise te ajuda a <b className="font-medium text-fg">escolher o que vender</b> e a saber <b className="font-medium text-fg">quanto você vai lucrar</b>. Escolha por onde começar:</p>
+    <div className="space-y-12 md:space-y-16">
+      <section>
+        <p className="text-[14px] text-muted first-letter:uppercase">{today}</p>
+        <h1 className="display mt-2 text-[30px] md:text-[40px]">{greeting}{name ? `, ${name}` : ""}.</h1>
+        <p className="mt-3 max-w-xl text-[16px] leading-relaxed text-muted">O que você quer fazer hoje?</p>
+        {usage.plan === "free" && usage.trial_denied ? (
+          <div role="note" className="card mt-8 flex flex-col gap-4 border-[#3B82F6]/40 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[15.5px] font-semibold">Esta conta não tem pesquisas grátis</p>
+              <p className="mt-1 text-[14.5px] leading-relaxed text-muted">O teste grátis vale para uma conta por aparelho e por internet, e já foi usado {usage.trial_denied === "same_device" ? "neste aparelho" : "nesta rede"}. Para continuar, assine um plano. A calculadora de lucro continua liberada.</p>
+            </div>
+            <Link href="/app/configuracoes" className="btn btn-primary shrink-0">Ver planos</Link>
+          </div>
+        ) : null}
+
+        <form action="/app/descobrir" role="search" className="card mt-8 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:p-5">
+          <label htmlFor="dash-q" className="sr-only">Pesquisar produto</label>
+          <div className="relative min-w-0 flex-1">
+            <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
+            <input id="dash-q" name="q" required minLength={2} maxLength={120} placeholder="Ex.: fone bluetooth" className="input !h-12 !pl-11 !text-[16px]" />
+          </div>
+          <button className="btn btn-primary btn-lg shrink-0">Pesquisar</button>
+        </form>
+        <p className="mt-3 text-[13.5px] text-faint">
+          {searchQuota ? `${searchQuota.remaining} pesquisa${searchQuota.remaining === 1 ? "" : "s"} disponíve${searchQuota.remaining === 1 ? "l" : "is"} ${PERIOD_LABELS[searchQuota.period]}.` : null}
+          {interests.length ? <> Sugestões: {interests.map((c, i) => <span key={c}>{i ? ", " : ""}<Link href={`/app/descobrir?q=${encodeURIComponent(c)}`} className="text-brand-hi hover:underline">{c}</Link></span>)}</> : null}
+        </p>
       </section>
 
-      <section aria-label="Por onde começar" className="grid gap-4 lg:grid-cols-3">
-        <Link href="/app/em-alta" className="card card-hover group relative flex flex-col items-center p-6 text-center">
-          <div className="flex w-full items-center justify-center"><span className="tabular absolute left-5 top-5 flex size-7 items-center justify-center rounded-full bg-brand text-[13px] font-semibold text-[#FFFFFF]">1</span><Flame size={20} className="text-brand" /></div>
-          <h2 className="mt-5 text-xl font-semibold tracking-tight">Veja o que está vendendo</h2>
-          <p className="mt-1.5 flex-1 text-[14.5px] leading-relaxed text-muted">O ranking dos mais vendidos do Mercado Livre por categoria, com foto e preço. Ótimo para ter ideias.</p>
-          <span className="btn btn-secondary btn-sm mt-5 w-fit">Ver mais vendidos <ArrowRight className="btn-arrow" size={14} /></span>
-        </Link>
-        <div className="card relative flex flex-col items-center p-6 text-center ring-1 ring-brand/30">
-          <div className="flex w-full items-center justify-center"><span className="tabular absolute left-5 top-5 flex size-7 items-center justify-center rounded-full bg-brand text-[13px] font-semibold text-[#FFFFFF]">2</span><Search size={20} className="text-brand" /></div>
-          <h2 className="mt-5 text-xl font-semibold tracking-tight">Pesquise um produto</h2>
-          <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted">Digite o nome e veja preços, avaliações e quem vende.</p>
-          <form action="/app/descobrir" role="search" className="mt-4 flex w-full gap-2">
-            <label htmlFor="dash-q" className="sr-only">Pesquisar produto</label>
-            <input id="dash-q" name="q" required minLength={2} maxLength={120} placeholder="Ex.: fone bluetooth" className="input !h-11 min-w-0 flex-1 !rounded-full" />
-            <button className="btn btn-primary !h-11 shrink-0 !px-4" aria-label="Pesquisar"><Search size={16} /></button>
-          </form>
-          <div className="mt-3 text-xs text-faint">{searchQuota ? `${searchQuota.remaining} pesquisa${searchQuota.remaining === 1 ? "" : "s"} disponíve${searchQuota.remaining === 1 ? "l" : "is"} ${PERIOD_LABELS[searchQuota.period]}` : null}</div>
-          {interests.length ? <div className="mt-2 flex flex-wrap justify-center gap-1.5">{interests.map((c) => <Link key={c} href={`/app/descobrir?q=${encodeURIComponent(c)}`} className="badge hover:!text-fg">{c}</Link>)}</div> : null}
+      <section aria-labelledby="atalhos">
+        <h2 id="atalhos" className="text-[18px] font-semibold tracking-tight">Por onde começar</h2>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          {([
+            ["/app/em-alta", Flame, "Ver os mais vendidos", "O ranking de cada loja, com foto e preço. Ótimo para ter ideias."],
+            ["/app/calculadora", Calculator, "Calcular meu lucro", "Responda 6 perguntas e veja quanto sobra em cada venda."],
+            ["/app/comparar", Store, "Comparar fornecedores", "Descubra quem sai mais barato somando frete e impostos."],
+          ] as const).map(([href, Icon, title, text]) => (
+            <Link key={href} href={href} className="card card-hover group flex items-start gap-4 p-5 md:flex-col md:gap-0 md:p-6">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-tint/[0.06] text-brand-hi"><Icon size={19} /></span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-[16.5px] font-semibold tracking-tight md:mt-5 md:text-[17px]">{title}</span>
+                <span className="mt-1.5 text-[14.5px] leading-relaxed text-muted md:mt-2">{text}</span>
+                <span className="mt-4 hidden items-center gap-1.5 text-[14px] font-medium text-brand-hi md:inline-flex">Abrir <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" /></span>
+              </span>
+              <ArrowRight size={17} className="mt-3 shrink-0 text-faint md:hidden" />
+            </Link>
+          ))}
         </div>
-        <Link href="/app/calculadora" className="card card-hover group relative flex flex-col items-center p-6 text-center">
-          <div className="flex w-full items-center justify-center"><span className="tabular absolute left-5 top-5 flex size-7 items-center justify-center rounded-full bg-brand text-[13px] font-semibold text-[#FFFFFF]">3</span><Calculator size={20} className="text-brand" /></div>
-          <h2 className="mt-5 text-xl font-semibold tracking-tight">Calcule seu lucro</h2>
-          <p className="mt-1.5 flex-1 text-[14.5px] leading-relaxed text-muted">Responda 6 perguntas simples e veja quanto sobra no seu bolso em cada venda.</p>
-          <span className="btn btn-secondary btn-sm mt-5 w-fit">Abrir calculadora <ArrowRight className="btn-arrow" size={14} /></span>
-        </Link>
       </section>
 
       <Suspense fallback={null}><HotStrip /></Suspense>
 
-      <section aria-label="Uso do plano" className="grid gap-3 sm:grid-cols-3">
-        {shown.map((q) => {
-          const pct = q.limit > 0 ? Math.min(100, (q.used / q.limit) * 100) : 0;
-          const Icon = ICONS[q.resource] ?? Search;
-          return (
-            <div key={q.resource} className="card !rounded-2xl p-5">
-              <div className="flex items-center justify-between text-xs text-muted"><span className="flex items-center gap-2"><Icon size={14} className="text-faint" />{RESOURCE_LABELS[q.resource]}</span><span>{PERIOD_LABELS[q.period]}</span></div>
-              <div className="tabular mt-3 text-[28px] font-semibold leading-none tracking-tight">{q.used}<span className="text-base font-normal text-faint"> / {q.limit}</span></div>
-              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-tint/[0.07]"><div className={cn("h-full rounded-full", pct >= 100 ? "bg-neg" : "bg-gradient-to-r from-brand to-brand-hi")} style={{ width: `${Math.max(pct, 1.5)}%` }} /></div>
-            </div>
-          );
-        })}
-      </section>
-
-      <section aria-label="Palavras que você vai ver" className="card p-6">
-        <h2 className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><BookOpen size={14} className="text-brand-hi" /></span>Palavras que você vai ver</h2>
-        <dl className="mt-4 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-          {GLOSSARY.map(([t, d]) => <div key={t}><dt className="text-sm font-semibold">{t}</dt><dd className="mt-0.5 text-[13.5px] leading-relaxed text-muted">{d}</dd></div>)}
-        </dl>
-      </section>
-
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Panel title="Histórico de pesquisas" href="/app/descobrir" icon={Clock} empty="Nenhuma pesquisa ainda. Reabrir uma pesquisa já feita nunca consome crédito.">
-          {(searches.data ?? []).map((s) => (
-            <li key={s.id as string}><Link href={`/app/descobrir?s=${s.id}`} className="group flex items-center justify-between gap-3 py-3 text-sm">
-              <span className="flex min-w-0 items-center gap-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-tint/[0.05] text-faint"><Search size={14} /></span><span className="truncate group-hover:text-brand-hi">{s.query as string}</span></span>
-              <span className="shrink-0 text-xs text-faint">{s.result_count as number} resultados · {relativeTime(s.created_at as string)}</span></Link></li>
-          ))}
-        </Panel>
-        <Panel title="Alertas recentes" href="/app/monitoramento" icon={Bell} empty="Nenhum alerta. Monitore um produto para ser avisado de mudanças de preço.">
-          {(alerts.data ?? []).map((a) => {
-            const d = a.data as { previous?: number; current?: number } | null;
-            const down = d?.previous != null && d.current != null && d.current < d.previous;
+      <section aria-labelledby="uso">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 id="uso" className="text-[18px] font-semibold tracking-tight">Seu plano</h2>
+          <Link href="/app/configuracoes" className="text-[14px] text-brand-hi hover:underline">Ver planos</Link>
+        </div>
+        <div className="card mt-5 grid divide-y divide-tint/[0.08] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {shown.map((q) => {
+            const pct = q.limit > 0 ? Math.min(100, (q.used / q.limit) * 100) : 0;
             return (
-              <li key={a.id as string} className="flex items-start gap-3 py-3 text-sm">
-                <span className={cn("mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg", down ? "bg-pos/12 text-pos" : "bg-brand/12 text-brand-hi")}>{down ? <TrendingDown size={14} /> : <TrendingUp size={14} />}</span>
-                <span className="min-w-0"><span className={cn("block font-medium", a.read_at && "font-normal text-muted")}>{a.title as string}</span><span className="block truncate text-xs text-muted">{a.message as string}</span></span>
-                <span className="ml-auto shrink-0 text-xs text-faint">{relativeTime(a.created_at as string)}</span>
-              </li>
+              <div key={q.resource} className="p-6">
+                <div className="text-[14px] text-muted">{RESOURCE_LABELS[q.resource]}</div>
+                <div className="tabular mt-2 text-[26px] font-semibold leading-none tracking-tight">{q.used}<span className="text-[15px] font-normal text-faint"> de {q.limit}</span></div>
+                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-tint/[0.08]"><div className={cn("h-full rounded-full", pct >= 100 ? "bg-neg" : "bg-brand")} style={{ width: `${Math.max(pct, 1.5)}%` }} /></div>
+                <div className="mt-2 text-[12.5px] text-faint">{PERIOD_LABELS[q.period]}</div>
+              </div>
             );
           })}
-        </Panel>
-        <Panel title="Produtos monitorados" href="/app/monitoramento" icon={BarChart3} empty="Nenhum produto monitorado.">
-          {(watches.data ?? []).map((w) => (
-            <li key={w.id as string}><Link href={`/app/produto/${w.source}/${w.external_id}`} className="group flex items-center justify-between gap-3 py-3 text-sm">
-              <span className="truncate group-hover:text-brand-hi">{w.title as string}</span>
-              <span className="shrink-0 text-right"><span className="tabular block font-semibold text-fg">{formatMoney(w.last_price as number | null, (w.last_currency as string) ?? "BRL")}</span>
-                <span className="text-xs text-faint">{w.last_checked_at ? `verificado ${relativeTime(w.last_checked_at as string)}` : "aguardando 1ª verificação"}</span></span></Link></li>
-          ))}
-        </Panel>
-        <Panel title="Comparações e simulações salvas" href="/app/comparar" icon={Store} empty="Nenhuma comparação ou simulação salva.">
-          {comparisons.map((c) => <li key={c}><Link href={`/app/comparar?c=${encodeURIComponent(c)}`} className="group flex items-center justify-between py-3 text-sm"><span className="truncate group-hover:text-brand-hi">{c}</span><span className="badge">comparação</span></Link></li>)}
-          {(sims.data ?? []).map((s) => {
-            const profit = (s.results as { profit?: number } | null)?.profit;
-            return <li key={s.id as string}><Link href="/app/calculadora" className="group flex items-center justify-between gap-3 py-3 text-sm"><span className="truncate group-hover:text-brand-hi">{s.name as string}</span>
-              <span className={cn("tabular shrink-0 font-semibold", profit != null && profit < 0 ? "text-neg" : "text-pos")}>{formatMoney(profit ?? null)}</span></Link></li>;
-          })}
-        </Panel>
-      </div>
-      <p className="flex items-center gap-2 text-xs text-faint"><Bookmark size={13} /> {favorites.count ?? 0} produto{favorites.count === 1 ? "" : "s"} nos favoritos · <Link href="/app/favoritos" className="underline underline-offset-2 hover:text-fg">ver favoritos e coleções</Link></p>
+        </div>
+      </section>
+
+      {recentEmpty ? null : (
+        <section aria-labelledby="recentes">
+          <h2 id="recentes" className="text-[18px] font-semibold tracking-tight">Atividade recente</h2>
+          <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            {searches.data?.length ? (
+              <Panel title="Pesquisas" href="/app/descobrir" icon={Clock} empty="">
+                {(searches.data ?? []).map((s) => (
+                  <li key={s.id as string}><Link href={`/app/descobrir?s=${s.id}`} className="group flex items-center justify-between gap-3 py-3.5 text-[14.5px]">
+                    <span className="truncate group-hover:text-brand-hi">{s.query as string}</span>
+                    <span className="shrink-0 text-[13px] text-faint">{relativeTime(s.created_at as string)}</span></Link></li>
+                ))}
+              </Panel>
+            ) : null}
+            {alerts.data?.length ? (
+              <Panel title="Alertas" href="/app/monitoramento" icon={Bell} empty="">
+                {(alerts.data ?? []).map((a) => {
+                  const d = a.data as { previous?: number; current?: number } | null;
+                  const down = d?.previous != null && d.current != null && d.current < d.previous;
+                  return (
+                    <li key={a.id as string} className="flex items-start gap-3 py-3.5 text-[14.5px]">
+                      {down ? <TrendingDown size={16} className="mt-0.5 shrink-0 text-pos" /> : <TrendingUp size={16} className="mt-0.5 shrink-0 text-brand-hi" />}
+                      <span className="min-w-0"><span className={cn("block font-medium", a.read_at && "font-normal text-muted")}>{a.title as string}</span><span className="block truncate text-[13px] text-muted">{a.message as string}</span></span>
+                      <span className="ml-auto shrink-0 text-[13px] text-faint">{relativeTime(a.created_at as string)}</span>
+                    </li>
+                  );
+                })}
+              </Panel>
+            ) : null}
+            {watches.data?.length ? (
+              <Panel title="Produtos monitorados" href="/app/monitoramento" icon={BarChart3} empty="">
+                {(watches.data ?? []).map((w) => (
+                  <li key={w.id as string}><Link href={`/app/produto/${w.source}/${w.external_id}`} className="group flex items-center justify-between gap-3 py-3.5 text-[14.5px]">
+                    <span className="truncate group-hover:text-brand-hi">{w.title as string}</span>
+                    <span className="tabular shrink-0 font-semibold">{formatMoney(w.last_price as number | null, (w.last_currency as string) ?? "BRL")}</span></Link></li>
+                ))}
+              </Panel>
+            ) : null}
+            {comparisons.length || sims.data?.length ? (
+              <Panel title="Comparações e cálculos salvos" href="/app/comparar" icon={Store} empty="">
+                {comparisons.map((c) => <li key={c}><Link href={`/app/comparar?c=${encodeURIComponent(c)}`} className="group flex items-center justify-between py-3.5 text-[14.5px]"><span className="truncate group-hover:text-brand-hi">{c}</span><span className="badge">comparação</span></Link></li>)}
+                {(sims.data ?? []).map((s) => {
+                  const profit = (s.results as { profit?: number } | null)?.profit;
+                  return <li key={s.id as string}><Link href="/app/calculadora" className="group flex items-center justify-between gap-3 py-3.5 text-[14.5px]"><span className="truncate group-hover:text-brand-hi">{s.name as string}</span>
+                    <span className={cn("tabular shrink-0 font-semibold", profit != null && profit < 0 ? "text-neg" : "text-pos")}>{formatMoney(profit ?? null)}</span></Link></li>;
+                })}
+              </Panel>
+            ) : null}
+          </div>
+          <p className="mt-5 flex items-center gap-2 text-[13.5px] text-faint"><Bookmark size={14} /> {favorites.count ?? 0} produto{favorites.count === 1 ? "" : "s"} salvo{favorites.count === 1 ? "" : "s"} · <Link href="/app/favoritos" className="text-brand-hi hover:underline">ver salvos</Link></p>
+        </section>
+      )}
+
+      <details className="card group p-6">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[16px] font-semibold tracking-tight">
+          <span className="flex items-center gap-2.5"><BookOpen size={17} className="text-brand-hi" />O que significa cada palavra?</span>
+          <span className="text-[13px] font-normal text-muted group-open:hidden">Mostrar</span><span className="hidden text-[13px] font-normal text-muted group-open:inline">Esconder</span>
+        </summary>
+        <dl className="mt-6 grid gap-x-10 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+          {GLOSSARY.map(([t, d]) => <div key={t}><dt className="text-[14.5px] font-semibold">{t}</dt><dd className="mt-1 text-[14px] leading-relaxed text-muted">{d}</dd></div>)}
+        </dl>
+      </details>
     </div>
   );
 }
@@ -144,8 +184,8 @@ export default async function Dashboard() {
 function Panel({ title, href, icon: Icon, empty, children }: { title: string; href: string; icon: typeof Clock; empty: string; children: React.ReactNode[] | React.ReactNode }) {
   const items = (Array.isArray(children) ? children.flat() : [children]).filter(Boolean);
   return (
-    <section className="card !rounded-2xl p-6">
-      <div className="flex items-center justify-between"><h2 className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"><span className="flex size-7 items-center justify-center rounded-lg bg-tint/[0.06]"><Icon size={14} className="text-brand-hi" /></span>{title}</h2>
+    <section className="card p-6">
+      <div className="flex items-center justify-between"><h2 className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"><Icon size={16} className="text-brand-hi" />{title}</h2>
         <Link href={href} className="flex items-center gap-1 text-xs text-muted hover:text-fg">Ver tudo <ArrowRight className="btn-arrow" size={12} /></Link></div>
       {items.length ? <ul className="mt-3 divide-y divide-tint/[0.06]">{items}</ul> : <p className="mt-5 rounded-xl border border-dashed border-tint/[0.08] px-4 py-5 text-center text-sm text-muted">{empty}</p>}
     </section>

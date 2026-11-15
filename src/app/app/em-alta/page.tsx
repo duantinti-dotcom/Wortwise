@@ -1,15 +1,16 @@
 import { ArrowUpRight, Flame, Search, Settings2, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HowTo } from "@/components/ui/how-to";
-import { EmptyState } from "@/components/ui/misc";
+import { StoreTabs } from "@/components/app/store-tabs";
+import { sourceName } from "@/components/source-mark";
+import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { getUsage, isAdmin } from "@/lib/auth";
-import { loadTrending } from "@/lib/trending";
+import { isStore, loadStoreTrending, STORES, type StoreId } from "@/lib/trending";
 import { supabaseAnon } from "@/lib/supabase/server";
 import { cn, relativeTime } from "@/lib/utils";
 import { TrendingGrid } from "./grid";
 
-export const metadata: Metadata = { title: "Em alta" };
+export const metadata: Metadata = { title: "Mais vendidos" };
 
 async function freeVisible(): Promise<number> {
   const { data } = await supabaseAnon().from("app_settings").select("value").eq("key", "trial_policy").maybeSingle();
@@ -17,85 +18,89 @@ async function freeVisible(): Promise<number> {
   return typeof n === "number" && n > 0 ? n : 6;
 }
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ categoria?: string }> }) {
-  const { categoria } = await searchParams;
-  const [data, usage, admin] = await Promise.all([loadTrending(categoria), getUsage(), isAdmin()]);
+const SOURCE_NOTE: Record<StoreId, { text: string; link: string }> = {
+  mercadolivre: { text: "Fonte: API oficial do Mercado Livre (ranking “Mais vendidos” da categoria).", link: "https://www.mercadolivre.com.br/mais-vendidos" },
+  shopee: { text: "Fonte: API oficial de Afiliados da Shopee, com os produtos ordenados por quantidade vendida pela própria Shopee.", link: "https://shopee.com.br" },
+  amazon: { text: "Fonte: Amazon.", link: "https://www.amazon.com.br/gp/bestsellers" },
+};
+
+export default async function Page({ searchParams }: { searchParams: Promise<{ categoria?: string; loja?: string }> }) {
+  const { categoria, loja } = await searchParams;
+  const store: StoreId = isStore(loja) ? loja : "mercadolivre";
+  const [data, usage, admin] = await Promise.all([loadStoreTrending(store, categoria), getUsage(), isAdmin()]);
   const free = usage.plan === "free";
   const visible = free ? await freeVisible() : data.products.length;
   const shown = data.products.slice(0, visible);
   const locked = Math.max(0, data.products.length - shown.length);
+  const name = sourceName(store);
+  const qs = (s: string, c?: string) => `/app/em-alta?loja=${s}${c ? `&categoria=${c}` : ""}`;
 
   return (
     <>
-      <div className="mb-7 flex flex-col items-center gap-4 text-center">
-        <div className="min-w-0">
-          <div className="flex items-center justify-center gap-2 text-[13px] font-semibold text-brand-hi">
-            <span className="relative flex size-2"><span className="absolute inset-0 animate-ping rounded-full bg-brand/60" /><span className="relative size-2 rounded-full bg-brand" /></span>
-            Ranking oficial do Mercado Livre
-          </div>
-          <h1 className="display mt-2 text-[36px] md:text-[48px]">Mais vendidos</h1>
-          <p className="mx-auto mt-2 max-w-2xl text-[15px] text-muted">O que mais está vendendo agora em cada categoria, com foto, preço e link do anúncio. A posição vem do próprio Mercado Livre.</p>
-        </div>
-        {data.updatedAt ? <span className="badge"><TrendingUp size={13} className="text-brand" />atualizado {relativeTime(data.updatedAt)}</span> : null}
-      </div>
+      <PageHeader title="Mais vendidos" description="O que mais está vendendo agora em cada loja, com foto, preço e link do anúncio."
+        action={data.updatedAt ? <span className="badge"><TrendingUp size={13} />atualizado {relativeTime(data.updatedAt)}</span> : undefined} />
 
-      <HowTo id="em-alta" steps={["Escolha uma categoria logo abaixo", "Veja os produtos mais vendidos, com foto e preço", "Toque em Analisar para ver se vale a pena revender"]} />
+      <StoreTabs stores={STORES} active={store} href={(s) => qs(s)} />
 
-      {/* Categorias */}
-      <nav aria-label="Categorias" className="-mx-4 mb-6 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-        <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap lg:justify-center">
-          {data.categories.map((c) => {
-            const on = c.id === data.category.id;
-            return (
-              <li key={c.id}>
-                <Link href={`/app/em-alta?categoria=${c.id}`} scroll={false} aria-current={on ? "page" : undefined}
-                  className={cn("chip !h-9 whitespace-nowrap", on && "!border-transparent !bg-fg !text-ink hover:!translate-y-0")}>{c.name}</Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      {data.categories.length ? (
+        <nav aria-label="Categorias" className="-mx-5 mt-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+          <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
+            {data.categories.map((c) => {
+              const on = c.id === data.category.id;
+              return (
+                <li key={c.id}>
+                  <Link href={qs(store, c.id)} scroll={false} aria-current={on ? "page" : undefined}
+                    className={cn("chip whitespace-nowrap", on && "!border-transparent !bg-fg !text-[var(--bg)]")}>{c.name}</Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      ) : null}
 
-      {!data.state.ok ? (
-        data.state.reason === "not_configured" ? (
-          <EmptyState icon={Flame} title="Conecte o Mercado Livre para ver os mais vendidos"
-            action={admin ? <Link href="/admin/integracoes" className="btn btn-primary"><Settings2 size={16} /> Configurar integração</Link> : <Link href="/app/calculadora" className="btn btn-secondary">Usar a calculadora enquanto isso</Link>}>
-            {admin
-              ? "Cadastre o Client ID e o Client Secret do aplicativo criado no DevCenter do Mercado Livre. Assim que estiverem configurados, o ranking aparece aqui com fotos, preços e links."
-              : "A integração com o Mercado Livre está sendo configurada. Assim que estiver ativa, o ranking de mais vendidos aparece aqui com fotos, preços e links."}
-          </EmptyState>
+      <div className="mt-8">
+        {!data.state.ok ? (
+          store === "amazon" ? (
+            <EmptyState icon={Search} title="A Amazon não tem ranking pela API"
+              action={<Link href="/app/descobrir?loja=amazon" className="btn btn-primary">Pesquisar na Amazon</Link>}>
+              A API oficial da Amazon não informa a lista de mais vendidos. Você pode pesquisar qualquer produto da Amazon na tela Pesquisar.
+            </EmptyState>
+          ) : data.state.reason === "not_configured" ? (
+            <EmptyState icon={Flame} title={`Ainda sem conexão com: ${name}`}
+              action={admin ? <Link href="/admin/integracoes" className="btn btn-primary"><Settings2 size={16} /> Configurar integração</Link> : <Link href="/app/calculadora" className="btn btn-secondary">Usar a calculadora enquanto isso</Link>}>
+              {admin
+                ? `Cadastre as chaves da API oficial (${name}). Assim que estiverem configuradas, o ranking aparece aqui com fotos, preços e links.`
+                : `A conexão com ${name} está sendo feita. Assim que estiver pronta, os mais vendidos aparecem aqui.`}
+            </EmptyState>
+          ) : (
+            <EmptyState icon={Flame} title="Não foi possível carregar agora" action={<Link href={qs(store, data.category.id)} className="btn btn-secondary">Tentar de novo</Link>}>
+              {data.state.message} Nenhum dado foi inventado para preencher o espaço.
+            </EmptyState>
+          )
         ) : (
-          <EmptyState icon={Flame} title="Não foi possível carregar o ranking agora" action={<Link href={`/app/em-alta?categoria=${data.category.id}`} className="btn btn-secondary">Tentar novamente</Link>}>
-            {data.state.message} Nenhum dado foi inventado para preencher o espaço.
-          </EmptyState>
-        )
-      ) : (
-        <>
-          {data.trends.length ? (
-            <section aria-label="Buscas em alta" className="lg mb-6 rounded-2xl p-4 sm:p-5">
-              <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold"><Flame size={16} className="text-brand" />Buscas que mais cresceram em {data.category.name}</div>
-              <ul className="flex flex-wrap justify-center gap-2">
-                {data.trends.slice(0, 16).map((t, i) => (
-                  <li key={t.keyword} className="flex">
-                    <Link href={`/app/descobrir?q=${encodeURIComponent(t.keyword)}`} className="chip !h-9 !pr-3">
-                      <span className="tabular text-[11px] font-bold text-faint">{i + 1}</span>{t.keyword}<Search size={13} className="text-faint" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
+          <>
+            {data.trends.length ? (
+              <section aria-label="Buscas em alta" className="mb-10">
+                <h2 className="text-[16px] font-semibold tracking-tight">Buscas que mais cresceram</h2>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {data.trends.slice(0, 12).map((t) => (
+                    <li key={t.keyword}><Link href={`/app/descobrir?q=${encodeURIComponent(t.keyword)}`} className="chip">{t.keyword}<Search size={13} className="text-faint" /></Link></li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
-          {shown.length ? <TrendingGrid products={shown} locked={locked} /> : (
-            <EmptyState icon={TrendingUp} title="O Mercado Livre não informou mais vendidos para esta categoria">Escolha outra categoria acima.</EmptyState>
-          )}
+            {shown.length ? <TrendingGrid products={shown} locked={locked} /> : (
+              <EmptyState icon={TrendingUp} title="Nenhum produto nesta categoria">Escolha outra categoria acima.</EmptyState>
+            )}
 
-          <p className="mt-6 flex flex-wrap items-center gap-1.5 text-xs leading-relaxed text-faint">
-            Fonte: API oficial do Mercado Livre (ranking “Mais vendidos” da categoria {data.category.name}). Preços e fotos são os da ficha ou do anúncio no momento da coleta.
-            <a href="https://www.mercadolivre.com.br/mais-vendidos" target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-0.5 text-brand-hi hover:underline">Ver no Mercado Livre <ArrowUpRight size={12} /></a>
-          </p>
-        </>
-      )}
+            <p className="mt-10 text-[13px] leading-relaxed text-faint">
+              {SOURCE_NOTE[store].text} Preços e fotos são os do anúncio no momento da coleta.{" "}
+              <a href={SOURCE_NOTE[store].link} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-0.5 text-brand-hi hover:underline">Abrir em {name} <ArrowUpRight size={12} /></a>
+            </p>
+          </>
+        )}
+      </div>
     </>
   );
 }

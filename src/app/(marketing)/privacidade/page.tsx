@@ -15,19 +15,19 @@ export default function Page() {
           <li><strong>Preferências</strong> (opcionais): estágio de venda, canais, categorias e faixa de investimento.</li>
           <li><strong>Uso da plataforma</strong>: pesquisas realizadas, favoritos, coleções, cotações, simulações, monitoramentos, conversas com o assistente e relatórios que você salvar.</li>
           <li><strong>Assinatura</strong>: plano, situação, datas e histórico de pagamentos (valor, meio e situação). <strong>Não recebemos nem armazenamos número de cartão ou CVV</strong>: o pagamento ocorre no checkout da HeroPay.</li>
-          <li><strong>Prevenção a abuso</strong>: um identificador derivado (hash) do endereço IP usado no cadastro.</li>
+          <li><strong>Prevenção a abuso</strong>: um identificador derivado (hash) do endereço IP usado no cadastro e um cookie aleatório do navegador (ww_did), também guardado só como hash.</li>
           <li><strong>Registros técnicos</strong>: logs de chamadas a APIs externas, sem conteúdo pessoal.</li>
         </ul>
         <h2>2. Para que usamos e com qual base legal</h2>
         <ul>
           <li>Prestar o serviço contratado e aplicar os limites do seu plano — execução de contrato.</li>
           <li>Processar assinaturas e cumprir obrigações fiscais — execução de contrato e obrigação legal.</li>
-          <li>Evitar a criação repetida de contas para burlar o teste gratuito — legítimo interesse, com tratamento mínimo: o IP é convertido em hash, não bloqueamos pessoas automaticamente por compartilharem rede e não usamos fingerprinting oculto.</li>
+          <li>Garantir um teste grátis por pessoa — legítimo interesse, com tratamento mínimo: o IP e o cookie do navegador são convertidos em hash. Se o mesmo aparelho, ou a mesma rede nos últimos 30 dias, já tiver uma conta grátis, a nova conta é criada normalmente, só que sem as cotas grátis. Ninguém é impedido de se cadastrar ou de assinar, e não usamos fingerprinting oculto.</li>
           <li>Personalizar o painel com as preferências que você informar — consentimento, revogável a qualquer momento.</li>
         </ul>
         <h2>3. Retenção</h2>
         <ul>
-          <li>Identificador derivado do IP: até 90 dias.</li>
+          <li>Identificadores derivados do IP e do cookie do navegador: até 90 dias.</li>
           <li>Logs técnicos: até 30 dias.</li>
           <li>Dados da conta e do uso: enquanto a conta existir. Ao excluir a conta, são apagados de forma permanente.</li>
           <li>Registros de pagamento: pelo prazo exigido pela legislação fiscal.</li>

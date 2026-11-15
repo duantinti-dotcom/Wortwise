@@ -1,42 +1,33 @@
-import { ArrowRight, Bell, Calculator, Check, LineChart, MessagesSquare, Scale, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Bell, Calculator, Check, LineChart, MessagesSquare, Scale, Search } from "lucide-react";
 import Link from "next/link";
 import { Faq } from "@/components/marketing/faq";
 import { FeatureTile } from "@/components/marketing/feature-tile";
 import { LiveTrending } from "@/components/marketing/live-trending";
-import { QuestionMarquee } from "@/components/marketing/marquee";
 import { Pricing } from "@/components/marketing/pricing";
-import { ScrollFrame } from "@/components/marketing/scroll-frame";
-import { TextRotator } from "@/components/marketing/text-rotator";
 import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualCompare, VisualSearch, VisualWatch } from "@/components/marketing/visuals";
 import { ProfitCalculator } from "@/components/profit-calculator";
-import { Reveal, Stagger, StaggerItem } from "@/components/ui/reveal";
-import { Spot } from "@/components/ui/spot";
-import { CountUp } from "@/components/ui/count-up";
-import { RevealWords, ScaleIn, ScrubWords } from "@/components/ui/scroll-text";
+import { SourceMark } from "@/components/source-mark";
+import { Reveal } from "@/components/ui/reveal";
 import { publicEnv } from "@/lib/env";
 import { FAQ_ITEMS } from "@/lib/faq";
 import { cn } from "@/lib/utils";
 
-const QUESTIONS_A = ["O que vale a pena vender essa semana?", "Encontre produtos até R$ 50 com boa margem", "Qual fornecedor tem o menor custo total?", "Por quanto eu deveria vender?", "Vale a pena vender isso no Mercado Livre?"];
-const QUESTIONS_B = ["Quanto sobra se eu vender 100 unidades?", "Compare este produto entre canais", "Quais são os riscos desse produto?", "O preço caiu nas últimas semanas?", "Qual o preço mínimo para não ter prejuízo?"];
-
-
-const SOURCES = [
-  { icon: Search, label: "API oficial do Mercado Livre" },
-  { icon: ShieldCheck, label: "CNPJ via Receita Federal" },
-  { icon: LineChart, label: "Histórico de preços próprio" },
-  { icon: Sparkles, label: "IA que cita as fontes" },
-];
-
 const STEPS = [
-  { title: "Pesquise", text: "Digite o que você pensa em vender ou veja os mais vendidos de cada categoria.", icon: Search },
-  { title: "Analise", text: "Veja preço, avaliações, concorrência e os riscos — com a fonte de cada número.", icon: LineChart },
-  { title: "Calcule", text: "Descubra quanto sobra em cada venda e qual fornecedor sai mais barato.", icon: Scale },
-  { title: "Decida", text: "Uma resposta simples — vale a pena ou não — e alertas para comprar na hora certa.", icon: Check },
+  { title: "Pesquise", text: "Digite o que você pensa em vender, ou veja os mais vendidos de cada loja.", icon: Search },
+  { title: "Calcule", text: "Veja quanto sobra em cada venda depois de taxas, frete e impostos.", icon: Calculator },
+  { title: "Decida", text: "Compare fornecedores e receba um aviso quando o preço ficar bom.", icon: Check },
 ];
 
-function Title({ a, b, className }: { a: string; b?: string; className?: string }) {
-  return <RevealWords className={cn("display text-[34px] sm:text-[46px] lg:text-[56px]", className)} parts={[{ text: a }, ...(b ? [{ text: b, className: "accent" }] : [])]} />;
+const STORES = ["mercadolivre", "shopee", "amazon"] as const;
+
+function SectionHead({ label, title, text, className }: { label?: string; title: string; text?: string; className?: string }) {
+  return (
+    <Reveal className={cn("mx-auto mb-12 max-w-2xl text-center md:mb-16", className)}>
+      {label ? <p className="eyebrow">{label}</p> : null}
+      <h2 className="display mt-3 text-[32px] sm:text-[42px] lg:text-[48px]">{title}</h2>
+      {text ? <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-muted">{text}</p> : null}
+    </Reveal>
+  );
 }
 
 export default function HomePage() {
@@ -50,183 +41,110 @@ export default function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      {/* Hero */}
-      <section id="produto" className="relative overflow-x-clip pt-32 md:pt-44">
-        <div aria-hidden className="grid-bg pointer-events-none absolute inset-x-0 top-0 -z-10 h-[720px] [mask-image:radial-gradient(60%_60%_at_50%_0%,#000,transparent)]" />
-        <div className="container-page relative text-center">
-          <Reveal y={10}>
-            <Link href="/cadastro" className="group mx-auto inline-flex items-center gap-2.5 rounded-full border border-tint/10 bg-tint/[0.03] py-1 pl-1 pr-3 text-[13px] text-muted backdrop-blur transition-colors hover:border-tint/25 hover:text-fg">
-              <span className="rounded-full bg-tint/10 px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-fg">Novo</span>
-              Ranking de mais vendidos<span className="hidden sm:inline"> do Mercado Livre</span>
-              <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
-          </Reveal>
-          <h1 className="display mx-auto mt-8 max-w-[1000px] text-[40px] sm:text-[64px] lg:text-[82px]">
-            <span className="word block" style={{ animationDelay: "60ms" }}>Encontre o produto</span>
-            <TextRotator className="pb-[0.08em] text-brand-glow" phrases={["que mais vende.", "com a melhor margem.", "com o fornecedor certo.", "antes da concorrência."]} interval={3400} />
-          </h1>
-          <p className="animate-fade-up mx-auto mt-7 max-w-[620px] text-[17px] leading-relaxed text-muted [animation-delay:380ms] md:text-[19px]">
-            Ranking oficial de mais vendidos com foto, preço e link direto. Fornecedores comparados pelo custo total e o lucro real de cada venda — com a fonte de cada número.
+      {/* Abertura */}
+      <section id="produto" className="pt-32 md:pt-44">
+        <div className="container-page text-center">
+          <h1 className="display mx-auto max-w-[860px] text-[40px] sm:text-[58px] lg:text-[68px]">Descubra o que vender e quanto você vai lucrar.</h1>
+          <p className="mx-auto mt-6 max-w-[580px] text-[17px] leading-relaxed text-muted md:text-[19px]">
+            Veja os mais vendidos de cada loja, compare fornecedores e calcule o lucro real de cada venda. Tudo com a fonte de cada número.
           </p>
-          <div className="animate-fade-up mt-9 flex flex-wrap justify-center gap-3 [animation-delay:480ms]">
-            <Link href="/cadastro" className="btn btn-primary btn-xl">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
-            <Link href="#em-alta" className="btn btn-secondary btn-xl">Ver o que está em alta</Link>
+          <div className="mx-auto mt-10 grid max-w-[420px] gap-3 sm:grid-cols-2">
+            <Link href="/cadastro" className="btn btn-primary btn-lg w-full">Começar grátis</Link>
+            <Link href="#em-alta" className="btn btn-secondary btn-lg w-full">Ver mais vendidos</Link>
           </div>
-          <ul className="animate-fade-up mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[13px] text-faint [animation-delay:560ms]">
-            {["3 pesquisas grátis", "Sem cartão de crédito", "Cancele quando quiser"].map((t) => <li key={t} className="flex items-center gap-1.5"><Check size={14} className="text-brand" />{t}</li>)}
-          </ul>
-        </div>
-        <div className="container-page !max-w-[1240px] mt-16 md:mt-20">
-          <ScrollFrame><HeroPreview /></ScrollFrame>
-        </div>
-        <div className="container-page mt-14">
-          <ul className="glass-cells grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 md:grid-cols-4">
-            {SOURCES.map((s) => (
-              <li key={s.label} className="flex items-center justify-center gap-2.5 px-4 py-4 text-center text-[13.5px] text-soft"><s.icon size={16} className="shrink-0 text-brand" />{s.label}</li>
+          <p className="mt-5 text-[13.5px] text-faint">Grátis para começar · Sem cartão de crédito</p>
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[14px] text-muted">
+            <span className="text-faint">Lojas:</span>
+            {STORES.map((s) => (
+              <span key={s} className="inline-flex items-center gap-2"><SourceMark source={s} size={20} />{({ mercadolivre: "Mercado Livre", shopee: "Shopee", amazon: "Amazon" } as const)[s]}</span>
             ))}
-          </ul>
+          </div>
+        </div>
+        <div className="container-page mt-16 !max-w-[1160px] md:mt-20">
+          <HeroPreview />
         </div>
       </section>
 
-      {/* Em alta agora */}
-      <section id="em-alta" aria-label="Produtos em alta" className="scroll-mt-24 pt-16 md:pt-36">
+      {/* Mais vendidos */}
+      <section id="em-alta" aria-label="Produtos em alta" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page">
-          <Reveal className="mx-auto mb-10 max-w-3xl text-center">
-            <span className="eyebrow">Em alta agora</span>
-            <Title className="mt-5" a="O que está vendendo" b="agora" />
-            <p className="mt-5 text-lg text-muted">O ranking de mais vendidos de cada categoria, com foto, preço e link direto para o anúncio. Dentro do app você filtra por categoria, analisa a margem e monitora o preço.</p>
-          </Reveal>
+          <SectionHead label="Mais vendidos" title="O que está vendendo agora" text="O ranking oficial de cada categoria, com foto, preço e link direto para o anúncio." />
           <LiveTrending />
-          <div className="mt-8 flex justify-center"><Link href="/cadastro" className="btn btn-contrast btn-lg">Ver o ranking completo <ArrowRight className="btn-arrow" size={16} /></Link></div>
+          <div className="mt-10 flex justify-center"><Link href="/cadastro" className="btn btn-secondary">Ver o ranking completo <ArrowRight className="btn-arrow" size={16} /></Link></div>
         </div>
-      </section>
-
-      {/* Números */}
-      <section aria-label="Worthwise em números" className="pt-16 md:pt-36">
-        <div className="container-page">
-          <Stagger className="glass-cells grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 lg:grid-cols-4">
-            {([[0, "R$ ", "", "para começar, sem cartão"], [100, "", "%", "dos preços com fonte e data"], [30, "", " min", "atualização do ranking"], [0, "", "", "números inventados"]] as const).map(([n, pre, suf, small]) => (
-              <StaggerItem key={small} className="p-6 text-center md:p-8">
-                <div className="text-[34px] font-semibold tracking-[-0.04em] md:text-[44px]"><CountUp to={n} prefix={pre} suffix={suf} /></div>
-                <div className="mt-1 font-mono text-[11.5px] uppercase tracking-wider text-faint">{small}</div>
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
-      </section>
-
-      {/* Princípios */}
-      <section className="pt-16 md:pt-36">
-        <div className="container-page">
-          <ScrubWords className="mx-auto max-w-4xl text-center text-[21px] font-medium leading-[1.32] tracking-[-0.03em] text-muted md:text-[36px]"
-            parts={[{ text: "Sem scraping, sem números inventados." }, { text: "Cada preço tem fonte e data,", strong: true }, { text: "cada CNPJ é conferido na Receita e" }, { text: "todo custo entra na conta.", strong: true }]} />
-        </div>
-      </section>
-
-      {/* Funcionalidades */}
-      <section id="funcionalidades" className="scroll-mt-24 py-16 md:py-36">
-        <div className="container-page">
-          <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
-            <span className="eyebrow">Funcionalidades</span>
-            <Title className="mt-5" a="Tudo para decidir" b="o que vender" />
-            <p className="mt-5 text-lg text-muted">Seis ferramentas que conversam entre si. Cada uma mostra de onde veio o dado.</p>
-          </Reveal>
-          <div className="snap-row md:grid md:grid-cols-2 md:gap-5">
-            <FeatureTile tone="tile-sunset" icon={<Search />} title="Descubra o que vender" text="Digite um produto e veja preço, avaliações e quem vende — com foto e link para o anúncio."><VisualSearch /></FeatureTile>
-            <FeatureTile tone="tile-berry" icon={<Scale />} title="Compare fornecedores" text="Some preço, frete e impostos e descubra quem sai mais barato de verdade. E confira se a empresa existe na Receita." flip><VisualCompare /></FeatureTile>
-            <FeatureTile tone="tile-ocean" icon={<LineChart />} title="Entenda o preço" text="Veja se o preço está subindo ou caindo, o menor e o maior preço e quantos vendedores disputam o produto." flip><VisualChart id="ft" /></FeatureTile>
-            <FeatureTile tone="tile-ember" icon={<Calculator />} title="Saiba quanto sobra" text="Responda 6 perguntas e veja quanto fica no seu bolso em cada venda — e o menor preço sem ter prejuízo."><VisualCalc /></FeatureTile>
-            <FeatureTile tone="tile-mint" icon={<Bell />} title="Receba alertas" text="Escolha um preço e seja avisado quando o produto chegar nele. Bom para comprar na hora certa."><VisualWatch /></FeatureTile>
-            <FeatureTile tone="tile-night" icon={<MessagesSquare />} title="Pergunte ao assistente" text="Pergunte em português, como para um amigo que entende de vendas. Ele faz as contas e mostra de onde tirou cada número." flip><VisualAssistant /></FeatureTile>
-          </div>
-          <p className="mt-1 text-center text-xs text-faint md:hidden">Deslize para o lado →</p>
-          <div className="mt-6 flex justify-center"><DemoTag /></div>
-        </div>
-      </section>
-
-      {/* Perguntas */}
-      <section aria-label="Perguntas que o assistente responde" className="pb-16 md:pb-36">
-        <Reveal className="container-page mb-10 text-center"><Title className="!text-[32px] sm:!text-[44px]" a="Pergunte como perguntaria a um" b="analista" /></Reveal>
-        <div className="space-y-3"><QuestionMarquee items={QUESTIONS_A} /><QuestionMarquee items={QUESTIONS_B} reverse /></div>
       </section>
 
       {/* Como funciona */}
-      <section id="como-funciona" className="scroll-mt-24 py-16 md:py-32">
+      <section id="como-funciona" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page">
-          <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
-            <span className="eyebrow">Como funciona</span>
-            <Title className="mt-5" a="Da dúvida à decisão em" b="quatro passos" />
-          </Reveal>
-          <Stagger as="ol" className="snap-row md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
+          <SectionHead label="Como funciona" title="Três passos, sem complicação" />
+          <ol className="grid gap-4 md:grid-cols-3 md:gap-6">
             {STEPS.map((s, i) => (
-              <StaggerItem as="li" key={s.title} className="h-full">
-                <Spot className="lg card-hover relative flex h-full flex-col items-center rounded-2xl p-6 text-center md:p-7">
-                  <div className="flex justify-center">
-                    <span className="flex size-10 items-center justify-center rounded-[10px] border border-tint/10 bg-tint/[0.04] text-brand"><s.icon size={18} /></span>
-                    <span className="absolute right-5 top-5 font-mono text-[12px] text-faint">0{i + 1}</span>
-                  </div>
-                  <h3 className="mt-6 text-xl font-semibold tracking-tight">{s.title}</h3>
-                  <p className="mt-3 text-[15px] leading-relaxed text-muted">{s.text}</p>
-                </Spot>
-              </StaggerItem>
+              <li key={s.title} className="card p-7 md:p-8">
+                <div className="flex items-center gap-3">
+                  <span className="tabular flex size-8 items-center justify-center rounded-full bg-tint/[0.07] text-[14px] font-semibold">{i + 1}</span>
+                  <h3 className="text-[19px] font-semibold tracking-tight">{s.title}</h3>
+                </div>
+                <p className="mt-4 text-[15.5px] leading-relaxed text-muted">{s.text}</p>
+              </li>
             ))}
-          </Stagger>
-          <div className="mt-10 flex justify-center"><Link href="/cadastro" className="btn btn-primary btn-lg">Começar agora <ArrowRight className="btn-arrow" size={16} /></Link></div>
+          </ol>
+        </div>
+      </section>
+
+      {/* Ferramentas */}
+      <section id="funcionalidades" className="scroll-mt-24 pt-28 md:pt-40">
+        <div className="container-page">
+          <SectionHead label="Ferramentas" title="Tudo o que você precisa para decidir" text="Cada ferramenta mostra de onde veio o dado." />
+          <div className="snap-row md:grid md:grid-cols-2 md:gap-6">
+            <FeatureTile tone="" icon={<Search />} title="Pesquise produtos" text="Preço, avaliações e quem vende, com foto e link para o anúncio."><VisualSearch /></FeatureTile>
+            <FeatureTile tone="" icon={<Scale />} title="Compare fornecedores" text="Some preço, frete e impostos e veja quem sai mais barato. E confira o CNPJ na Receita."><VisualCompare /></FeatureTile>
+            <FeatureTile tone="" icon={<LineChart />} title="Entenda o preço" text="Veja se o preço está subindo ou caindo e quantos vendedores disputam o produto."><VisualChart id="ft" /></FeatureTile>
+            <FeatureTile tone="" icon={<Calculator />} title="Calcule o lucro" text="Responda 6 perguntas e veja quanto fica no seu bolso, e o menor preço sem prejuízo."><VisualCalc /></FeatureTile>
+            <FeatureTile tone="" icon={<Bell />} title="Receba alertas" text="Escolha um preço e seja avisado quando o produto chegar nele."><VisualWatch /></FeatureTile>
+            <FeatureTile tone="" icon={<MessagesSquare />} title="Pergunte ao assistente" text="Tire dúvidas em português. Ele faz as contas e mostra de onde tirou cada número."><VisualAssistant /></FeatureTile>
+          </div>
+          <div className="mt-8 flex justify-center"><DemoTag /></div>
         </div>
       </section>
 
       {/* Calculadora */}
-      <section id="demonstracao" className="scroll-mt-24 py-16 md:py-32">
+      <section id="demonstracao" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page">
-          <Reveal className="mx-auto mb-8 max-w-3xl text-center md:mb-14">
-            <span className="eyebrow">Grátis, sem cadastro</span>
-            <Title className="mt-5" a="Experimente a" b="calculadora de lucro" />
-            <p className="mt-5 text-lg text-muted">Mexa nos números e veja o lucro, o preço mínimo e o caminho da receita até o que sobra.</p>
-          </Reveal>
-          <Reveal><ProfitCalculator compact /></Reveal>
+          <SectionHead label="Grátis, sem cadastro" title="Experimente a calculadora de lucro" text="Mexa nos números e veja o lucro e o preço mínimo na hora." />
+          <ProfitCalculator compact />
         </div>
       </section>
 
       {/* Planos */}
-      <section id="planos" className="scroll-mt-24 py-16 md:py-32">
+      <section id="planos" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page">
-          <Reveal className="mx-auto mb-16 max-w-3xl text-center">
-            <span className="eyebrow">Planos</span>
-            <Title className="mt-5" a="Comece grátis." b="Assine quando fizer sentido." />
-            <p className="mt-5 text-lg text-muted">Limites claros em todos os planos. Cancele quando quiser; o acesso vale até o fim do período pago.</p>
-          </Reveal>
+          <SectionHead label="Planos" title="Comece grátis. Assine quando quiser." text="Limites claros. Cancele quando quiser." />
           <Pricing />
-          <p className="mt-1 text-center text-xs text-faint lg:hidden">Deslize para ver os outros planos →</p>
-          <p className="mt-8 text-center text-sm text-faint">Pagamento processado pela HeroPay (Pix, cartão ou boleto). O Worthwise não armazena dados de cartão.</p>
+          <p className="mt-10 text-center text-sm text-faint">Pagamento pela HeroPay (Pix, cartão ou boleto). O Worthwise não guarda dados de cartão.</p>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="perguntas" className="scroll-mt-24 py-16 md:py-32">
+      {/* Dúvidas */}
+      <section id="perguntas" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page !max-w-3xl">
-          <Reveal className="mb-12 text-center">
-            <span className="eyebrow">Dúvidas</span>
-            <Title className="mt-5" a="Perguntas" b="frequentes" />
-            <p className="mt-5 text-muted">Quer os detalhes? Leia a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link> e veja o estado das <Link href="/fontes-de-dados" className="text-brand-hi underline underline-offset-4">fontes de dados</Link>.</p>
-          </Reveal>
-          <Reveal delay={0.08}><div className="lg rounded-[24px] px-6 py-2 md:px-8"><Faq /></div></Reveal>
+          <SectionHead label="Dúvidas" title="Perguntas frequentes" />
+          <div className="card px-6 py-2 md:px-8"><Faq /></div>
+          <p className="mt-8 text-center text-[14.5px] text-muted">Quer os detalhes? Leia a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link> e as <Link href="/fontes-de-dados" className="text-brand-hi underline underline-offset-4">fontes de dados</Link>.</p>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="pb-28 pt-8 md:pb-36">
+      {/* Chamada final */}
+      <section className="pb-24 pt-28 md:pb-32 md:pt-40">
         <div className="container-page">
-          <ScaleIn>
-            <div className="tile relative px-6 py-20 text-center md:py-28">
-              <div aria-hidden className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgb(var(--tint)/0.05)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--tint)/0.05)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(60%_70%_at_50%_100%,#000,transparent)]" />
-              <h2 className="display relative mx-auto max-w-3xl text-[38px] md:text-[60px]">Sua próxima compra merece dados melhores.</h2>
-              <p className="tile-muted relative mx-auto mt-5 max-w-xl text-lg">Crie sua conta e faça três pesquisas completas por nossa conta.</p>
-              <div className="relative mt-10 flex flex-wrap justify-center gap-3">
-                <Link href="/cadastro" className="btn btn-primary btn-xl">Começar grátis <ArrowRight className="btn-arrow" size={18} /></Link>
-                <Link href="/precos" className="btn btn-secondary btn-xl">Ver planos</Link>
-              </div>
+          <div className="card px-6 py-16 text-center md:py-24">
+            <h2 className="display mx-auto max-w-2xl text-[32px] md:text-[48px]">Pronto para escolher melhor o que vender?</h2>
+            <p className="mx-auto mt-5 max-w-md text-[17px] text-muted">Crie sua conta grátis em menos de um minuto.</p>
+            <div className="mx-auto mt-10 grid max-w-[420px] gap-3 sm:grid-cols-2">
+              <Link href="/cadastro" className="btn btn-primary btn-lg w-full">Começar grátis</Link>
+              <Link href="/precos" className="btn btn-secondary btn-lg w-full">Ver planos</Link>
             </div>
-          </ScaleIn>
+          </div>
         </div>
       </section>
     </>

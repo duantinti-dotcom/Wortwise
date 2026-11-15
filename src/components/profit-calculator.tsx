@@ -3,7 +3,7 @@ import { Info, RotateCcw, Save, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildScenarios, calculateProfit, CHANNEL_PRESETS, compareChannels, DEFAULT_INPUTS, priceForTargetMargin, profitCurve, type ProfitInputs } from "@/lib/profit/calc";
-import { AnimatedNumber, BorderBeam } from "@/components/ui/fx";
+import { AnimatedNumber } from "@/components/ui/fx";
 import { EXAMPLE } from "@/lib/profit/example";
 import { cn, formatMoney, formatPercent } from "@/lib/utils";
 
@@ -71,7 +71,7 @@ function WRow({ label, value, start, width, tone, strong }: { label: string; val
       <span className={cn("truncate", strong ? "font-medium text-fg" : "text-muted")}>{label}</span>
       <span className="relative h-5 rounded-md bg-tint/[0.03]">
         <span className={cn("absolute inset-y-0 rounded-md transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          tone === "pos" && "bg-gradient-to-r from-pos/50 to-pos/80", tone === "neg" && "bg-neg/45", tone === "brand" && "bg-gradient-to-r from-brand to-brand-hi")}
+          tone === "pos" && "bg-gradient-to-r from-pos/50 to-pos/80", tone === "neg" && "bg-neg/45", tone === "brand" && "bg-brand")}
           style={{ left: `${Math.min(start, 1) * 100}%`, width: `${Math.max(Math.min(width, 1 - Math.min(start, 1)), 0.004) * 100}%` }} />
       </span>
       <span className={cn("tabular w-[92px] text-right", strong ? "font-semibold" : "", value < 0 && !strong ? "text-danger" : "text-fg")}>{formatMoney(value)}</span>
@@ -188,9 +188,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
       </div>
 
       <div className="space-y-4 lg:sticky lg:top-24">
-        <div className={cn("edge-grad relative overflow-hidden rounded-2xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),var(--surface)]" : "edge-brand bg-[linear-gradient(160deg,rgba(59,130,246,0.16),rgba(59,130,246,0.02)_55%),var(--surface)]")}>
-          <BorderBeam />
-          <div aria-hidden className="aurora -right-16 -top-20 h-56 w-56 bg-brand/20" />
+        <div className={cn("edge-grad relative overflow-hidden rounded-2xl border p-6 md:p-7", ready && r.profit < 0 ? "border-neg/30 bg-surface" : "bg-surface")}>
           <div className="relative">
             <div className="text-[13px] text-muted">{ready && r.profit < 0 ? `Prejuízo total (${i.quantity} unidades)` : `Lucro total (${i.quantity} unidades)`}</div>
             <div className={cn("tabular mt-1 text-[44px] font-semibold leading-none tracking-[-0.04em] transition-colors md:text-5xl", !ready ? "text-faint" : r.profit >= 0 ? "text-fg" : "text-danger")}

@@ -30,6 +30,11 @@ export async function middleware(request: NextRequest) {
 
   const { data } = await supabase.auth.getUser();
 
+  // Identificador aleatório do navegador, usado só para a regra "uma conta grátis por aparelho".
+  if (!request.cookies.get("ww_did")) {
+    response.cookies.set("ww_did", crypto.randomUUID(), { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 730 });
+  }
+
   if (isPrivate && !data.user) {
     const login = new URL("/entrar", request.url);
     login.searchParams.set("next", pathname + request.nextUrl.search);

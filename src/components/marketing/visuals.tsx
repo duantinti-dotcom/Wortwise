@@ -64,7 +64,7 @@ export function VisualCompare() {
       {rows.map(([n, v, w, best, s]) => (
         <div key={n} className={cn("rounded-xl border px-3.5 py-3", best ? "border-brand/40 bg-brand/[0.07]" : "border-tint/8 bg-tint/[0.03]")}>
           <div className="flex items-start justify-between gap-2 text-sm"><span className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium"><span className="whitespace-nowrap">{n}</span>{best ? <span className="badge badge-brand !h-5 !text-[10.5px]">menor custo total</span> : null}</span><span className="tabular whitespace-nowrap font-semibold">{v}<span className="text-xs font-normal text-faint"> /un</span></span></div>
-          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-tint/8"><div className={cn("h-full rounded-full", best ? "bg-gradient-to-r from-brand to-brand-hi" : "bg-tint/30")} style={{ width: `${w}%` }} /></div>
+          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-tint/8"><div className={cn("h-full rounded-full", best ? "bg-brand" : "bg-tint/30")} style={{ width: `${w}%` }} /></div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">{best ? <BadgeCheck size={13} className="text-pos" /> : null}{s}</div>
         </div>
       ))}
@@ -158,7 +158,7 @@ export function HeroPreview({ widget }: { widget?: ReactNode }) {
                   <div className="rounded-2xl border border-tint/10 bg-tint/[0.04] p-4">
                     <div className="flex items-center gap-4"><ScoreRing value={82} size={78} /><div><div className="text-sm font-semibold">Worthwise Score</div><div className="mt-0.5 text-xs text-muted">Grau de confiança: <span className="text-fg">moderado</span></div></div></div>
                     <div className="mt-4 space-y-2">{[["Margem estimada", 76], ["Evidências de demanda", 68], ["Preço competitivo", 84]].map(([l, w]) => (
-                      <div key={l} className="flex items-center gap-2.5 text-[11px]"><span className="w-32 shrink-0 text-muted">{l}</span><span className="h-1 flex-1 rounded-full bg-tint/10"><span className="block h-full rounded-full bg-gradient-to-r from-brand to-brand-hi" style={{ width: `${w}%` }} /></span></div>))}</div>
+                      <div key={l} className="flex items-center gap-2.5 text-[11px]"><span className="w-32 shrink-0 text-muted">{l}</span><span className="h-1 flex-1 rounded-full bg-tint/10"><span className="block h-full rounded-full bg-brand" style={{ width: `${w}%` }} /></span></div>))}</div>
                   </div>
                   <div className="rounded-2xl border border-tint/10 bg-tint/[0.04] p-4"><div className="text-xs text-muted">Lucro por unidade</div>
                     <div className="mt-1 flex items-baseline gap-2"><span className="tabular text-2xl font-semibold tracking-tight text-pos">R$ 13,70</span><span className="text-xs text-muted">margem 22,8%</span></div></div>

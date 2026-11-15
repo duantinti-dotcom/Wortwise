@@ -1,8 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { serverRpcSafe, supabaseServer } from "@/lib/supabase/server";
-import { clientIp } from "@/lib/http";
-import { sha256Hex } from "@/lib/utils";
+import { registerSignup } from "@/lib/signup-guard";
+import { supabaseServer } from "@/lib/supabase/server";
 
 const TYPES: EmailOtpType[] = ["signup", "recovery", "email", "email_change", "invite", "magiclink"];
 
@@ -18,7 +17,7 @@ export async function GET(request: Request) {
   if (error || !data.user) return NextResponse.redirect(`${origin}/entrar?erro=link`);
 
   if (type === "recovery") return NextResponse.redirect(`${origin}/redefinir-senha`);
-  const ipHash = await sha256Hex(`ww-ip:${clientIp(request)}`);
-  await serverRpcSafe("server_register_signup", { p_user: data.user.id, p_ip_hash: ipHash });
+  // Uma conta grátis por aparelho e por rede (só hashes, nunca o IP puro).
+  await registerSignup(request, data.user.id);
   return NextResponse.redirect(`${origin}/app/boas-vindas`);
 }

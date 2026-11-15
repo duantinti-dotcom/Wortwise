@@ -1,7 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { FooterMark } from "./footer-mark";
 
 const COLS = [
   { title: "Produto", links: [["/#funcionalidades", "Funcionalidades"], ["/precos", "Preços"], ["/calculadora-de-lucro", "Calculadora de lucro"], ["/cadastro", "Começar grátis"]] },
@@ -11,13 +10,13 @@ const COLS = [
 
 export function Footer() {
   return (
-    <footer className="relative px-3 pb-3">
-      <div className="lg relative mx-auto max-w-[1240px] overflow-hidden rounded-2xl">
+    <footer className="relative border-t border-tint/[0.08]">
+      <div className="relative mx-auto max-w-[1160px]">
         <div className="grid justify-items-center gap-10 px-6 py-12 text-center md:grid-cols-[1.4fr_repeat(3,1fr)] md:px-12 md:py-14">
           <div className="flex flex-col items-center">
             <Logo />
             <p className="mt-4 max-w-xs text-center text-sm leading-relaxed text-muted">Inteligência comercial para quem vende online. Dados com fonte, cálculos transparentes e conclusões fundamentadas.</p>
-            <Link href="/cadastro" className="btn btn-contrast btn-sm mt-6">Começar grátis <ArrowRight className="btn-arrow" size={14} /></Link>
+            <Link href="/cadastro" className="btn btn-secondary btn-sm mt-6">Começar grátis <ArrowRight className="btn-arrow" size={14} /></Link>
           </div>
           {COLS.map((c) => (
             <nav key={c.title} aria-label={c.title}>
@@ -28,7 +27,6 @@ export function Footer() {
             </nav>
           ))}
         </div>
-        <FooterMark />
         <div className="flex flex-col items-center justify-center gap-1.5 border-t border-tint/10 px-6 py-5 text-center text-xs text-faint md:px-12">
           <span>© {new Date().getFullYear()} Worthwise. Todos os direitos reservados.</span>
           <span>Não somos afiliados aos marketplaces citados. Marcas pertencem aos seus titulares.</span>
