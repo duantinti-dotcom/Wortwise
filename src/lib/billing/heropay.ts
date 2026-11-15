@@ -93,10 +93,13 @@ export async function cancelRecurring(recurringPaymentId: string): Promise<void>
 }
 
 /** Cadastra o webhook de um gatilho. A URL carrega o gatilho, pois o payload não o informa. */
-export async function registerWebhook(trigger: string, webhookUrl: string): Promise<{ trigger: string; ok: boolean; error?: string }> {
+export async function registerWebhook(trigger: string, webhookUrl: string): Promise<{ trigger: string; ok: boolean; error?: string; secret?: string | null }> {
   try {
-    await call("POST", "/webhook", { webhook: { trigger, webhook_url: webhookUrl, request_method: "post" } });
-    return { trigger, ok: true };
+    const r = await call<Record<string, unknown>>("POST", "/webhook", { webhook: { trigger, webhook_url: webhookUrl, request_method: "post" } });
+    // Algumas contas devolvem o segredo de assinatura no cadastro: guardamos para configurar a verificação.
+    const flat = JSON.stringify(r);
+    const m = /"(?:secret|signature_secret|webhook_secret|token|signing_secret)"\s*:\s*"([^"]{8,})"/i.exec(flat);
+    return { trigger, ok: true, secret: m?.[1] ?? null };
   } catch (e) {
     return { trigger, ok: false, error: e instanceof Error ? e.message : "erro" };
   }

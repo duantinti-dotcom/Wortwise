@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { CONNECTORS, isSourceId } from "@/lib/connectors/registry";
 import { ConnectorError, type ConnectorContext } from "@/lib/connectors/types";
-import { serverEnv } from "@/lib/env";
+import { publicEnv, serverEnv } from "@/lib/env";
+import { createSubscriptionLink, HANDLED_TRIGGERS, registerWebhook } from "@/lib/billing/heropay";
 import { runMaintenance } from "@/lib/maintenance";
 import { warmAllIdeas } from "@/lib/ai/ideas";
 import { flushLogs, toMarketItem } from "@/lib/search/service";
@@ -23,6 +24,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   // "purge" (nome antigo do agendamento) e "maintenance" executam a mesma rotina.
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
+  }
+  if (task === "heropay-setup") {
+    // Configuração inicial da HeroPay feita pelo servidor: links de assinatura e webhooks.
+    const { data: plans } = await supabaseAnon().from("plans").select("id, name, description, price_cents, provider_checkout_url").in("id", ["pro", "business"]);
+    const links: { plan: string; id?: number; url?: string; error?: string; existing?: string }[] = [];
+    for (const p of (plans ?? []) as { id: string; name: string; description: string | null; price_cents: number; provider_checkout_url: string | null }[]) {
+      if (p.provider_checkout_url) { links.push({ plan: p.id, existing: p.provider_checkout_url }); continue; }
+      try { const l = await createSubscriptionLink(p); links.push({ plan: p.id, id: l.id, url: l.url }); }
+      catch (e) { links.push({ plan: p.id, error: e instanceof Error ? e.message : "erro" }); }
+    }
+    const hooks = [];
+    for (const trigger of HANDLED_TRIGGERS) hooks.push(await registerWebhook(trigger, `${publicEnv.appUrl}/api/webhooks/heropay?trigger=${trigger}`));
+    return NextResponse.json({ task, links, hooks });
   }
   if (task === "ideas") {
     return NextResponse.json({ task: "ideas", result: await warmAllIdeas() });
