@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { serverEnv } from "@/lib/env";
+import { serverRpc, serverRpcSafe } from "@/lib/supabase/server";
 import { FALLBACK_ML_CATEGORIES } from "./ml-categories";
 import { SHOPEE_CATEGORIES } from "./shopee";
 import { ConnectorError, type Category, type Connector, type ConnectorContext, type ProductDetail, type ProductResult, type RankedProduct, type SearchParams, type SourceId } from "./types";
@@ -15,8 +16,9 @@ import { ConnectorError, type Category, type Connector, type ConnectorContext, t
 const ENDPOINT = "https://api.geckoapi.com.br/v1/extract";
 const TIMEOUT_MS = 90_000;
 /** Depois deste tempo a resposta é atualizada em segundo plano (quem acessa continua vendo a anterior). */
-const FRESH_MS = { ranking: 12 * 3600_000, search: 6 * 3600_000, product: 6 * 3600_000 };
-const KEEP_S = 3 * 86400;
+// Para economizar créditos: cada lista/produto só é buscado de novo na Gecko a cada 3 dias.
+const DAY = 86400_000;
+const FRESH_MS = { ranking: 3 * DAY, search: 3 * DAY, product: 3 * DAY };
 
 export const geckoConfigured = () => Boolean(serverEnv().geckoToken);
 
@@ -63,22 +65,43 @@ function waitUntil(p: Promise<unknown>) {
 }
 
 /** Busca na Gecko com cache: resposta nova é guardada; resposta antiga é devolvida e atualizada em segundo plano. */
-async function extract(source: SourceId, kind: Kind, body: Json, ctx: ConnectorContext): Promise<{ data: Json; at: string }> {
-  const edge = (globalThis as { caches?: { default?: Cache } }).caches?.default;
-  const key = new Request(`https://cache.worthwise.site/gecko/v1/${await sha(JSON.stringify(body))}`);
-  const save = async () => {
+/** Máximo de consultas pagas por dia (protege os créditos). Ajustável por GECKO_DAILY_MAX. */
+const dailyMax = () => Math.max(0, Number(process.env.GECKO_DAILY_MAX ?? 10) || 0);
+const keyOf = async (body: Json) => `v1:${String(body.target)}:${String(body.type)}:${await sha(JSON.stringify(body))}`;
+type Stored = { data: Json; at: string };
+
+async function dbGet(key: string): Promise<Stored | null> {
+  try { return (await serverRpc<Stored | null>("server_gecko_get", { p_key: key })) ?? null; } catch { return null; }
+}
+async function dbPut(key: string, data: Json) { await serverRpcSafe("server_gecko_put", { p_key: key, p_body: data }); }
+async function claim(key: string) {
+  try { return await serverRpc<boolean>("server_gecko_claim", { p_key: key, p_max_per_day: dailyMax() }); } catch { return false; }
+}
+
+/** Só lê o que já está guardado (não gasta crédito). */
+async function peek(body: Json): Promise<Stored | null> { return dbGet(await keyOf(body)); }
+
+/**
+ * Consulta com cache permanente no banco:
+ *  - guardado há menos de 3 dias → devolve o guardado (0 crédito);
+ *  - mais antigo → devolve o guardado e atualiza em segundo plano (1 crédito, no máximo 1 vez);
+ *  - nunca guardado → consulta a Gecko (1 crédito), se o limite do dia permitir.
+ */
+async function extract(source: SourceId, kind: Kind, body: Json, ctx: ConnectorContext): Promise<Stored> {
+  if (!geckoConfigured()) throw new ConnectorError(source, "not_configured", "GECKO_API_KEY ausente");
+  const key = await keyOf(body);
+  const prev = await dbGet(key);
+  const refresh = async (): Promise<Stored> => {
     const data = await call(source, body, ctx);
-    const out = { data, at: new Date().toISOString() };
-    await edge?.put(key, new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${KEEP_S}` } })).catch(() => {});
-    return out;
+    await dbPut(key, data);
+    return { data, at: new Date().toISOString() };
   };
-  const hit = await edge?.match(key).catch(() => undefined);
-  if (hit) {
-    const prev = (await hit.json()) as { data: Json; at: string };
-    if (Date.now() - Date.parse(prev.at) > FRESH_MS[kind]) waitUntil(save());
+  if (prev) {
+    if (Date.now() - Date.parse(prev.at) > FRESH_MS[kind] && (await claim(key))) waitUntil(refresh());
     return prev;
   }
-  return save();
+  if (!(await claim(key))) throw new ConnectorError(source, "rate_limited", "Limite diário de consultas à GeckoAPI atingido");
+  return refresh();
 }
 
 /* ───────────── Normalização (só copia o que a Gecko devolveu) ───────────── */
@@ -139,14 +162,16 @@ export function shopeeItem(i: Json, now: string): ProductResult | null {
 }
 
 /* TikTok Shop */
-export const tiktokLink = (id: string) => `https://www.tiktok.com/shop/pdp/${id}`;
+const slug = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80) || "produto";
+/** Link público do produto no TikTok Shop (formato /shop/pdp/{nome}/{id}). */
+export const tiktokLink = (id: string, title?: string | null) => `https://www.tiktok.com/shop/pdp/${slug(title ?? "")}/${id}`;
 export function tiktokItem(i: Json, now: string): ProductResult | null {
   const id = str(i.productId), title = str(i.name);
   if (!id || !/^\d{6,25}$/.test(id) || !title || i.isAd === true) return null;
   const price = num(i.price), sold = pos(i.soldCount);
   return {
     ...base("tiktokshop", now), externalId: `t-${id}`, kind: "listing", title,
-    imageUrl: imgUrl(i.image), permalink: str(i.url) ?? tiktokLink(id), price, originalPrice: original(price, num(i.regularPrice)),
+    imageUrl: imgUrl(i.image), permalink: str(i.url) ?? tiktokLink(id, title), price, originalPrice: original(price, num(i.regularPrice)),
     currency: price != null ? str(i.currency) ?? "BRL" : null, rating: rating(i.rating), sellerId: str(i.shopId), sellerName: str(i.sellerName),
     freeShipping: typeof i.freeShipping === "boolean" ? i.freeShipping : null, soldQuantity: sold,
     attributes: sold ? [{ name: "Vendidos (segundo o TikTok Shop)", value: sold.toLocaleString("pt-BR") }] : [],
@@ -177,11 +202,35 @@ function detail(p: ProductResult, d: Json): ProductDetail {
 
 const ranked = (items: ProductResult[]): RankedProduct[] => items.map((p, i) => ({ ...p, rank: i + 1 }));
 
+/** Categoria "Geral": o que mais vende em todos os tópicos da loja. */
+export const GERAL: Category = { id: "geral", name: "Geral (todos)" };
+
+/**
+ * "Geral" sem gastar crédito: junta os rankings das categorias que já estão guardados.
+ * Se nenhum estiver guardado ainda, busca só a primeira categoria (1 crédito).
+ */
+async function mergeCategories(
+  bodies: Json[], toItems: (data: Json, at: string) => ProductResult[], order: "rank" | "sold", first: () => Promise<RankedProduct[]>,
+): Promise<RankedProduct[]> {
+  const lists = (await Promise.all(bodies.map(peek))).filter((x): x is { data: Json; at: string } => Boolean(x)).map((x) => toItems(x.data, x.at));
+  if (!lists.length) return first();
+  const seen = new Set<string>();
+  let merged: ProductResult[] = [];
+  if (order === "sold") merged = lists.flat().filter((p) => p.soldQuantity != null).sort((a, b) => b.soldQuantity! - a.soldQuantity!);
+  else for (let i = 0; i < 50; i++) for (const l of lists) if (l[i]) merged.push(l[i]!);
+  return ranked(merged.filter((p) => (seen.has(p.externalId) ? false : (seen.add(p.externalId), true))));
+}
+
 /* ───────────── Conectores ───────────── */
 const caps = { search: true, details: true, offers: false, fees: false, bestsellers: true };
 const stateOf = (name: string) => () => geckoConfigured()
   ? { state: "connected" as const, detail: `${name}: dados públicos via GeckoAPI.` }
   : { state: "not_configured" as const, detail: "Defina GECKO_API_KEY no servidor." };
+
+const mlRankBody = (categoryId: string): Json => ({ target: "mercadolivre.com.br", type: "plp", region: "BR", url: `https://www.mercadolivre.com.br/mais-vendidos/${categoryId}`, page: 1 });
+const mlRanked = (data: Json, at: string): RankedProduct[] => arr(data.items).map(obj).map((i) => ({ i, p: mlItem(i, at) }))
+  .filter((x): x is { i: Json; p: ProductResult } => Boolean(x.p))
+  .sort((a, b) => (num(a.i.resultPosition) ?? 999) - (num(b.i.resultPosition) ?? 999)).map(({ p }, n) => ({ ...p, rank: n + 1 }));
 
 export const geckoMercadoLivre: Connector = {
   id: "mercadolivre", name: "Mercado Livre", capabilities: caps, state: stateOf("Mercado Livre"),
@@ -199,17 +248,19 @@ export const geckoMercadoLivre: Connector = {
     if (!p) throw new ConnectorError("mercadolivre", "not_found", "Produto não encontrado no Mercado Livre");
     return detail({ ...p, externalId }, data);
   },
-  async getCategories() { return FALLBACK_ML_CATEGORIES; },
+  async getCategories() { return [GERAL, ...FALLBACK_ML_CATEGORIES]; },
   async getTrends() { return []; },
-  /** Página oficial "Mais vendidos" da categoria: a posição é a do próprio Mercado Livre. */
+  /** Página oficial "Mais vendidos" da categoria: a posição é a do próprio Mercado Livre. "Geral" junta as categorias já guardadas. */
   async getBestsellers(categoryId, ctx) {
-    const { data, at } = await extract("mercadolivre", "ranking", { target: "mercadolivre.com.br", type: "plp", region: "BR", url: `https://www.mercadolivre.com.br/mais-vendidos/${categoryId}`, page: 1 }, ctx);
-    const items = arr(data.items).map(obj).map((i) => ({ i, p: mlItem(i, at) })).filter((x): x is { i: Json; p: ProductResult } => Boolean(x.p));
-    return items.sort((a, b) => (num(a.i.resultPosition) ?? 999) - (num(b.i.resultPosition) ?? 999)).map(({ p }, i) => ({ ...p, rank: i + 1, salesRank: { rank: i + 1, category: categoryId } }));
+    if (categoryId === GERAL.id) return mergeCategories(FALLBACK_ML_CATEGORIES.map((c) => mlRankBody(c.id)), mlRanked, "sold", () => geckoMercadoLivre.getBestsellers!(FALLBACK_ML_CATEGORIES[0]!.id, ctx));
+    const { data, at } = await extract("mercadolivre", "ranking", mlRankBody(categoryId), ctx);
+    return mlRanked(data, at).map((p) => ({ ...p, salesRank: { rank: p.rank, category: categoryId } }));
   },
 };
 
 const shopeeCats = SHOPEE_CATEGORIES.map(({ id, name }) => ({ id, name }));
+const shopeeRankBody = (cat: { keyword: string }): Json => ({ target: "shopee.com.br", type: "plp", region: "BR", url: `https://shopee.com.br/search?keyword=${encodeURIComponent(cat.keyword)}&sortBy=sales` });
+const shopeeList = (data: Json, at: string) => arr(data.items).map(obj).filter((i) => i.sponsored !== true).map((i) => shopeeItem(i, at)).filter((p): p is ProductResult => Boolean(p));
 export const geckoShopee: Connector = {
   id: "shopee", name: "Shopee", capabilities: caps, state: stateOf("Shopee"),
   async search(params, ctx) {
@@ -225,12 +276,13 @@ export const geckoShopee: Connector = {
     if (!p) throw new ConnectorError("shopee", "not_found", "Produto não encontrado na Shopee");
     return detail(p, data);
   },
-  async getCategories() { return shopeeCats; },
+  async getCategories() { return [GERAL, ...shopeeCats]; },
   /** Busca da categoria na ordenação "Mais vendidos" da própria Shopee: a posição é a da Shopee. */
   async getBestsellers(categoryId, ctx) {
+    if (categoryId === GERAL.id) return mergeCategories(SHOPEE_CATEGORIES.map(shopeeRankBody), shopeeList, "rank", () => geckoShopee.getBestsellers!(SHOPEE_CATEGORIES[0]!.id, ctx));
     const cat = SHOPEE_CATEGORIES.find((c) => c.id === categoryId) ?? SHOPEE_CATEGORIES[0]!;
-    const { data, at } = await extract("shopee", "ranking", { target: "shopee.com.br", type: "plp", region: "BR", url: `https://shopee.com.br/search?keyword=${encodeURIComponent(cat.keyword)}&sortBy=sales` }, ctx);
-    return ranked(arr(data.items).map(obj).filter((i) => i.sponsored !== true).map((i) => shopeeItem(i, at)).filter((p): p is ProductResult => Boolean(p)));
+    const { data, at } = await extract("shopee", "ranking", shopeeRankBody(cat), ctx);
+    return ranked(shopeeList(data, at));
   },
 };
 
@@ -246,10 +298,13 @@ export const TIKTOK_CATEGORIES = [
 ];
 const tiktokCats: Category[] = TIKTOK_CATEGORIES.map(({ id, name }) => ({ id, name }));
 
+const tiktokBody = (keyword: string): Json => ({ target: "tiktok.com", type: "plp", region: "BR", keyword: keyword.trim().slice(0, 200) });
+const tiktokList = (data: Json, at: string) => arr(data.items).map(obj).map((i) => tiktokItem(i, at)).filter((p): p is ProductResult => Boolean(p));
 async function tiktokSearch(keyword: string, kind: Kind, ctx: ConnectorContext) {
-  const { data, at } = await extract("tiktokshop", kind, { target: "tiktok.com", type: "plp", region: "BR", keyword: keyword.trim().slice(0, 200) }, ctx);
-  return arr(data.items).map(obj).map((i) => tiktokItem(i, at)).filter((p): p is ProductResult => Boolean(p));
+  const { data, at } = await extract("tiktokshop", kind, tiktokBody(keyword), ctx);
+  return tiktokList(data, at);
 }
+const bySold = (items: ProductResult[]) => ranked(items.filter((p) => p.soldQuantity != null).sort((a, b) => b.soldQuantity! - a.soldQuantity!));
 
 export const geckoTikTok: Connector = {
   id: "tiktokshop", name: "TikTok Shop", capabilities: caps, state: stateOf("TikTok Shop"),
@@ -257,16 +312,16 @@ export const geckoTikTok: Connector = {
   async getProduct(externalId, ctx) {
     const id = externalId.slice(2);
     if (!externalId.startsWith("t-") || !/^\d{6,25}$/.test(id)) throw new ConnectorError("tiktokshop", "not_found", "Identificador inválido");
-    const { data, at } = await extract("tiktokshop", "product", { target: "tiktok.com", type: "pdp", region: "BR", url: tiktokLink(id) }, ctx);
+    const { data, at } = await extract("tiktokshop", "product", { target: "tiktok.com", type: "pdp", region: "BR", url: tiktokLink(id, null) }, ctx);
     const p = tiktokItem({ ...data, productId: id, image: data.mainImage ?? arr(data.images)[0] }, at);
     if (!p) throw new ConnectorError("tiktokshop", "not_found", "Produto não encontrado no TikTok Shop");
     return detail(p, data);
   },
-  async getCategories() { return tiktokCats; },
+  async getCategories() { return [GERAL, ...tiktokCats]; },
   /** O TikTok Shop não tem página pública de ranking: mostramos a busca da categoria ordenada pela quantidade vendida que o próprio TikTok informa. */
   async getBestsellers(categoryId, ctx) {
+    if (categoryId === GERAL.id) return mergeCategories(TIKTOK_CATEGORIES.map((c) => tiktokBody(c.keyword)), tiktokList, "sold", () => geckoTikTok.getBestsellers!(TIKTOK_CATEGORIES[0]!.id, ctx));
     const cat = TIKTOK_CATEGORIES.find((c) => c.id === categoryId) ?? TIKTOK_CATEGORIES[0]!;
-    const items = await tiktokSearch(cat.keyword, "ranking", ctx);
-    return ranked(items.filter((p) => p.soldQuantity != null).sort((a, b) => b.soldQuantity! - a.soldQuantity!));
+    return bySold(await tiktokSearch(cat.keyword, "ranking", ctx));
   },
 };

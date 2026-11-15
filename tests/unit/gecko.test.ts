@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+vi.mock("server-only", () => ({}));
 import fixture from "../fixtures/gecko.json";
 import { geckoMercadoLivre, geckoShopee, geckoTikTok, mlItem, shopeeItem, tiktokItem } from "@/lib/connectors/gecko";
 
@@ -52,5 +53,12 @@ describe("GeckoAPI: chamadas", () => {
     delete process.env.GECKO_API_KEY; delete process.env.GECKO_API_TOKEN;
     for (const c of [geckoMercadoLivre, geckoShopee, geckoTikTok]) expect(c.state().state).toBe("not_configured");
     await expect(geckoTikTok.getBestsellers!("casa", { logs: [] })).rejects.toMatchObject({ code: "not_configured" });
+  });
+});
+
+describe("GeckoAPI: link do TikTok Shop", () => {
+  it("usa o formato público /shop/pdp/{nome}/{id}", async () => {
+    const { tiktokLink } = await import("@/lib/connectors/gecko");
+    expect(tiktokLink("1737850574647363367", "Escorredor de Louças 2 Andares")).toBe("https://www.tiktok.com/shop/pdp/escorredor-de-loucas-2-andares/1737850574647363367");
   });
 });

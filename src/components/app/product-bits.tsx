@@ -87,8 +87,8 @@ const CALC_PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classi
 export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void; rank?: number; history?: { date: string; price: number }[] }) {
   const discount = p.originalPrice && p.price && p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
   const source = SOURCE_LABELS[p.source] ?? p.source;
-  // Amazon (mais vendidos da página pública): a análise detalhada fica na própria Amazon.
-  const external = p.source === "amazon" && Boolean(p.permalink);
+  // Amazon, Shopee e TikTok Shop: o botão abre o produto direto na loja (sem gastar crédito de consulta).
+  const external = (p.source === "amazon" || (p.provider === "geckoapi" && p.source !== "mercadolivre")) && Boolean(p.permalink);
   const analyzeHref = external ? p.permalink! : `/app/produto/${p.source}/${p.externalId}`;
   return (
     <article className="card card-hover group relative flex flex-col overflow-hidden">
@@ -128,7 +128,7 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           <span className="truncate">{p.sellerName ?? (p.kind === "catalog_product" ? "Ficha de catálogo" : "Vendedor não informado")}</span>
         </div>
         <div className="relative z-10 mt-auto grid grid-cols-[1fr_auto] gap-2 pt-4">
-          <Link href={analyzeHref} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer nofollow" : undefined} className="btn btn-primary btn-sm">{external ? "Ver na Amazon" : "Analisar"}</Link>
+          <Link href={analyzeHref} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer nofollow" : undefined} className="btn btn-primary btn-sm">{external ? `Ver ${p.source === "amazon" ? "na Amazon" : p.source === "shopee" ? "na Shopee" : "no TikTok Shop"}` : "Analisar"}</Link>
           {p.permalink ? (
             <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !w-9 !px-0" aria-label={`Abrir no ${source}`} title={`Abrir no ${source}`}>
               <ExternalLink size={15} />

@@ -73,7 +73,7 @@ export async function loadTrending(categoryId: string | null | undefined): Promi
 
   const categories = await cached(`cats:${mercadoLivre().state().detail.slice(0, 12)}`, () => mercadoLivre().getCategories!(ctx)).then((r) => r.value).catch(() => FALLBACK_CATEGORIES);
   const list = categories.length ? categories : FALLBACK_CATEGORIES;
-  const category = list.find((c) => c.id === categoryId) ?? list.find((c) => c.id === DEFAULT_CATEGORY) ?? list[0]!;
+  const category = list.find((c) => c.id === categoryId) ?? (list[0]?.id === "geral" ? list[0] : list.find((c) => c.id === DEFAULT_CATEGORY)) ?? list[0]!;
   try {
     const [products, trends] = await Promise.all([
       cached(`best:${trendingSource()}:${category.id}`, () => mercadoLivre().getBestsellers!(category.id, ctx).then(record)),
@@ -114,11 +114,11 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
     }
   }
   // Shopee e TikTok Shop: conector configurado (API oficial ou GeckoAPI).
-  const list = store === "shopee" ? SHOPEE_CATEGORIES : TIKTOK_CATEGORIES;
-  const categories = list.map(({ id, name }) => ({ id, name }));
-  const category = categories.find((c) => c.id === categoryId) ?? categories[0]!;
-  const base = { categories, category, trends: [] as TrendKeyword[], store, products: [] as RankedProduct[], updatedAt: null };
   const c = CONNECTORS[store];
+  const list = store === "shopee" ? SHOPEE_CATEGORIES : TIKTOK_CATEGORIES;
+  const categories = (await c.getCategories?.({ logs: [] }).catch(() => null)) ?? list.map(({ id, name }) => ({ id, name }));
+  const category = categories.find((x) => x.id === categoryId) ?? categories[0]!;
+  const base = { categories, category, trends: [] as TrendKeyword[], store, products: [] as RankedProduct[], updatedAt: null };
   if (!connected(store) || !c.getBestsellers) return { ...base, state: { ok: false, reason: "not_configured", message: USER_MESSAGES.not_configured }, storeState: "not_configured" };
   const ctx: ConnectorContext = { logs: [] };
   try {
@@ -134,9 +134,9 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
 /** "Geral": os destaques de todas as lojas com dados oficiais, num ranking só. */
 export async function loadOverall(): Promise<{ products: RankedProduct[]; stores: string[]; updatedAt: string | null }> {
   const parts = await Promise.all([
-    trendingConfigured() ? loadTrending(DEFAULT_CATEGORY) : null,
-    connected("shopee") ? loadStoreTrending("shopee", SHOPEE_CATEGORIES[0]!.id) : null,
-    connected("tiktokshop") ? loadStoreTrending("tiktokshop", TIKTOK_CATEGORIES[0]!.id) : null,
+    trendingConfigured() ? loadTrending(trendingSource() === "gecko" ? "geral" : DEFAULT_CATEGORY) : null,
+    connected("shopee") ? loadStoreTrending("shopee", "geral") : null,
+    connected("tiktokshop") ? loadStoreTrending("tiktokshop", "geral") : null,
     loadStoreTrending("amazon", "electronics"),
   ]);
   const lists = parts.filter((p): p is TrendingData => Boolean(p?.state.ok && p.products.length));

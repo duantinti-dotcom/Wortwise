@@ -35,6 +35,9 @@ export const CONNECTORS: Record<SourceId, Connector> = {
   tiktokshop: preferOfficial(tiktokPending, geckoTikTok),
 };
 
+/** Loja servida pela GeckoAPI (cada consulta nova gasta crédito). */
+export const geckoBacked = (id: SourceId) => CONNECTORS[id].state().detail.includes("GeckoAPI");
+
 export const SOURCE_IDS = Object.keys(CONNECTORS) as SourceId[];
 
 export function isSourceId(v: string): v is SourceId {
