@@ -11,6 +11,7 @@ import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualC
 import { ProfitCalculator } from "@/components/profit-calculator";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/reveal";
 import { Spot } from "@/components/ui/spot";
+import { CountUp } from "@/components/ui/count-up";
 import { publicEnv } from "@/lib/env";
 import { FAQ_ITEMS } from "@/lib/faq";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,7 @@ export default function HomePage() {
   const jsonLd = [
     { "@context": "https://schema.org", "@type": "Organization", name: "Worthwise", url: publicEnv.appUrl, logo: `${publicEnv.appUrl}/icon-512.png` },
     { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Worthwise", applicationCategory: "BusinessApplication", operatingSystem: "Web",
-      description: "Plataforma brasileira de inteligência comercial para vendedores online.", offers: { "@type": "AggregateOffer", priceCurrency: "BRL", lowPrice: "0", highPrice: "99.90", offerCount: 3 } },
+      description: "Plataforma brasileira de inteligência comercial para vendedores online.", offers: { "@type": "AggregateOffer", priceCurrency: "BRL", lowPrice: "0", highPrice: "59.90", offerCount: 3 } },
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ_ITEMS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
   ];
   return (
@@ -103,9 +104,9 @@ export default function HomePage() {
       <section aria-label="Worthwise em números" className="pt-16 md:pt-36">
         <div className="container-page">
           <Stagger className="glass-cells grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 lg:grid-cols-4">
-            {[["R$ 0", "para começar, sem cartão"], ["100%", "dos preços com fonte e data"], ["30 min", "atualização do ranking"], ["0", "números inventados"]].map(([big, small]) => (
-              <StaggerItem key={small} className="p-6 md:p-8">
-                <div className="tabular text-[34px] font-semibold tracking-[-0.04em] md:text-[44px]">{big}</div>
+            {([[0, "R$ ", "", "para começar, sem cartão"], [100, "", "%", "dos preços com fonte e data"], [30, "", " min", "atualização do ranking"], [0, "", "", "números inventados"]] as const).map(([n, pre, suf, small]) => (
+              <StaggerItem key={small} className="p-6 text-center md:p-8">
+                <div className="text-[34px] font-semibold tracking-[-0.04em] md:text-[44px]"><CountUp to={n} prefix={pre} suffix={suf} /></div>
                 <div className="mt-1 font-mono text-[11.5px] uppercase tracking-wider text-faint">{small}</div>
               </StaggerItem>
             ))}

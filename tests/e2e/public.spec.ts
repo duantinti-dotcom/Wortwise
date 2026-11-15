@@ -23,7 +23,7 @@ test.describe("site público", () => {
     }
     await expect(page).toHaveURL(/\/precos$/);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Preço simples");
-    await expect(page.getByText("49,90").first()).toBeVisible();
+    await expect(page.getByText("29,90").first()).toBeVisible();
   });
 
   test("calculadora de lucro calcula corretamente", async ({ page }) => {

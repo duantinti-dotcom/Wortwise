@@ -4,6 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import { publicEnv } from "@/lib/env";
 import { THEME_SCRIPT } from "@/components/theme/script";
 import { GlassFilters } from "@/components/ambient";
+import { GlassLight } from "@/components/ui/glass-light";
 import "./globals.css";
 
 const title = "Worthwise — Encontre produtos que realmente valem a pena";
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" data-theme="dark" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} /></head>
-      <body className="min-h-dvh"><GlassFilters />{children}</body>
+      <body className="min-h-dvh"><GlassFilters /><GlassLight />{children}</body>
     </html>
   );
 }

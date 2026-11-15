@@ -655,3 +655,26 @@ html.theme-vt::view-transition-new(root) { animation: theme-reveal .7s var(--eas
 /* Faixas em grade (fontes, números, resumo de preços) */
 .glass-cells { background: rgb(var(--tint) / 0.1); }
 .glass-cells > * { background: color-mix(in oklab, var(--bg) 52%, transparent); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); }
+
+/* Reflexo que acompanha o cursor (variáveis --lx/--ly definidas por GlassLight) */
+.card::after, .lg::after, .glass::after, .liquid::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: radial-gradient(360px circle at var(--lx, -400px) var(--ly, -400px), rgb(255 255 255 / 0.10), transparent 60%);
+  opacity: 0; transition: opacity .45s var(--ease-out);
+}
+.card:hover::after, .lg:hover::after, .glass:hover::after, .liquid:hover::after { opacity: 1; }
+[data-theme="light"] .card::after, [data-theme="light"] .lg::after, [data-theme="light"] .glass::after, [data-theme="light"] .liquid::after {
+  background: radial-gradient(360px circle at var(--lx, -400px) var(--ly, -400px), rgb(255 160 80 / 0.16), transparent 60%);
+}
+/* .tile: borda luminosa vai para ::before e a luz do cursor fica em ::after */
+.tile::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1; padding: 1.2px; background: var(--glass-rim);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
+}
+.tile::after {
+  padding: 0 !important; -webkit-mask: none !important; mask: none !important; z-index: -1 !important;
+  background: radial-gradient(420px circle at var(--lx, -400px) var(--ly, -400px), rgb(255 255 255 / 0.10), transparent 60%) !important;
+  opacity: 0; transition: opacity .45s var(--ease-out);
+}
+.tile:hover::after { opacity: 1; }

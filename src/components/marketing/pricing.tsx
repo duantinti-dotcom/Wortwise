@@ -1,7 +1,7 @@
 "use client";
 import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BorderBeam } from "@/components/ui/fx";
 import { Spot } from "@/components/ui/spot";
 import { Stagger, StaggerItem } from "@/components/ui/reveal";
@@ -14,6 +14,14 @@ const [int, dec] = [(c: number) => Math.floor(c / 100).toLocaleString("pt-BR"), 
 /** Planos: renderiza os valores padrão e atualiza com os preços vigentes do banco (editáveis no admin). */
 export function Pricing({ initial }: { initial?: PlanInfo[] }) {
   const [plans, setPlans] = useState<PlanInfo[]>(initial ?? DEFAULT_PLANS);
+  const featuredRef = useRef<HTMLDivElement>(null);
+  // No celular, o carrossel abre centralizado no plano mais escolhido (sem rolar a página).
+  useEffect(() => {
+    const el = featuredRef.current, row = el?.parentElement?.parentElement;
+    if (!el || !row || !window.matchMedia("(max-width: 1023.98px)").matches) return;
+    const item = el.parentElement!;
+    row.scrollLeft = item.offsetLeft - (row.clientWidth - item.clientWidth) / 2;
+  }, []);
   useEffect(() => {
     if (initial) return;
     let alive = true;
@@ -28,7 +36,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
         const featured = p.id === "pro";
         return (
           <StaggerItem key={p.id} className={cn("flex", featured && "lg:-my-4")}>
-          <Spot className={cn("lg card-hover relative flex flex-1 flex-col rounded-2xl p-8", featured && "edge-brand lg:py-12")}>
+          <Spot ref={featured ? featuredRef : undefined} className={cn("lg card-hover relative flex flex-1 flex-col rounded-2xl p-8", featured && "edge-brand lg:py-12")}>
             {featured ? <BorderBeam /> : null}
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>

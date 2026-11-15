@@ -89,8 +89,8 @@ describe("isolamento entre usuários (RLS)", () => {
 });
 
 describe("cobrança HeroPay", () => {
-  const paid = (src: string, id: string, value = "49.90") => ({
-    buyer: { email: "x@nowhere.dev" }, payment: { id, value, method: "pix", status: "paid", net_value_cents: "4990", date: "2026-11-13T10:00:00-03:00" },
+  const paid = (src: string, id: string, value = "29.90") => ({
+    buyer: { email: "x@nowhere.dev" }, payment: { id, value, method: "pix", status: "paid", net_value_cents: "2990", date: "2026-11-13T10:00:00-03:00" },
     cart: { src }, subscription: { id: "sub-1", status: "active", next_invoice_at: "" },
   });
 
@@ -174,7 +174,7 @@ describe("administração e dados globais", () => {
     const [{ o }] = await db.as<{ o: { users: number } }>(u, "select public.admin_overview() o");
     expect(o.users).toBeGreaterThan(0);
     expect(await db.as(u, "update public.plans set price_cents = 5990 where id = 'pro' returning id")).toHaveLength(1);
-    await db.pool.query("update public.plans set price_cents = 4990 where id = 'pro'");
+    await db.pool.query("update public.plans set price_cents = 2990 where id = 'pro'");
   });
 
   it("fornecedor só vira 'verificado' por procedimento do servidor", async () => {

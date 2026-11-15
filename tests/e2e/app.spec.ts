@@ -142,7 +142,7 @@ test("assinatura: plano só muda por webhook assinado; duplicata é ignorada; es
     return page.request.post(`/api/webhooks/heropay?trigger=${trigger}`, {
       data: body, headers: { "content-type": "application/json", "x-heropay-signature": createHmac("sha256", secret).update(body).digest("hex") } });
   };
-  const payload = { buyer: { email: EMAIL }, payment: { id, value: "49.90", method: "pix", status: "paid", net_value_cents: "4990", date: new Date().toISOString() },
+  const payload = { buyer: { email: EMAIL }, payment: { id, value: "29.90", method: "pix", status: "paid", net_value_cents: "2990", date: new Date().toISOString() },
     cart: { src: "" }, subscription: { id: `sub-${id}`, status: "active", next_invoice_at: "" } };
 
   expect((await send("spark_payment_confirmed", payload, "segredo-errado")).status()).toBe(401);

@@ -35,7 +35,7 @@ export function Ambient({ variant = "vivid" }: { variant?: "vivid" | "calm" }) {
 
 const enc = (svg: string) => `data:image/svg+xml,${encodeURIComponent(svg)}`;
 /** Mapa de deslocamento: neutro (0,5) no meio e forte só nas bordas — a "lente" do vidro da Apple. */
-const MAP_X = enc(`<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' preserveAspectRatio='none'><defs><linearGradient id='g'><stop offset='0' stop-color='#ff0000'/><stop offset='.1' stop-color='#800000'/><stop offset='.9' stop-color='#800000'/><stop offset='1' stop-color='#000000'/></linearGradient></defs><rect width='100' height='100' fill='url(#g)'/></svg>`);
+const MAP_X = enc(`<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' preserveAspectRatio='none'><defs><linearGradient id='g'><stop offset='0' stop-color='#ff0000'/><stop offset='.06' stop-color='#800000'/><stop offset='.94' stop-color='#800000'/><stop offset='1' stop-color='#000000'/></linearGradient></defs><rect width='100' height='100' fill='url(#g)'/></svg>`);
 const MAP_Y = enc(`<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' preserveAspectRatio='none'><defs><linearGradient id='g' x2='0' y2='1'><stop offset='0' stop-color='#00ff00'/><stop offset='.18' stop-color='#008000'/><stop offset='.82' stop-color='#008000'/><stop offset='1' stop-color='#000000'/></linearGradient></defs><rect width='100' height='100' fill='url(#g)'/></svg>`);
 
 /**
@@ -49,7 +49,7 @@ export function GlassFilters() {
         <feImage href={MAP_X} x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="mx" />
         <feImage href={MAP_Y} x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="my" />
         <feComposite in="mx" in2="my" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="map" />
-        <feDisplacementMap in="SourceGraphic" in2="map" scale="34" xChannelSelector="R" yChannelSelector="G" />
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="16" xChannelSelector="R" yChannelSelector="G" />
       </filter>
     </svg>
   );
