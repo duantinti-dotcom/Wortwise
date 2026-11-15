@@ -26,7 +26,7 @@ export interface ChatResult {
 export interface AiProvider {
   id: string;
   model: string;
-  chat(messages: ChatMessage[], tools: ToolDef[], maxTokens: number): Promise<ChatResult>;
+  chat(messages: ChatMessage[], tools: ToolDef[], maxTokens: number, timeoutMs?: number): Promise<ChatResult>;
 }
 
 export class AiUnavailable extends Error {}
@@ -82,9 +82,9 @@ function workersAi(model: string): AiProvider | null {
   if (!ai) return null;
   return {
     id: "workers-ai", model,
-    async chat(messages, tools, maxTokens) {
+    async chat(messages, tools, maxTokens, timeoutMs = TIMEOUT_MS) {
       const run = ai.run(model, { messages, tools: tools.length ? toOpenAiTools(tools) : undefined, max_tokens: maxTokens, temperature: 0.3 });
-      const timeout = new Promise<never>((_, rej) => setTimeout(() => rej(new AiUnavailable("timeout")), TIMEOUT_MS));
+      const timeout = new Promise<never>((_, rej) => setTimeout(() => rej(new AiUnavailable("timeout")), timeoutMs));
       const out = (await Promise.race([run, timeout])) as WorkersAiOutput;
       return parseWorkersAi(out);
     },
@@ -95,14 +95,14 @@ function workersAi(model: string): AiProvider | null {
 function openAiCompatible(baseUrl: string, apiKey: string, model: string): AiProvider {
   return {
     id: "openai-compatible", model,
-    async chat(messages, tools, maxTokens) {
+    async chat(messages, tools, maxTokens, timeoutMs = TIMEOUT_MS) {
       let res: Response;
       try {
         res = await fetch(`${baseUrl}/chat/completions`, {
           method: "POST",
           headers: { "content-type": "application/json", ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}) },
           body: JSON.stringify({ model, messages, tools: tools.length ? toOpenAiTools(tools) : undefined, max_tokens: maxTokens, temperature: 0.2 }),
-          signal: AbortSignal.timeout(TIMEOUT_MS),
+          signal: AbortSignal.timeout(timeoutMs),
         });
       } catch {
         throw new AiUnavailable("network");
@@ -135,10 +135,10 @@ export function getAiProvider(): AiProvider | null {
   // Se o modelo principal falhar (fila cheia, instabilidade), tenta uma vez o modelo reserva.
   return {
     id: main.id, model: main.model,
-    async chat(messages, tools, maxTokens) {
-      try { return await main.chat(messages, tools, maxTokens); } catch (err) {
+    async chat(messages, tools, maxTokens, timeoutMs) {
+      try { return await main.chat(messages, tools, maxTokens, timeoutMs); } catch (err) {
         console.warn("[ai] modelo principal falhou, usando reserva:", err instanceof Error ? err.message : err);
-        return backup.chat(messages, tools, maxTokens);
+        return backup.chat(messages, tools, maxTokens, timeoutMs);
       }
     },
   };

@@ -67,15 +67,19 @@ export async function generateIdeas(store: string, categoryId: string): Promise<
   const provider = getAiProvider();
   if (!provider) return null;
   const month = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "America/Sao_Paulo" }).format(new Date());
-  const res = await provider.chat([
+  const ask = (angle: string) => provider.chat([
     { role: "system", content: "Você é especialista em e-commerce no Brasil. Responda SOMENTE com JSON válido, sem texto antes ou depois." },
-    { role: "user", content: `Sugira 8 ideias de produtos com bom potencial para revender na ${storeName}, categoria "${cat.name}", pensando em ${month}.
+    { role: "user", content: `Sugira 4 ideias de produtos ${angle} para revender na ${storeName}, categoria "${cat.name}", pensando em ${month}.
 Prefira produtos de giro rápido, fáceis de enviar e com boa margem para pequenos vendedores. Não cite marcas registradas famosas.
-Devolva um array JSON com 8 objetos, cada um com exatamente estes campos:
-{"emoji": "um emoji que represente o produto", "nome": "nome curto do produto", "descricao": "o que é o produto em 1 frase", "por_que_vende": "por que costuma vender bem, em 1 frase", "publico": "para quem", "preco_min": número em reais, "preco_max": número em reais, "dica": "1 dica prática para vender", "busca": "2 a 4 palavras para buscar o produto na loja"}
+Devolva um array JSON com 4 objetos, cada um com exatamente estes campos:
+{"emoji": "um emoji que represente o produto", "nome": "nome curto do produto", "descricao": "o que é, em 1 frase curta", "por_que_vende": "por que vende bem, em 1 frase curta", "publico": "para quem", "preco_min": número em reais, "preco_max": número em reais, "dica": "1 dica prática curta", "busca": "2 a 4 palavras para buscar na loja"}
 preco_min e preco_max são uma faixa de preço de venda ESTIMADA ao consumidor.` },
-  ], [], 2600);
-  const ideas = parseIdeas(res.content, store);
+  ], [], 1600, 75000);
+  // Duas metades em paralelo: metade do tempo de espera.
+  const parts = await Promise.allSettled([ask("baratos (até uns R$ 60), de compra por impulso"), ask("de ticket médio, com boa margem")]);
+  const seen = new Set<string>();
+  const ideas = parts.flatMap((p) => (p.status === "fulfilled" ? parseIdeas(p.value.content, store) : []))
+    .filter((it) => { const k = it.nome.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
   if (!ideas.length) return { ideas: [], generatedAt: new Date().toISOString() };
   memory.set(key, { at: Date.now(), ideas });
   if (memory.size > 100) memory.delete(memory.keys().next().value!);
