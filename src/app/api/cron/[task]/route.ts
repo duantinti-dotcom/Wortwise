@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { CONNECTORS, isSourceId } from "@/lib/connectors/registry";
 import { ConnectorError, type ConnectorContext } from "@/lib/connectors/types";
 import { publicEnv, serverEnv } from "@/lib/env";
-import { createSubscriptionLink, HANDLED_TRIGGERS, registerWebhook } from "@/lib/billing/heropay";
+import { createSubscriptionLink, getPaymentLink, HANDLED_TRIGGERS, registerWebhook } from "@/lib/billing/heropay";
 import { runMaintenance } from "@/lib/maintenance";
 import { warmAllIdeas } from "@/lib/ai/ideas";
 import { flushLogs, toMarketItem } from "@/lib/search/service";
@@ -24,6 +24,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   // "purge" (nome antigo do agendamento) e "maintenance" executam a mesma rotina.
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
+  }
+  if (task === "heropay-check") {
+    const ids = (new URL(req.url).searchParams.get("ids") ?? "").split(",").map(Number).filter((n) => Number.isFinite(n) && n > 0).slice(0, 5);
+    const out = [];
+    for (const id of ids) { try { out.push({ id, data: await getPaymentLink(id) }); } catch (e) { out.push({ id, error: e instanceof Error ? e.message : "erro" }); } }
+    return NextResponse.json({ task, links: out });
   }
   if (task === "heropay-setup") {
     // Configuração inicial da HeroPay feita pelo servidor: links de assinatura e webhooks.

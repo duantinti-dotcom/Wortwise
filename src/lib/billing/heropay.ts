@@ -132,3 +132,8 @@ export function dedupeKey(trigger: string, payload: Record<string, unknown>): st
   };
   return [trigger, get("payment", "id"), get("subscription", "id"), get("subscription", "status"), get("payment", "status")].join(":").slice(0, 200);
 }
+
+/** Lê um link de pagamento (para conferir se ficou como assinatura mensal). */
+export async function getPaymentLink(id: number): Promise<unknown> {
+  return call("GET", `/payment_links/${id}`);
+}
