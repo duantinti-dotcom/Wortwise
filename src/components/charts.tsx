@@ -1,4 +1,6 @@
 "use client";
+import { useInView } from "motion/react";
+import { useRef } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatDate, formatMoney } from "@/lib/utils";
 
@@ -12,7 +14,7 @@ function TipBox({ title, rows }: { title: string; rows: { label: string; value: 
       {rows.map((r) => (
         <div key={r.label} className="flex items-center justify-between gap-5">
           <span className="flex items-center gap-1.5 text-muted">
-            <span className="size-1.5 rounded-full" style={{ background: r.color ?? "#ff7900" }} />{r.label}
+            <span className="size-1.5 rounded-full" style={{ background: r.color ?? "#3B82F6" }} />{r.label}
           </span>
           <span className="tabular font-medium text-fg">{r.value}</span>
         </div>
@@ -31,12 +33,12 @@ export function PriceHistoryChart({ data, height = 260 }: { data: HistoryPoint[]
   const max = Math.max(...prices);
   const pad = Math.max((max - min) * 0.15, max * 0.02, 1);
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <InView h={height}><ResponsiveContainer width="100%" height={height}>
       <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="ww-price" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ff7900" stopOpacity={0.32} />
-            <stop offset="100%" stopColor="#ff7900" stopOpacity={0} />
+            <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.32} />
+            <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid stroke="rgb(var(--tint) / 0.06)" vertical={false} />
@@ -50,17 +52,17 @@ export function PriceHistoryChart({ data, height = 260 }: { data: HistoryPoint[]
             return <TipBox title={formatDate(p.date, true)} rows={[{ label: "Preço", value: formatMoney(p.price) },
               ...(p.offersCount != null ? [{ label: "Ofertas", value: String(p.offersCount), color: "var(--muted)" }] : [])]} />;
           }} />
-        <Area type="stepAfter" dataKey="price" stroke="#ff7900" strokeWidth={2} fill="url(#ww-price)" dot={rows.length < 30 ? { r: 2.5, fill: "#ff7900", strokeWidth: 0 } : false}
-          activeDot={{ r: 4, fill: "#ff7900", stroke: "var(--bg)", strokeWidth: 2 }} animationDuration={900} animationEasing="ease-out" />
+        <Area type="stepAfter" dataKey="price" stroke="#3B82F6" strokeWidth={2} fill="url(#ww-price)" dot={rows.length < 30 ? { r: 2.5, fill: "#3B82F6", strokeWidth: 0 } : false}
+          activeDot={{ r: 4, fill: "#3B82F6", stroke: "var(--bg)", strokeWidth: 2 }} animationDuration={900} animationEasing="ease-out" />
       </AreaChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></InView>
   );
 }
 
 /** Lucro em função do preço de venda. */
 export function ProfitCurveChart({ data, current, height = 220 }: { data: { price: number; profit: number }[]; current: number; height?: number }) {
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <InView h={height}><ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="rgb(var(--tint) / 0.06)" vertical={false} />
         <XAxis dataKey="price" type="number" domain={["dataMin", "dataMax"]} tick={AXIS} tickLine={false} axisLine={false} tickFormatter={money0} minTickGap={36} />
@@ -73,16 +75,16 @@ export function ProfitCurveChart({ data, current, height = 220 }: { data: { pric
             if (!active || !p) return null;
             return <TipBox title={`Vendendo a ${formatMoney(p.price)}`} rows={[{ label: "Lucro do lote", value: formatMoney(p.profit), color: p.profit >= 0 ? "#3ecf8e" : "#f25f5c" }]} />;
           }} />
-        <Line type="monotone" dataKey="profit" stroke="#ff7900" strokeWidth={2.2} dot={false} activeDot={{ r: 4, fill: "#ff7900", stroke: "var(--bg)", strokeWidth: 2 }} animationDuration={500} />
+        <Line type="monotone" dataKey="profit" stroke="#3B82F6" strokeWidth={2.2} dot={false} activeDot={{ r: 4, fill: "#3B82F6", stroke: "var(--bg)", strokeWidth: 2 }} animationDuration={500} />
       </LineChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></InView>
   );
 }
 
 /** Barras horizontais simples (comparações de preço, canais, fornecedores). */
 export function CompareBars({ data, height, positiveNegative }: { data: { name: string; value: number; highlight?: boolean }[]; height?: number; positiveNegative?: boolean }) {
   return (
-    <ResponsiveContainer width="100%" height={height ?? Math.max(72, data.length * 44)}>
+    <InView h={height ?? Math.max(72, data.length * 44)}><ResponsiveContainer width="100%" height={height ?? Math.max(72, data.length * 44)}>
       <BarChart data={data} layout="vertical" margin={{ top: 4, right: 84, left: 0, bottom: 4 }} barCategoryGap={10}>
         <XAxis type="number" hide domain={positiveNegative ? ["dataMin", "dataMax"] : [0, "dataMax"]} />
         <YAxis type="category" dataKey="name" tick={{ ...AXIS, fill: "var(--soft)", fontSize: 12 }} tickLine={false} axisLine={false} width={150} />
@@ -94,19 +96,19 @@ export function CompareBars({ data, height, positiveNegative }: { data: { name: 
           }} />
         <Bar dataKey="value" radius={[6, 6, 6, 6]} animationDuration={600} maxBarSize={26}>
           {data.map((d) => (
-            <Cell key={d.name} fill={positiveNegative ? (d.value >= 0 ? (d.highlight ? "#3ecf8e" : "rgba(62,207,142,0.45)") : "rgba(242,95,92,0.6)") : d.highlight ? "#ff7900" : "rgba(255,121,0,0.35)"} />
+            <Cell key={d.name} fill={positiveNegative ? (d.value >= 0 ? (d.highlight ? "#3ecf8e" : "rgba(62,207,142,0.45)") : "rgba(242,95,92,0.6)") : d.highlight ? "#3B82F6" : "rgba(59,130,246,0.35)"} />
           ))}
           <LabelList dataKey="value" position="right" formatter={(v: unknown) => formatMoney(Number(v))} style={{ fill: "var(--soft)", fontSize: 12, fontWeight: 600 }} />
         </Bar>
       </BarChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></InView>
   );
 }
 
 /** Barras verticais de contagem (distribuição de preços). */
 export function CountBars({ data, height = 220 }: { data: { name: string; value: number }[]; height?: number }) {
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <InView h={height}><ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="rgb(var(--tint) / 0.06)" vertical={false} />
         <XAxis dataKey="name" tick={AXIS} tickLine={false} axisLine={false} interval={0} />
@@ -117,8 +119,15 @@ export function CountBars({ data, height = 220 }: { data: { name: string; value:
             if (!active || !p) return null;
             return <TipBox title={p.name} rows={[{ label: "Anúncios", value: String(p.value) }]} />;
           }} />
-        <Bar dataKey="value" fill="#ff7900" radius={[5, 5, 0, 0]} animationDuration={600} />
+        <Bar dataKey="value" fill="#3B82F6" radius={[5, 5, 0, 0]} animationDuration={600} />
       </BarChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></InView>
   );
+}
+
+/** Monta o gráfico só quando ele entra na tela, para a animação acontecer à vista do usuário. */
+function InView({ h, children }: { h: number; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const seen = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
+  return <div ref={ref} style={{ minHeight: h }}>{seen ? children : null}</div>;
 }

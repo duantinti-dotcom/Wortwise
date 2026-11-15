@@ -19,7 +19,7 @@ export async function HotStrip() {
           <li key={p.externalId} className="w-[170px] shrink-0 snap-start sm:w-auto sm:flex-1">
             <Link href={`/app/produto/${p.source}/${p.externalId}`} className="group block">
               <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-white p-3">
-                <span className={cn("tabular absolute left-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11px] font-semibold", p.rank === 1 ? "bg-brand text-[#160800]" : "bg-[#0f0f11] text-white")}>#{p.rank}</span>
+                <span className={cn("tabular absolute left-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11px] font-semibold", p.rank === 1 ? "bg-brand text-[#FFFFFF]" : "bg-[#0B1120] text-white")}>#{p.rank}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {p.imageUrl ? <img src={p.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105" /> : null}
               </div>

@@ -70,7 +70,7 @@ export function ProductCard({ p, favorite, onFavorite, rank }: { p: ProductResul
         <ProductImage src={p.imageUrl} alt={p.title} className="aspect-square w-full transition-transform duration-700 [transition-timing-function:var(--ease-out)] group-hover:scale-[1.05]" />
         {rank != null ? (
           <span className={cn("tabular absolute left-2.5 top-2.5 z-10 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11.5px] font-semibold shadow-sm",
-            rank === 1 ? "bg-brand text-[#160800]" : "bg-[#0f0f11] text-white")}>#{rank}</span>
+            rank === 1 ? "bg-brand text-[#FFFFFF]" : "bg-[#0B1120] text-white")}>#{rank}</span>
         ) : discount ? <span className="absolute left-2.5 top-2.5 z-10 rounded-md bg-pos px-1.5 py-0.5 text-[11.5px] font-semibold text-white">−{discount}%</span> : null}
         <FavoriteButton key={String(favorite)} product={p} initial={favorite} onChange={onFavorite} className="absolute right-2.5 top-2.5 z-10" />
         {p.fastDelivery ? <span className="absolute bottom-2.5 right-2.5 z-10 rounded-md bg-[#00a8e1] px-1.5 py-0.5 text-[11px] font-semibold text-white">Prime</span> : null}

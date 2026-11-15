@@ -149,7 +149,7 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
             <div className="mx-auto max-w-2xl pt-6 text-center md:pt-14">
               <div className="relative mx-auto w-fit">
                 <div aria-hidden className="aurora -inset-8 bg-brand/30" />
-                <div className="relative flex size-16 items-center justify-center rounded-[20px] border border-brand/40 bg-gradient-to-b from-brand/30 to-brand/5 text-brand-hi shadow-[0_0_40px_-8px_rgba(255,121,0,0.7)]"><Sparkles size={28} /></div>
+                <div className="relative flex size-16 items-center justify-center rounded-[20px] border border-brand/40 bg-gradient-to-b from-brand/30 to-brand/5 text-brand-hi shadow-[0_0_40px_-8px_rgba(59,130,246,0.7)]"><Sparkles size={28} /></div>
               </div>
               <h1 className="text-grad mt-7 text-3xl font-semibold tracking-[-0.035em] md:text-[40px]">Assistente</h1>
               <p className="mt-2 text-muted">Pergunte em português, como perguntaria a um amigo que entende de vendas. Ele consulta os dados, faz as contas e mostra de onde tirou cada número.</p>

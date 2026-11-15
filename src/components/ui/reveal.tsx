@@ -12,7 +12,7 @@ export function Reveal({ children, delay = 0, className, y = 28, scale = 1 }: { 
     <motion.div className={className}
       initial={{ opacity: 0, y, scale, filter: "blur(4px)" }}
       whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, margin: "0px 0px -15% 0px" }}
       transition={{ ...SPRING, delay, filter: { duration: 0.6, delay } , opacity: { duration: 0.6, delay } }}>
       {children}
     </motion.div>
@@ -29,7 +29,7 @@ const child: Variants = {
 export function Stagger({ children, className, as = "div" }: { children: ReactNode; className?: string; as?: "div" | "ul" | "ol" }) {
   const reduce = useReducedMotion();
   const C = motion[as];
-  return <C className={className} variants={parent} initial={reduce ? "show" : "hidden"} whileInView="show" viewport={{ once: true, margin: "-60px" }}>{children}</C>;
+  return <C className={className} variants={parent} initial={reduce ? "show" : "hidden"} whileInView="show" viewport={{ once: true, margin: "0px 0px -15% 0px" }}>{children}</C>;
 }
 export function StaggerItem({ children, className, as = "div" }: { children: ReactNode; className?: string; as?: "div" | "li" }) {
   const C = motion[as];

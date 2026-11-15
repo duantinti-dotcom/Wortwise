@@ -28,6 +28,7 @@ export function Ambient({ variant = "vivid" }: { variant?: "vivid" | "calm" }) {
   return (
     <div ref={ref} aria-hidden className={cn("ambient", variant === "calm" && "ambient-calm")}>
       <span className="blob b1" /><span className="blob b2" /><span className="blob b3" /><span className="blob b4" /><span className="blob b5" />
+      <span className="arc" />
       <span className="ambient-veil" />
     </div>
   );

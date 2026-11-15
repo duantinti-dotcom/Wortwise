@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { publicEnv } from "@/lib/env";
-import { THEME_SCRIPT } from "@/components/theme/script";
+import { INVIEW_SCRIPT, THEME_SCRIPT } from "@/components/theme/script";
 import { GlassFilters } from "@/components/ambient";
 import { GlassLight } from "@/components/ui/glass-light";
 import "./globals.css";
@@ -22,12 +22,12 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-export const viewport: Viewport = { themeColor: "#0a0a0b", width: "device-width", initialScale: 1, viewportFit: "cover" };
+export const viewport: Viewport = { themeColor: "#0B0F1A", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" data-theme="dark" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
-      <head><script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} /></head>
+      <head><script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} /><script dangerouslySetInnerHTML={{ __html: INVIEW_SCRIPT }} /></head>
       <body className="min-h-dvh"><GlassFilters /><GlassLight />{children}</body>
     </html>
   );

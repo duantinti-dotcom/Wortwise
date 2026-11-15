@@ -188,7 +188,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
       </div>
 
       <div className="space-y-4 lg:sticky lg:top-24">
-        <div className={cn("edge-grad relative overflow-hidden rounded-2xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),var(--surface)]" : "edge-brand bg-[linear-gradient(160deg,rgba(255,121,0,0.16),rgba(255,121,0,0.02)_55%),var(--surface)]")}>
+        <div className={cn("edge-grad relative overflow-hidden rounded-2xl border p-6 md:p-7", ready && r.profit < 0 ? "bg-[linear-gradient(160deg,rgba(242,95,92,0.16),rgba(242,95,92,0.02)_55%),var(--surface)]" : "edge-brand bg-[linear-gradient(160deg,rgba(59,130,246,0.16),rgba(59,130,246,0.02)_55%),var(--surface)]")}>
           <BorderBeam />
           <div aria-hidden className="aurora -right-16 -top-20 h-56 w-56 bg-brand/20" />
           <div className="relative">
@@ -210,7 +210,7 @@ export function ProfitCalculator({ initial, onSave, saving, compact, example = t
               <div className="flex items-baseline justify-between text-[13px]"><span className="text-muted">Arraste para mudar o preço de venda</span><span className="tabular text-base font-semibold">{formatMoney(i.salePrice)}</span></div>
               <div className="relative mt-3">
                 <input type="range" aria-label="Preço de venda" min={sliderMin} max={sliderMax} step={0.1} value={Math.min(Math.max(i.salePrice, sliderMin), sliderMax)}
-                  onChange={(e) => set("salePrice")(Number(e.target.value))} className="relative z-10 w-full accent-[#ff7900]" disabled={!ready} />
+                  onChange={(e) => set("salePrice")(Number(e.target.value))} className="relative z-10 w-full accent-[#3B82F6]" disabled={!ready} />
                 <div className="pointer-events-none relative mt-1 h-11 text-[10.5px]">
                   {ready && r.minPrice != null && pos(r.minPrice) != null ? (
                     <span className="absolute -translate-x-1/2 whitespace-nowrap text-center text-danger" style={{ left: `${pos(r.minPrice)}%` }}><span className="mx-auto block h-2 w-px bg-current" />mínimo {formatMoney(r.minPrice)}</span>) : null}

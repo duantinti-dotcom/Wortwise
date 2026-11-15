@@ -100,7 +100,7 @@ export function RefinePanel({ f, set, counts, sourcesInResults }: {
             return (
               <label key={s} className="flex cursor-pointer items-center justify-between gap-3 py-1.5 text-sm">
                 <span className="flex items-center gap-2.5">
-                  <input type="checkbox" className="size-4 accent-[#ff7900]" checked={on} onChange={() => {
+                  <input type="checkbox" className="size-4 accent-[#3B82F6]" checked={on} onChange={() => {
                     const cur = f.sources?.length ? f.sources : sourcesInResults;
                     const next = on ? cur.filter((x) => x !== s) : [...cur, s];
                     set({ sources: next.length === sourcesInResults.length ? [] : next });

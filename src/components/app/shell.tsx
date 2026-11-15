@@ -72,8 +72,8 @@ function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNa
                       className="absolute inset-0 -z-10 rounded-[9px] border border-tint/10 bg-tint/[0.07]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
-                    {n.href === "/app/em-alta" ? <span aria-hidden className="ml-auto size-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,121,0,0.9)]" /> : null}
-                    {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#1a0900]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
+                    {n.href === "/app/em-alta" ? <span aria-hidden className="ml-auto size-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(59,130,246,0.9)]" /> : null}
+                    {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#FFFFFF]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
                   </Link>
                 </li>
               );
@@ -92,7 +92,7 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
   const { openUpgrade } = useUpgrade();
   const pct = search && search.limit > 0 ? Math.min(100, (search.used / search.limit) * 100) : 0;
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "edge-grad edge-brand bg-[linear-gradient(180deg,rgba(255,121,0,0.10),rgba(255,121,0,0.02))]" : "border-tint/8 bg-tint/[0.03]")}>
+    <div className={cn("relative overflow-hidden rounded-2xl border p-4", plan === "free" ? "edge-grad edge-brand bg-[linear-gradient(180deg,rgba(59,130,246,0.10),rgba(59,130,246,0.02))]" : "border-tint/8 bg-tint/[0.03]")}>
       <div className="flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 font-semibold"><Sparkles size={13} className="text-brand" />Plano {planName}</span>
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>
@@ -168,20 +168,20 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="liquid glass-lens h-10 w-full rounded-full pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(255,121,0,0.14)] " />
+                className="liquid glass-lens h-10 w-full rounded-full pl-10 pr-14 text-sm outline-none transition-[border-color,box-shadow,background-color,width] duration-300 placeholder:text-faint hover:border-tint/[0.14] focus:border-brand focus:bg-tint/[0.06] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.14)] " />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
               <ThemeToggle size="sm" className="mr-1" />
               <Link href="/app/monitoramento" className="icon-btn relative" aria-label={`Alertas${props.unreadAlerts ? ` (${props.unreadAlerts} não lidos)` : ""}`}>
-                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1 top-1 size-2.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,121,0,0.9)] ring-2 ring-[var(--bg)]" /> : null}
+                <Bell size={18} />{props.unreadAlerts > 0 ? <span className="absolute right-1 top-1 size-2.5 rounded-full bg-brand shadow-[0_0_8px_rgba(59,130,246,0.9)] ring-2 ring-[var(--bg)]" /> : null}
               </Link>
               <Profile user={props.user} />
             </div>
           </header>
 
           <main id="conteudo" key={path} className="relative animate-[page-in_0.45s_cubic-bezier(0.16,1,0.3,1)] px-4 pb-28 pt-7 lg:px-10 lg:pb-16 lg:pt-10">
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(45%_100%_at_70%_0%,rgba(255,121,0,0.06),transparent)]" />
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(45%_100%_at_70%_0%,rgba(59,130,246,0.06),transparent)]" />
             <div className="page-stagger mx-auto max-w-[1240px]">{props.children}</div>
           </main>
 

@@ -14,7 +14,7 @@ export function setTheme(next: Theme, origin?: { x: number; y: number }) {
   const apply = () => {
     d.classList.add("theme-switching");
     d.dataset.theme = next; d.style.colorScheme = next;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "light" ? "#f7f6f3" : "#0a0a0b");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "light" ? "#F5F7FB" : "#0B0F1A");
     try { localStorage.setItem(KEY, next); } catch { /* armazenamento indisponível: vale só nesta visita */ }
     window.dispatchEvent(new CustomEvent("ww-theme", { detail: next }));
     requestAnimationFrame(() => requestAnimationFrame(() => d.classList.remove("theme-switching")));
@@ -52,7 +52,7 @@ export function ThemeToggle({ className, size = "md" }: { className?: string; si
         <Moon size={size === "sm" ? 12 : 14} /><Sun size={size === "sm" ? 12 : 14} />
       </span>
       <motion.span aria-hidden layout transition={{ type: "spring", stiffness: 500, damping: 32 }}
-        className={cn("relative z-10 flex items-center justify-center rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.25)]", light ? "ml-auto bg-gradient-to-b from-[#ffb15c] to-brand text-[#1a0900]" : "bg-fg text-ink")}
+        className={cn("relative z-10 flex items-center justify-center rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.25)]", light ? "ml-auto bg-gradient-to-b from-[#22D3EE] to-brand text-[#FFFFFF]" : "bg-fg text-ink")}
         style={{ width: s.k, height: s.k }}>
         <motion.span key={theme} initial={{ rotate: -90, scale: 0.4, opacity: 0 }} animate={{ rotate: 0, scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
           {light ? <Sun size={size === "sm" ? 12 : 14} strokeWidth={2.4} /> : <Moon size={size === "sm" ? 12 : 14} strokeWidth={2.4} />}

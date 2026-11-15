@@ -101,7 +101,7 @@ test.describe("proteção de rotas e APIs", () => {
     await page.getByRole("switch", { name: "Mudar para o modo claro" }).filter({ visible: true }).first().click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     const bg = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
-    expect(bg).toBe("rgb(247, 246, 243)");
+    expect(bg).toBe("rgb(245, 247, 251)");
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   });

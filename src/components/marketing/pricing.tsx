@@ -40,7 +40,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
             {featured ? <BorderBeam /> : null}
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>
-              {featured ? <span className="rounded-full bg-gradient-to-r from-[#ffb15c] to-brand px-3 py-1 text-xs font-bold text-[#1a0900]">Mais escolhido</span> : null}
+              {featured ? <span className="rounded-full bg-gradient-to-r from-[#22D3EE] to-brand px-3 py-1 text-xs font-bold text-[#FFFFFF]">Mais escolhido</span> : null}
             </div>
             <p className="mt-2 text-sm text-muted">{p.description}</p>
             <div className="mt-8 flex items-end gap-2">

@@ -31,8 +31,8 @@ export function SparkPath({ className, animated = true, id = "spark" }: { classN
   return (
     <svg viewBox="0 0 380 96" className={cn("w-full overflow-visible", className)} preserveAspectRatio="none" aria-hidden="true">
       <defs>
-        <linearGradient id={`${id}-fill`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff7900" stopOpacity="0.35" /><stop offset="1" stopColor="#ff7900" stopOpacity="0" /></linearGradient>
-        <linearGradient id={`${id}-line`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#ff7900" stopOpacity="0.5" /><stop offset="1" stopColor="#ffb066" /></linearGradient>
+        <linearGradient id={`${id}-fill`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#3B82F6" stopOpacity="0.35" /><stop offset="1" stopColor="#3B82F6" stopOpacity="0" /></linearGradient>
+        <linearGradient id={`${id}-line`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#3B82F6" stopOpacity="0.5" /><stop offset="1" stopColor="#22D3EE" /></linearGradient>
       </defs>
       {[24, 48, 72].map((y) => <line key={y} x1="0" x2="380" y1={y} y2={y} stroke="rgb(var(--tint) / 0.05)" strokeDasharray="3 5" />)}
       <path d={`${d} L 380 96 L 0 96 Z`} fill={`url(#${id}-fill)`} />

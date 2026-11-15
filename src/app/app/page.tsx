@@ -50,13 +50,13 @@ export default async function Dashboard() {
 
       <section aria-label="Por onde começar" className="grid gap-4 lg:grid-cols-3">
         <Link href="/app/em-alta" className="card card-hover group flex flex-col p-6">
-          <div className="flex items-center justify-between"><span className="tabular flex size-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-[#160800]">1</span><Flame size={20} className="text-brand" /></div>
+          <div className="flex items-center justify-between"><span className="tabular flex size-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-[#FFFFFF]">1</span><Flame size={20} className="text-brand" /></div>
           <h2 className="mt-5 text-xl font-semibold tracking-tight">Veja o que está vendendo</h2>
           <p className="mt-1.5 flex-1 text-[14.5px] leading-relaxed text-muted">O ranking dos mais vendidos do Mercado Livre por categoria, com foto e preço. Ótimo para ter ideias.</p>
           <span className="btn btn-secondary btn-sm mt-5 w-fit">Ver mais vendidos <ArrowRight className="btn-arrow" size={14} /></span>
         </Link>
         <div className="card flex flex-col p-6 ring-1 ring-brand/30">
-          <div className="flex items-center justify-between"><span className="tabular flex size-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-[#160800]">2</span><Search size={20} className="text-brand" /></div>
+          <div className="flex items-center justify-between"><span className="tabular flex size-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-[#FFFFFF]">2</span><Search size={20} className="text-brand" /></div>
           <h2 className="mt-5 text-xl font-semibold tracking-tight">Pesquise um produto</h2>
           <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted">Digite o nome e veja preços, avaliações e quem vende.</p>
           <form action="/app/descobrir" role="search" className="mt-4 flex gap-2">
@@ -68,7 +68,7 @@ export default async function Dashboard() {
           {interests.length ? <div className="mt-2 flex flex-wrap gap-1.5">{interests.map((c) => <Link key={c} href={`/app/descobrir?q=${encodeURIComponent(c)}`} className="badge hover:!text-fg">{c}</Link>)}</div> : null}
         </div>
         <Link href="/app/calculadora" className="card card-hover group flex flex-col p-6">
-          <div className="flex items-center justify-between"><span className="tabular flex size-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-[#160800]">3</span><Calculator size={20} className="text-brand" /></div>
+          <div className="flex items-center justify-between"><span className="tabular flex size-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-[#FFFFFF]">3</span><Calculator size={20} className="text-brand" /></div>
           <h2 className="mt-5 text-xl font-semibold tracking-tight">Calcule seu lucro</h2>
           <p className="mt-1.5 flex-1 text-[14.5px] leading-relaxed text-muted">Responda 6 perguntas simples e veja quanto sobra no seu bolso em cada venda.</p>
           <span className="btn btn-secondary btn-sm mt-5 w-fit">Abrir calculadora <ArrowRight className="btn-arrow" size={14} /></span>

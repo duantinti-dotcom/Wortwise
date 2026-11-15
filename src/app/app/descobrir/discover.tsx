@@ -153,7 +153,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
                 </aside>
                 <div className="min-w-0">
                   <div className="mb-4 flex flex-wrap items-center gap-2">
-                    <button type="button" onClick={() => setSheet(true)} className="btn btn-secondary btn-sm lg:hidden"><SlidersHorizontal size={14} /> Filtros{nActive ? <span className="flex size-5 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-[#160800]">{nActive}</span> : null}</button>
+                    <button type="button" onClick={() => setSheet(true)} className="btn btn-secondary btn-sm lg:hidden"><SlidersHorizontal size={14} /> Filtros{nActive ? <span className="flex size-5 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-[#FFFFFF]">{nActive}</span> : null}</button>
                     <label className="ml-auto flex items-center gap-2 text-sm text-muted"><span className="hidden sm:inline">Ordenar por</span>
                       <select className="input !h-9 !w-auto !rounded-full !py-0 !pl-3.5 text-sm" value={refine.sort ?? "relevance"} onChange={(e) => setRefine({ sort: e.target.value as SortKey })} aria-label="Ordenar por">
                         {SORTS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}

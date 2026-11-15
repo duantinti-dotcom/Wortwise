@@ -10,19 +10,19 @@ interface LiveData { configured: boolean; category: string; updatedAt: string | 
 
 /** Itens ilustrativos (sem foto real) usados só quando a integração ainda não está ativa. */
 const DEMO: { title: string; price: string; icon: LucideIcon; tone: string }[] = [
-  { title: "Fone Bluetooth TWS com estojo", price: "R$ 58,90", icon: Headphones, tone: "from-[#ffe2c4] to-[#ffb36b]" },
+  { title: "Fone Bluetooth TWS com estojo", price: "R$ 58,90", icon: Headphones, tone: "from-[#CFFAFE] to-[#7DD3FC]" },
   { title: "Smartwatch esportivo à prova d'água", price: "R$ 129,00", icon: Watch, tone: "from-[#d6e8ff] to-[#7fb2ff]" },
   { title: "Luminária de mesa LED recarregável", price: "R$ 74,50", icon: Lamp, tone: "from-[#efe1ff] to-[#b892ff]" },
   { title: "Kit elásticos de treino 5 níveis", price: "R$ 39,90", icon: Dumbbell, tone: "from-[#d4f7e6] to-[#5fd3a0]" },
-  { title: "Garrafa térmica inox 1 litro", price: "R$ 49,90", icon: Coffee, tone: "from-[#ffe0e6] to-[#ff8aa5]" },
-  { title: "Suporte de celular articulado", price: "R$ 29,90", icon: Smartphone, tone: "from-[#fff1c2] to-[#ffcf4d]" },
+  { title: "Garrafa térmica inox 1 litro", price: "R$ 49,90", icon: Coffee, tone: "from-[#E0E7FF] to-[#A5B4FC]" },
+  { title: "Suporte de celular articulado", price: "R$ 29,90", icon: Smartphone, tone: "from-[#E0F2FE] to-[#67E8F9]" },
   { title: "Controle sem fio para PC e celular", price: "R$ 89,90", icon: Gamepad2, tone: "from-[#dff3ff] to-[#6cc6ff]" },
-  { title: "Camiseta dry fit masculina", price: "R$ 34,90", icon: Shirt, tone: "from-[#ffe6d6] to-[#ff9f6b]" },
+  { title: "Camiseta dry fit masculina", price: "R$ 34,90", icon: Shirt, tone: "from-[#DBEAFE] to-[#93C5FD]" },
 ];
 
 function RankBadge({ rank }: { rank: number }) {
   return (
-    <span className={cn("tabular absolute left-2.5 top-2.5 z-10 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11.5px] font-semibold shadow-sm", rank === 1 ? "bg-brand text-[#160800]" : "bg-[#0f0f11] text-white")}>
+    <span className={cn("tabular absolute left-2.5 top-2.5 z-10 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11.5px] font-semibold shadow-sm", rank === 1 ? "bg-brand text-[#FFFFFF]" : "bg-[#0B1120] text-white")}>
       #{rank}
     </span>
   );

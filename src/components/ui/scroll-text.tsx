@@ -16,7 +16,7 @@ export function RevealWords({ parts, className, as: Tag = "h2" }: { parts: Part[
   const list = words(parts);
   if (reduce) return <Tag className={className}>{list.map((x, i) => <span key={i} className={x.className}>{x.w}{i < list.length - 1 ? " " : ""}</span>)}</Tag>;
   return (
-    <C className={className} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+    <C className={className} initial="hidden" whileInView="show" viewport={{ once: true, margin: "0px 0px -15% 0px" }}
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}>
       {list.map((x, i) => (
         <span key={i}>

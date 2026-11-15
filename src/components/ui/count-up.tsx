@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 /** Número que conta até o valor quando aparece na tela. */
 export function CountUp({ to, prefix = "", suffix = "", duration = 1.4 }: { to: number; prefix?: string; suffix?: string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
   const reduce = useReducedMotion();
   const [v, setV] = useState(0);
   useEffect(() => {

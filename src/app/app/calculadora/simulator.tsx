@@ -58,7 +58,7 @@ export function Simulator() {
           <div className="card divide-y divide-line">
             {sims.data.map((s) => (
               <div key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
-                <input type="checkbox" aria-label={`Comparar ${s.name}`} checked={picked.includes(s.id)} onChange={(e) => setPicked((p) => (e.target.checked ? [...p, s.id] : p.filter((x) => x !== s.id)))} className="size-4 accent-[#ff7900]" />
+                <input type="checkbox" aria-label={`Comparar ${s.name}`} checked={picked.includes(s.id)} onChange={(e) => setPicked((p) => (e.target.checked ? [...p, s.id] : p.filter((x) => x !== s.id)))} className="size-4 accent-[#3B82F6]" />
                 <button onClick={() => { setLoaded(s); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="min-w-0 flex-1 truncate text-left font-medium hover:text-brand-hi">{s.name}</button>
                 <span className="text-xs text-faint">{formatDate(s.created_at)}</span>
                 <span className={cn("tabular w-28 text-right font-medium", s.results.profit >= 0 ? "text-pos" : "text-neg")}>{formatMoney(s.results.profit)}</span>

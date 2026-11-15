@@ -7,7 +7,7 @@ export default function GlobalError({ reset }: { error: Error; reset: () => void
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 600 }}>Algo não saiu como esperado</h1>
           <p style={{ color: "#a4a4a4", marginTop: 8 }}>Tente novamente. Se o problema continuar, volte em alguns minutos.</p>
-          <button onClick={reset} style={{ marginTop: 24, background: "#ff7900", color: "#140900", border: 0, borderRadius: 10, padding: "10px 18px", fontWeight: 600, cursor: "pointer" }}>Tentar novamente</button>
+          <button onClick={reset} style={{ marginTop: 24, background: "#3B82F6", color: "#140900", border: 0, borderRadius: 10, padding: "10px 18px", fontWeight: 600, cursor: "pointer" }}>Tentar novamente</button>
         </div>
       </body>
     </html>

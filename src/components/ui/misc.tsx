@@ -11,7 +11,7 @@ export function EmptyState({ icon: Icon, title, children, action }: { icon: Luci
       <div className="relative">
         <div className="relative w-fit">
           <div aria-hidden className="absolute -inset-3 rounded-[22px] border border-tint/[0.06]" />
-          <div className="relative flex size-14 items-center justify-center rounded-2xl border border-brand/40 bg-gradient-to-b from-brand/25 to-brand/5 text-brand-hi shadow-[0_0_34px_-8px_rgba(255,121,0,0.7)]"><Icon size={24} /></div>
+          <div className="relative flex size-14 items-center justify-center rounded-2xl border border-brand/40 bg-gradient-to-b from-brand/25 to-brand/5 text-brand-hi shadow-[0_0_34px_-8px_rgba(59,130,246,0.7)]"><Icon size={24} /></div>
         </div>
         <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em]">{title}</h3>
         {children ? <div className="mt-3 max-w-md text-[15px] leading-relaxed text-muted">{children}</div> : null}

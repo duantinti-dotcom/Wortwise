@@ -32,7 +32,7 @@ export function HowTo({ id, steps }: { id: string; steps: string[] }) {
           <ol className="snap-row !-mx-4 !px-4 !pb-1 md:grid md:grid-cols-3 md:gap-2.5">
             {steps.map((s, i) => (
               <li key={s} className="flex items-start gap-3 rounded-xl bg-tint/[0.035] px-3.5 py-3 text-[13.5px] leading-snug text-soft max-md:!basis-[82%]">
-                <span className="tabular flex size-6 shrink-0 items-center justify-center rounded-full bg-brand text-[12px] font-semibold text-[#160800]">{i + 1}</span>{s}
+                <span className="tabular flex size-6 shrink-0 items-center justify-center rounded-full bg-brand text-[12px] font-semibold text-[#FFFFFF]">{i + 1}</span>{s}
               </li>
             ))}
           </ol>

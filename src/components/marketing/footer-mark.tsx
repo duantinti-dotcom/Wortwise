@@ -7,7 +7,7 @@ export function FooterMark() {
   return (
     <motion.div aria-hidden className="pointer-events-none select-none overflow-hidden px-4 pb-2 text-center font-semibold leading-[0.85] tracking-[-0.07em]"
       style={{ fontSize: "clamp(64px, 16vw, 240px)" }}
-      initial={reduce ? false : "hidden"} whileInView="show" viewport={{ once: true, margin: "-20px" }}
+      initial={reduce ? false : "hidden"} whileInView="show" viewport={{ once: true, margin: "0px 0px -15% 0px" }}
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.045 } } }}>
       {Array.from("Worthwise").map((ch, i) => (
         <motion.span key={i} className="inline-block"

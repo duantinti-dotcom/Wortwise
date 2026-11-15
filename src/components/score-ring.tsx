@@ -5,7 +5,7 @@ export function ScoreRing({ value, size = 92, label }: { value: number | null; s
   const r = (size - 10) / 2;
   const c = 2 * Math.PI * r;
   const pct = value == null ? 0 : Math.max(0, Math.min(100, value)) / 100;
-  const color = value == null ? "var(--chart-muted)" : value >= 70 ? "#3ecf8e" : value >= 45 ? "#ff7900" : "#f25f5c";
+  const color = value == null ? "var(--chart-muted)" : value >= 70 ? "#3ecf8e" : value >= 45 ? "#f59e0b" : "#f25f5c";
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }} role="img" aria-label={value == null ? "Score indisponível" : `Score ${value} de 100`}>
       <svg width={size} height={size} className="-rotate-90">
