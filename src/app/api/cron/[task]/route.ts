@@ -26,6 +26,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
   }
+  if (task === "robots") {
+    const r = await fetch("https://www.amazon.com.br/robots.txt", { signal: AbortSignal.timeout(10000) });
+    const t = await r.text();
+    const lines = t.split("\n").map((l) => l.trim());
+    // Só o bloco "User-agent: *"
+    const start = lines.findIndex((l) => /^user-agent:\s*\*$/i.test(l));
+    const block: string[] = [];
+    for (let i = start + 1; i < lines.length && start >= 0; i++) { if (/^user-agent:/i.test(lines[i]!)) break; block.push(lines[i]!); }
+    return NextResponse.json({ status: r.status, relevant: block.filter((l) => /bestseller|gp\/|zgbs|movers|new-releases|\/s\?|\/s$|dp\//i.test(l)).slice(0, 60) });
+  }
   if (task === "meli-probe") {
     // Testa quais fontes públicas respondem sem credenciais.
     const urls = [
