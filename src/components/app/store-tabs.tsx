@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export function StorePill({ id }: { id: string }) {
   return (
     <motion.span layoutId={`store-pill-${id}`} aria-hidden transition={{ type: "spring", stiffness: 380, damping: 30 }}
-      className="absolute inset-0 -z-10 rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.06))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),inset_0_0_0_1px_rgba(255,255,255,0.18),0_6px_18px_-6px_rgba(59,130,246,0.55)] ring-1 ring-[#3B82F6]/60" />
+      className="absolute inset-0 -z-10 rounded-[10px] bg-[linear-gradient(180deg,rgba(59,130,246,0.22),rgba(59,130,246,0.10))] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_8px_-2px_rgba(0,0,0,0.3)] ring-1 ring-[#3B82F6]/70" />
   );
 }
 
@@ -17,13 +17,13 @@ export function StorePill({ id }: { id: string }) {
 export function StoreTabs({ stores, active, links }: { stores: readonly string[]; active: string; links: Record<string, string> }) {
   return (
     <nav aria-label="Lojas" className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-      <ul className="glass flex w-max gap-1 rounded-full p-1.5">
+      <ul className="glass flex w-max gap-1 rounded-[14px] p-1">
         {stores.map((s) => {
           const on = s === active;
           return (
             <li key={s}>
               <Link href={links[s] ?? "#"} scroll={false} aria-current={on ? "page" : undefined}
-                className={cn("relative isolate flex h-11 items-center gap-2.5 rounded-full px-4 text-[15px] font-medium transition-colors", on ? "text-fg" : "text-muted hover:text-fg")}>
+                className={cn("relative isolate flex h-10 items-center gap-2.5 rounded-[10px] px-3.5 text-[15px] font-medium transition-colors", on ? "text-fg" : "text-muted hover:text-fg")}>
                 {on ? <StorePill id="tabs" /> : null}
                 <motion.span animate={on ? { scale: [1, 1.18, 1], rotate: [0, -8, 0] } : { scale: 1, rotate: 0 }} transition={{ duration: 0.45 }} className="flex">
                   <SourceMark source={s} size={22} />

@@ -22,32 +22,24 @@ export function setTheme(next: Theme, origin?: { x: number; y: number }) {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce) return apply();
   const x = origin?.x ?? window.innerWidth / 2, y = origin?.y ?? 0;
-  const vt = (document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } }).startViewTransition;
-  if (vt) {
-    // Navegadores com View Transitions: o novo tema aparece num círculo que nasce no botão.
-    d.style.setProperty("--tx", `${x}px`);
-    d.style.setProperty("--ty", `${y}px`);
-    d.classList.add("theme-vt");
-    vt.call(document, apply).finished.finally(() => d.classList.remove("theme-vt"));
-    return;
-  }
-  // Demais navegadores (ex.: iPhone mais antigo): uma onda da cor do novo tema cobre a tela e se dissolve.
+  // Um círculo da cor do novo tema cresce a partir do botão (só transform/opacity: roda na placa de vídeo,
+  // sem travar mesmo com o vidro desfocado na tela). Coberta a tela, o tema troca e o círculo se dissolve.
+  const r = Math.ceil(Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)));
   const wave = document.createElement("div");
-  const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
   wave.setAttribute("aria-hidden", "true");
-  wave.style.cssText = `position:fixed;inset:0;z-index:2147483647;pointer-events:none;background:${next === "light" ? "#F7F7F5" : "#0F0F11"};clip-path:circle(0px at ${x}px ${y}px);-webkit-clip-path:circle(0px at ${x}px ${y}px);transition:clip-path .5s cubic-bezier(.16,1,.3,1),-webkit-clip-path .5s cubic-bezier(.16,1,.3,1),opacity .35s ease`;
+  wave.style.cssText = `position:fixed;left:${x - r}px;top:${y - r}px;width:${2 * r}px;height:${2 * r}px;border-radius:50%;z-index:2147483647;pointer-events:none;`
+    + `background:${next === "light" ? "#F7F7F5" : "#0F0F11"};transform:scale(0.001);will-change:transform,opacity;`
+    + `transition:transform .55s cubic-bezier(.65,0,.35,1),opacity .4s ease;`;
   document.body.appendChild(wave);
-  void wave.offsetWidth;
-  wave.style.clipPath = `circle(${r}px at ${x}px ${y}px)`;
-  wave.style.setProperty("-webkit-clip-path", `circle(${r}px at ${x}px ${y}px)`);
+  requestAnimationFrame(() => requestAnimationFrame(() => { wave.style.transform = "scale(1)"; }));
   let done = false;
   const finish = () => {
     if (done) return; done = true;
     apply();
-    requestAnimationFrame(() => { wave.style.opacity = "0"; setTimeout(() => wave.remove(), 400); });
+    requestAnimationFrame(() => requestAnimationFrame(() => { wave.style.opacity = "0"; setTimeout(() => wave.remove(), 450); }));
   };
-  wave.addEventListener("transitionend", finish, { once: true });
-  setTimeout(finish, 650);
+  wave.addEventListener("transitionend", (e) => { if (e.propertyName === "transform") finish(); });
+  setTimeout(finish, 700);
 }
 
 function subscribe(cb: () => void) {

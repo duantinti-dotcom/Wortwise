@@ -29,16 +29,16 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-3 pt-3 md:pt-4">
       <nav aria-label="Principal"
-        className={cn("grid h-[60px] w-full max-w-[1160px] grid-cols-[1fr_auto_1fr] items-center rounded-full pl-5 pr-2.5 transition-all duration-500", scrolled ? "glass" : "bg-transparent")}>
+        className={cn("grid h-[60px] w-full max-w-[1160px] grid-cols-[1fr_auto_1fr] items-center rounded-[18px] pl-5 pr-2.5 transition-all duration-500", scrolled ? "glass" : "bg-transparent")}>
         <Link href="/" aria-label="Worthwise — página inicial" className="flex items-center justify-self-start"><Logo /></Link>
         <ul className="hidden items-center justify-center gap-1 lg:flex">
           {LINKS.map((l) => (
-            <li key={l.href}><Link href={l.href} className="rounded-full px-3.5 py-2 text-[14px] text-muted transition-colors hover:bg-tint/[0.07] hover:text-fg">{l.label}</Link></li>
+            <li key={l.href}><Link href={l.href} className="rounded-[10px] px-3 py-2 text-[14px] text-muted transition-colors hover:bg-tint/[0.07] hover:text-fg">{l.label}</Link></li>
           ))}
         </ul>
         <div className="col-start-3 flex items-center justify-self-end gap-1.5">
           <ThemeToggle size="sm" className="mr-1 hidden sm:inline-flex" />
-          <Link href="/entrar" className="hidden rounded-full px-3 py-2 text-[14px] font-medium text-soft transition-colors hover:text-fg sm:inline-flex">Entrar</Link>
+          <Link href="/entrar" className="hidden rounded-[10px] px-3 py-2 text-[14px] font-medium text-soft transition-colors hover:text-fg sm:inline-flex">Entrar</Link>
           <Link href="/cadastro" className="btn btn-primary btn-sm">Começar grátis</Link>
           <D.Root open={open} onOpenChange={setOpen}>
             <D.Trigger className="btn btn-ghost btn-sm !px-2 lg:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>

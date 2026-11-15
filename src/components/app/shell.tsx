@@ -66,10 +66,10 @@ function NavList({ onNavigate, unreadAlerts, admin, layoutKey = "side" }: { onNa
               return (
                 <li key={n.href}>
                   <Link href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined} title={n.hint}
-                    className={cn("group relative isolate flex h-10 items-center gap-3 rounded-full px-3.5 text-[14px] transition-colors duration-200",
+                    className={cn("group relative isolate flex h-10 items-center gap-3 rounded-[10px] px-3 text-[14px] transition-colors duration-200",
                       on ? "font-semibold text-fg" : "text-muted hover:bg-tint/[0.05] hover:text-fg")}>
                     {on ? <motion.span layoutId={`nav-pill-${layoutKey}`} aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                      className="absolute inset-0 -z-10 rounded-full bg-tint/[0.09] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]" /> : null}
+                      className="absolute inset-0 -z-10 rounded-[10px] bg-tint/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]" /> : null}
                     <n.icon size={16} className={cn("shrink-0 transition-colors", on ? "text-brand" : "text-faint group-hover:text-muted")} />
                     <span className="truncate">{n.label}</span>
                     {n.href === "/app/monitoramento" && unreadAlerts > 0 ? <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-[#FFFFFF]">{unreadAlerts > 99 ? "99+" : unreadAlerts}</span> : null}
@@ -142,7 +142,7 @@ export function AppShell(props: ShellProps) {
         <div className="min-h-dvh lg:pl-[284px]">
           <Ambient variant="calm" />
           {/* Sidebar — desktop */}
-          <aside className="glass fixed bottom-3 left-3 top-3 z-30 hidden w-[260px] flex-col overflow-hidden rounded-[28px] lg:flex">
+          <aside className="glass fixed bottom-3 left-3 top-3 z-30 hidden w-[260px] flex-col overflow-hidden rounded-[22px] lg:flex">
             <Link href="/app" className="relative flex h-16 shrink-0 items-center px-5" aria-label="Worthwise — início"><Logo size={26} /></Link>
             <nav aria-label="Aplicação" className="relative min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2"><NavList unreadAlerts={props.unreadAlerts} admin={props.admin} /></nav>
             <div className="shrink-0 p-3"><UsageCard plan={props.plan} planName={props.planName} search={props.search} /></div>
@@ -167,7 +167,7 @@ export function AppShell(props: ShellProps) {
             <form action="/app/descobrir" className="relative ml-auto hidden w-full max-w-md md:block lg:ml-0">
               <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
               <input id="ww-global-search" name="q" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos…" maxLength={120}
-                className="glass h-11 w-full rounded-full pl-10 pr-12 text-sm outline-none placeholder:text-faint focus:shadow-[0_0_0_3px_rgba(59,130,246,0.25)]" />
+                className="glass h-11 w-full rounded-[12px] pl-10 pr-12 text-sm outline-none placeholder:text-faint focus:shadow-[0_0_0_3px_rgba(59,130,246,0.25)]" />
               <span className="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">/</span>
             </form>
             <div className="ml-auto flex items-center gap-2">
@@ -184,13 +184,13 @@ export function AppShell(props: ShellProps) {
           </main>
 
           {/* Navegação inferior — mobile */}
-          <nav aria-label="Atalhos" className="glass fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-full p-1.5 lg:hidden">
+          <nav aria-label="Atalhos" className="glass fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-30 grid grid-cols-5 rounded-[22px] p-1.5 lg:hidden">
             {TABS.map((t) => {
               const on = t.href === "/app" ? path === "/app" : path.startsWith(t.href);
               return (
                 <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
                   className={cn("relative isolate flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[10.5px] transition-colors active:scale-95", on ? "font-semibold text-fg" : "text-muted")}>
-                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-full bg-tint/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]" /> : null}
+                  {on ? <motion.span layoutId="tab-pill" aria-hidden transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 -z-10 rounded-[16px] bg-tint/[0.09]" /> : null}
                   <t.icon size={19} className={on ? "text-brand" : undefined} />{({ "/app": "Início", "/app/em-alta": "Em alta", "/app/descobrir": "Pesquisar", "/app/calculadora": "Lucro" } as Record<string, string>)[t.href] ?? t.label}
                 </Link>
               );
