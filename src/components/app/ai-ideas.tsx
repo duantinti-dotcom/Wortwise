@@ -1,12 +1,12 @@
 "use client";
-import { ArrowUpRight, Calculator, RefreshCw, Sparkles } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { ArrowUpRight, Calculator, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { sourceName } from "@/components/source-mark";
+import { SourceMark, sourceName } from "@/components/source-mark";
 import { cn, formatMoney } from "@/lib/utils";
 
-interface Idea { emoji: string; nome: string; descricao: string; por_que_vende: string; publico: string; preco_min: number; preco_max: number; dica: string; busca: string; link: string }
+interface Item { emoji: string; nome: string; descricao: string; por_que_vende: string; publico: string; preco_min: number; preco_max: number; dica: string; busca: string; imagem?: string; link: string }
 const CATS = [
   { id: "eletronicos", name: "Eletrônicos" }, { id: "casa", name: "Casa e cozinha" }, { id: "beleza", name: "Beleza" },
   { id: "moda", name: "Moda" }, { id: "esportes", name: "Esportes" }, { id: "pets", name: "Pets" },
@@ -14,79 +14,83 @@ const CATS = [
 ];
 const PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classico", shopee: "shopee", amazon: "amazon", tiktokshop: "tiktokshop" };
 
-/** Ideias de produtos geradas pela IA para a loja escolhida (sugestões, não dados da loja). */
+function Photo({ item }: { item: Item }) {
+  const [failed, setFailed] = useState(false);
+  const desc = item.imagem || item.busca;
+  if (failed || !desc) return <span className="text-[56px] leading-none" aria-hidden>{item.emoji}</span>;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={`/api/ideas/image?d=${encodeURIComponent(desc)}`} alt={item.nome} loading="lazy" onError={() => setFailed(true)}
+    className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" />;
+}
+
+/**
+ * "Mais vendidos" montado pela IA enquanto a API oficial da loja não está conectada.
+ * Mesmo formato do ranking oficial, com o selo de estimativa (não é o ranking da loja).
+ */
 export function AiIdeas({ store }: { store: string }) {
   const [cat, setCat] = useState(CATS[0]!.id);
-  const [state, setState] = useState<{ key: string; ideas: Idea[] | null; error: string | null }>({ key: "", ideas: null, error: null });
+  const [state, setState] = useState<{ key: string; items: Item[] | null; error: string | null }>({ key: "", items: null, error: null });
   const [nonce, setNonce] = useState(0);
   const key = `${store}:${cat}:${nonce}`;
   useEffect(() => {
     let alive = true;
     fetch(`/api/ideas?loja=${store}&categoria=${cat}`).then(async (r) => {
-      const body = (await r.json().catch(() => null)) as { ideas?: Idea[]; error?: { message: string } } | null;
+      const body = (await r.json().catch(() => null)) as { ideas?: Item[]; error?: { message: string } } | null;
       if (!alive) return;
-      if (!r.ok || !body?.ideas) setState({ key, ideas: null, error: body?.error?.message ?? "Não foi possível gerar as ideias agora." });
-      else setState({ key, ideas: body.ideas, error: body.ideas.length ? null : "A IA não trouxe ideias desta vez. Tente de novo." });
-    }).catch(() => { if (alive) setState({ key, ideas: null, error: "Sem conexão. Tente de novo." }); });
+      if (!r.ok || !body?.ideas) setState({ key, items: null, error: body?.error?.message ?? "Não foi possível montar o ranking agora." });
+      else setState({ key, items: body.ideas, error: body.ideas.length ? null : "A IA não respondeu desta vez. Tente de novo." });
+    }).catch(() => { if (alive) setState({ key, items: null, error: "Sem conexão. Tente de novo." }); });
     return () => { alive = false; };
   }, [store, cat, key]);
   const loading = state.key !== key;
   const name = sourceName(store);
 
   return (
-    <section aria-labelledby="ideias-ia">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 id="ideias-ia" className="flex items-center gap-2 text-[19px] font-semibold tracking-tight"><Sparkles size={18} className="text-brand-hi" />Ideias da IA para vender em {name}</h2>
-          <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-faint">Sugestões geradas por inteligência artificial com base em conhecimento geral. Os preços são <b className="font-medium text-muted">estimativas</b>, não dados da loja. Toque em “Ver em {name}” para conferir os anúncios reais.</p>
-        </div>
-        <button type="button" onClick={() => setNonce((n) => n + 1)} disabled={loading} className="btn btn-secondary btn-sm"><RefreshCw size={14} className={cn(loading && "animate-spin")} /><span>Atualizar</span></button>
-      </div>
-
-      <div className="-mx-5 mt-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+    <section aria-label={`Mais vendidos em ${name}`}>
+      <div className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
         <div className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
           {CATS.map((c) => (
             <button key={c.id} type="button" onClick={() => setCat(c.id)} aria-pressed={c.id === cat}
-              className={cn("chip whitespace-nowrap", c.id === cat && "!text-fg ring-2 ring-[#3B82F6]/60")}>{c.name}</button>
+              className={cn("chip whitespace-nowrap", c.id === cat && "!bg-[#2563EB] !text-white !shadow-none")}>{c.name}</button>
           ))}
         </div>
       </div>
 
+      <p className="mt-5 flex items-start gap-2 text-[13px] leading-relaxed text-faint">
+        <Sparkles size={14} className="mt-0.5 shrink-0 text-brand-hi" />
+        <span>Ranking estimado pela IA enquanto a conexão oficial com {name} não está ativa. Fotos ilustrativas e preços aproximados: toque em “Ver em {name}” para ver os anúncios reais.</span>
+      </p>
+
       <div className="mt-6" aria-live="polite">
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {Array.from({ length: 8 }, (_, i) => <div key={i} className="card h-[260px] p-5"><div className="skeleton size-12 !rounded-2xl" /><div className="skeleton mt-5 h-4 w-3/4" /><div className="skeleton mt-3 h-3 w-full" /><div className="skeleton mt-2 h-3 w-5/6" /><div className="skeleton mt-6 h-6 w-1/2" /></div>)}
-            <p className="col-span-full text-center text-[13.5px] text-muted">A IA está pensando nas melhores ideias…</p>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
+            {Array.from({ length: 8 }, (_, i) => <div key={i} className="card overflow-hidden"><div className="skeleton m-2 aspect-square !rounded-[12px]" /><div className="space-y-2.5 p-4"><div className="skeleton h-4" /><div className="skeleton h-4 w-2/3" /><div className="skeleton h-6 w-1/2" /></div></div>)}
+            <p className="col-span-full text-center text-[13.5px] text-muted">Montando o ranking de {name}…</p>
           </div>
         ) : state.error ? (
-          <div className="card flex flex-col items-center gap-4 p-8 text-center"><p className="text-[15px] text-muted">{state.error}</p><button type="button" className="btn btn-secondary btn-sm" onClick={() => setNonce((n) => n + 1)}><span>Tentar de novo</span></button></div>
+          <div className="card flex flex-col items-center gap-4 p-8 text-center"><p className="text-[15px] text-muted">{state.error}</p><button type="button" className="btn btn-secondary btn-sm" onClick={() => setNonce((n) => n + 1)}>Tentar de novo</button></div>
         ) : (
-          <AnimatePresence mode="popLayout">
-            <motion.ul key={key} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {(state.ideas ?? []).map((it, i) => (
-                <motion.li key={it.nome} initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 140, damping: 18, delay: i * 0.05 }} className="card card-hover flex flex-col p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="glass flex size-14 items-center justify-center rounded-2xl text-[30px] leading-none" aria-hidden>{it.emoji}</span>
-                    <span className="badge !h-6 shrink-0">IA</span>
+          <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 xl:grid-cols-4">
+            {(state.items ?? []).map((it, i) => (
+              <motion.li key={`${key}:${it.nome}`} initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: "spring", stiffness: 140, damping: 18, delay: Math.min(i, 10) * 0.04 }} className="card card-hover group flex flex-col overflow-hidden">
+                <div className="relative m-2 flex aspect-square items-center justify-center overflow-hidden rounded-[12px] bg-white">
+                  <Photo item={it} />
+                  <span className="tabular absolute left-2.5 top-2.5 flex h-7 min-w-7 items-center justify-center rounded-[8px] bg-[#18181B]/85 px-2 text-[12.5px] font-semibold text-white backdrop-blur">{i + 1}º</span>
+                </div>
+                <div className="flex flex-1 flex-col px-4 pb-4 pt-2">
+                  <div className="flex items-center gap-2 text-[12px] text-muted"><SourceMark source={store} size={16} />{name}<span className="ml-auto rounded-[6px] bg-tint/[0.07] px-1.5 py-0.5 text-[10.5px] font-medium text-faint">estimativa IA</span></div>
+                  <h3 className="mt-2.5 line-clamp-2 text-[15px] font-semibold leading-snug">{it.nome}</h3>
+                  <div className="tabular mt-2 text-[19px] font-semibold tracking-tight">{formatMoney(it.preco_min)}<span className="text-[14px] font-normal text-muted"> a {formatMoney(it.preco_max)}</span></div>
+                  <p className="mt-2 line-clamp-3 text-[13.5px] leading-relaxed text-muted">{it.por_que_vende}</p>
+                  <div className="mt-auto grid grid-cols-[1fr_auto] gap-2 pt-4">
+                    <a href={it.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary btn-sm">Ver em {name}<ArrowUpRight size={15} /></a>
+                    <Link href={`/app/calculadora?canal=${PRESET[store] ?? ""}`} className="btn btn-secondary btn-sm !w-10 !px-0" aria-label="Calcular lucro" title="Calcular lucro"><Calculator size={16} /></Link>
                   </div>
-                  <h3 className="mt-4 text-[16px] font-semibold leading-snug">{it.nome}</h3>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{it.descricao}</p>
-                  <p className="mt-3 text-[13.5px] leading-relaxed text-soft"><b className="font-medium text-fg">Por que vende:</b> {it.por_que_vende}</p>
-                  {it.publico ? <p className="mt-1.5 text-[13px] text-faint">Para: {it.publico}</p> : null}
-                  <div className="mt-4">
-                    <div className="text-[12px] text-faint">Preço de venda estimado</div>
-                    <div className="tabular text-[19px] font-semibold tracking-tight">{formatMoney(it.preco_min)} a {formatMoney(it.preco_max)}</div>
-                  </div>
-                  {it.dica ? <p className="mt-3 rounded-xl bg-tint/[0.05] px-3 py-2.5 text-[13px] leading-relaxed text-soft">💡 {it.dica}</p> : null}
-                  <div className="mt-auto grid grid-cols-[1fr_auto] gap-2 pt-5">
-                    <a href={it.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary btn-sm"><span>Ver em {name}</span><ArrowUpRight size={14} /></a>
-                    <Link href={`/app/calculadora?canal=${PRESET[store] ?? ""}`} className="btn btn-secondary btn-sm !w-9 !px-0" aria-label="Calcular lucro" title="Calcular lucro"><Calculator size={15} /></Link>
-                  </div>
-                </motion.li>
-              ))}
-            </motion.ul>
-          </AnimatePresence>
+                </div>
+              </motion.li>
+            ))}
+          </ul>
         )}
       </div>
     </section>

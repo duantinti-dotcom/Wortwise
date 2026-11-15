@@ -25,6 +25,7 @@ export const ideaSchema = z.object({
   preco_max: z.coerce.number().min(1).max(20000),
   dica: z.string().max(200).catch(""),
   busca: z.string().min(2).max(60),
+  imagem: z.string().max(160).catch(""),
 });
 export type Idea = z.infer<typeof ideaSchema> & { link: string };
 
@@ -51,7 +52,7 @@ export function parseIdeas(raw: string, store: string): Idea[] {
     const lo = Math.min(p.data.preco_min, p.data.preco_max), hi = Math.max(p.data.preco_min, p.data.preco_max);
     out.push({ ...p.data, preco_min: lo, preco_max: hi, link: storeSearchUrl(store, p.data.busca) });
   }
-  return out.slice(0, 8);
+  return out.slice(0, 12);
 }
 
 const memory = new Map<string, { at: number; ideas: Idea[] }>();
@@ -60,7 +61,7 @@ const TTL = 12 * 60 * 60 * 1000;
 export async function generateIdeas(store: string, categoryId: string): Promise<{ ideas: Idea[]; generatedAt: string } | null> {
   const cat = IDEA_CATEGORIES.find((c) => c.id === categoryId) ?? IDEA_CATEGORIES[0];
   const storeName = STORE_NAMES[store] ?? "marketplaces brasileiros";
-  const key = `${store}:${cat.id}:${new Date().toISOString().slice(0, 10)}`;
+  const key = `v2:${store}:${cat.id}:${new Date().toISOString().slice(0, 10)}`;
   const hit = memory.get(key);
   if (hit && Date.now() - hit.at < TTL) return { ideas: hit.ideas, generatedAt: new Date(hit.at).toISOString() };
 
@@ -68,18 +69,19 @@ export async function generateIdeas(store: string, categoryId: string): Promise<
   if (!provider) return null;
   const month = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "America/Sao_Paulo" }).format(new Date());
   const ask = (angle: string) => provider.chat([
-    { role: "system", content: "Você é especialista em e-commerce no Brasil. Responda SOMENTE com JSON válido, sem texto antes ou depois." },
-    { role: "user", content: `Sugira 4 ideias de produtos ${angle} para revender na ${storeName}, categoria "${cat.name}", pensando em ${month}.
-Prefira produtos de giro rápido, fáceis de enviar e com boa margem para pequenos vendedores. Não cite marcas registradas famosas.
+    { role: "system", content: "Você é analista de e-commerce no Brasil e conhece bem o que mais vende em cada marketplace. Responda SOMENTE com JSON válido, sem texto antes ou depois." },
+    { role: "user", content: `Liste 4 produtos ${angle} entre os que MAIS VENDEM hoje na ${storeName}, categoria "${cat.name}" (${month}), do mais vendido para o menos vendido.
+Use produtos genéricos (sem marcas famosas registradas), do tipo que aparece no ranking de mais vendidos.
 Devolva um array JSON com 4 objetos, cada um com exatamente estes campos:
-{"emoji": "um emoji que represente o produto", "nome": "nome curto do produto", "descricao": "o que é, em 1 frase curta", "por_que_vende": "por que vende bem, em 1 frase curta", "publico": "para quem", "preco_min": número em reais, "preco_max": número em reais, "dica": "1 dica prática curta", "busca": "2 a 4 palavras para buscar na loja"}
-preco_min e preco_max são uma faixa de preço de venda ESTIMADA ao consumidor.` },
-  ], [], 1600, 75000);
-  // Duas metades em paralelo: metade do tempo de espera.
-  const parts = await Promise.allSettled([ask("baratos (até uns R$ 60), de compra por impulso"), ask("de ticket médio, com boa margem")]);
+{"emoji": "um emoji", "nome": "nome do produto como aparece num anúncio (curto)", "descricao": "o que é, em 1 frase curta", "por_que_vende": "por que vende tanto, em 1 frase curta", "publico": "para quem", "preco_min": número em reais, "preco_max": número em reais, "dica": "1 dica prática curta para vender", "busca": "2 a 4 palavras para buscar na loja", "imagem": "descrição curta EM INGLÊS da aparência do produto para gerar uma foto"}
+preco_min e preco_max: faixa de preço de venda típica ao consumidor nessa loja.` },
+  ], [], 1700, 80000);
+  // Três partes em paralelo (faixas de preço diferentes): 12 produtos no tempo de 4.
+  const parts = await Promise.allSettled([ask("baratos (até uns R$ 50)"), ask("de preço médio (R$ 50 a R$ 150)"), ask("de ticket mais alto (acima de R$ 150)")]);
   const seen = new Set<string>();
-  const ideas = parts.flatMap((p) => (p.status === "fulfilled" ? parseIdeas(p.value.content, store) : []))
-    .filter((it) => { const k = it.nome.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+  const lists = parts.map((p) => (p.status === "fulfilled" ? parseIdeas(p.value.content, store) : []));
+  const ideas: Idea[] = [];
+  for (let i = 0; i < 4; i++) for (const l of lists) { const it = l[i]; if (it && !seen.has(it.nome.toLowerCase())) { seen.add(it.nome.toLowerCase()); ideas.push(it); } }
   if (!ideas.length) return { ideas: [], generatedAt: new Date().toISOString() };
   memory.set(key, { at: Date.now(), ideas });
   if (memory.size > 100) memory.delete(memory.keys().next().value!);
@@ -89,7 +91,7 @@ preco_min e preco_max são uma faixa de preço de venda ESTIMADA ao consumidor.`
 const STORE_IDS = ["mercadolivre", "shopee", "amazon", "tiktokshop"] as const;
 type IdeasResult = { ideas: Idea[]; generatedAt: string };
 const edgeCache = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
-const cacheKey = (store: string, cat: string) => new Request(`https://cache.worthwise.site/ideas/${store}/${cat}/${new Date().toISOString().slice(0, 10)}`);
+const cacheKey = (store: string, cat: string) => new Request(`https://cache.worthwise.site/ideas-v2/${store}/${cat}/${new Date().toISOString().slice(0, 10)}`);
 
 /** Lê do cache compartilhado do Cloudflare; se não houver, pede à IA e guarda por 24 h. */
 export async function getIdeasCached(store: string, cat: string): Promise<IdeasResult | null> {
