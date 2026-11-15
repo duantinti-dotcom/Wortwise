@@ -1,5 +1,5 @@
 "use client";
-import { ExternalLink, Headphones, Lamp, Smartphone, Sparkles, Truck, Watch, Dumbbell, Coffee, Gamepad2, Shirt, type LucideIcon } from "lucide-react";
+import { ExternalLink, Sparkles, Truck } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { cn, formatMoney, relativeTime } from "@/lib/utils";
@@ -9,20 +9,22 @@ interface LiveData { configured: boolean; category: string; updatedAt: string | 
 
 
 /** Itens ilustrativos (sem foto real) usados só quando a integração ainda não está ativa. */
-const DEMO: { title: string; price: string; icon: LucideIcon; tone: string }[] = [
-  { title: "Fone Bluetooth TWS com estojo", price: "R$ 58,90", icon: Headphones, tone: "from-[#CFFAFE] to-[#7DD3FC]" },
-  { title: "Smartwatch esportivo à prova d'água", price: "R$ 129,00", icon: Watch, tone: "from-[#d6e8ff] to-[#7fb2ff]" },
-  { title: "Luminária de mesa LED recarregável", price: "R$ 74,50", icon: Lamp, tone: "from-[#efe1ff] to-[#b892ff]" },
-  { title: "Kit elásticos de treino 5 níveis", price: "R$ 39,90", icon: Dumbbell, tone: "from-[#d4f7e6] to-[#5fd3a0]" },
-  { title: "Garrafa térmica inox 1 litro", price: "R$ 49,90", icon: Coffee, tone: "from-[#E0E7FF] to-[#A5B4FC]" },
-  { title: "Suporte de celular articulado", price: "R$ 29,90", icon: Smartphone, tone: "from-[#E0F2FE] to-[#67E8F9]" },
-  { title: "Controle sem fio para PC e celular", price: "R$ 89,90", icon: Gamepad2, tone: "from-[#dff3ff] to-[#6cc6ff]" },
-  { title: "Camiseta dry fit masculina", price: "R$ 34,90", icon: Shirt, tone: "from-[#DBEAFE] to-[#93C5FD]" },
+const DEMO: { title: string; price: string; img: string }[] = [
+  { title: "Fone Bluetooth TWS com estojo", price: "R$ 58,90", img: "fone" },
+  { title: "Smartwatch esportivo à prova d'água", price: "R$ 129,00", img: "smartwatch" },
+  { title: "Luminária de mesa LED recarregável", price: "R$ 74,50", img: "luminaria" },
+  { title: "Kit elásticos de treino 5 níveis", price: "R$ 39,90", img: "elasticos" },
+  { title: "Garrafa térmica inox 1 litro", price: "R$ 49,90", img: "garrafa" },
+  { title: "Suporte de celular articulado", price: "R$ 29,90", img: "suporte" },
+  { title: "Controle sem fio para PC e celular", price: "R$ 89,90", img: "controle" },
+  { title: "Camiseta dry fit masculina", price: "R$ 34,90", img: "camiseta" },
+  { title: "Mochila para notebook com divisórias", price: "R$ 119,90", img: "mochila" },
+  { title: "Organizador de gavetas modular", price: "R$ 27,90", img: "organizador" },
 ];
 
 function RankBadge({ rank }: { rank: number }) {
   return (
-    <span className={cn("tabular absolute left-2.5 top-2.5 z-10 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11.5px] font-semibold shadow-sm", rank === 1 ? "bg-brand text-[#FFFFFF]" : "bg-[#0B1120] text-white")}>
+    <span className={cn("tabular absolute left-2.5 top-2.5 z-10 flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 font-mono text-[11.5px] font-semibold shadow-sm", "bg-[#18181B]/85 text-white backdrop-blur")}>
       #{rank}
     </span>
   );
@@ -52,7 +54,7 @@ export function LiveTrending() {
         {data === null ? <span className="badge">carregando…</span> : live ? (
           <span className="badge badge-brand !h-auto !whitespace-normal py-1 text-center"><span className="live-dot !size-1.5 shrink-0" />Ao vivo · Mais vendidos em {data!.category} · atualizado {relativeTime(data!.updatedAt)}</span>
         ) : (
-          <span className="badge !h-auto !whitespace-normal py-1 text-center"><span className="size-1.5 shrink-0 rounded-full bg-brand" />Demonstração · dados ilustrativos (o ranking real aparece quando a integração está ativa)</span>
+          <span className="badge !h-auto !whitespace-normal py-1 text-center"><span className="size-1.5 shrink-0 rounded-full bg-brand" />Demonstração · exemplo ilustrativo (o ranking real aparece quando a integração está ativa)</span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
@@ -75,11 +77,12 @@ export function LiveTrending() {
               </div>
             </div>
           </motion.a>
-        )) : DEMO.concat(DEMO.slice(0, 2)).map((d, i) => (
+        )) : DEMO.map((d, i) => (
           <motion.div key={i} {...item(i)} className={cn("card relative flex flex-col overflow-hidden !rounded-[14px]", i >= 4 && "max-md:hidden", i >= 8 && "max-lg:hidden")}>
-            <div className="relative m-2 flex aspect-square items-center justify-center rounded-[10px] bg-[#f4f4f5]">
+            <div className="relative m-2 flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-white">
               <RankBadge rank={i + 1} />
-              <d.icon size={46} strokeWidth={1.25} className="text-black/30" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/demo/${d.img}.webp`} alt={d.title} loading="lazy" width={480} height={480} className="size-full object-cover transition-transform duration-700 hover:scale-[1.05]" />
             </div>
             <div className="px-3.5 pb-4 pt-1.5">
               <h3 className="line-clamp-2 text-[13.5px] font-semibold leading-snug">{d.title}</h3>
@@ -88,7 +91,7 @@ export function LiveTrending() {
           </motion.div>
         ))}
       </div>
-      <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-faint"><Sparkles size={12} className="text-brand" />Posição informada pelo Mercado Livre. O Worthwise não inventa vendas: mostra a fonte e a data de cada dado.</p>
+      <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-faint"><Sparkles size={12} className="text-brand" />{live ? "Posição informada pelo Mercado Livre. O Worthwise não inventa vendas: mostra a fonte e a data de cada dado." : "Exemplo ilustrativo: fotos criadas por IA. Com a integração ativa, aparecem os produtos e fotos reais do ranking."}</p>
     </div>
   );
 }
