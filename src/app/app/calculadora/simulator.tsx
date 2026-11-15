@@ -56,7 +56,7 @@ export function Simulator({ preset, salePrice }: { preset?: string; salePrice?: 
         <EasyProfit initialPrice={salePrice} initialPreset={preset} />
       )}
       <div className="mt-6 flex justify-center">
-        <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setAdvanced((v) => !v); setLoaded(null); }}>{advanced || loaded ? "Voltar para a calculadora simples" : "Modo avançado (lotes, cenários e simulações salvas)"}</button>
+        <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setAdvanced((v) => !v); setLoaded(null); }}>{advanced || loaded ? "Voltar para a calculadora simples" : "Modo avançado"}</button>
       </div>
 
       {advanced || loaded ? <section className="mt-12">

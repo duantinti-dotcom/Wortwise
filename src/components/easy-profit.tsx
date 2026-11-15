@@ -154,7 +154,7 @@ export function EasyProfit({ initialPrice, initialPreset, productName }: { initi
                 ))}
               </div>
               <div className="mt-5 grid grid-cols-2 gap-4">
-                <div><p className="text-[13px] text-muted">Venda por</p><p className="tabular text-[26px] font-semibold text-brand-hi">{recommended ? formatMoney(recommended) : "—"}</p></div>
+                <div><p className="text-[13px] text-muted">Venda por pelo menos</p><p className="tabular text-[26px] font-semibold text-brand-hi">{recommended ? formatMoney(recommended) : "—"}</p></div>
                 <div><p className="text-[13px] text-muted">Mínimo sem prejuízo</p><p className="tabular text-[26px] font-semibold">{formatMoney(r.minPrice)}</p></div>
               </div>
             </div>
