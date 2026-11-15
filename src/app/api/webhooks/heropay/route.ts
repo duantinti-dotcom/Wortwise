@@ -16,7 +16,11 @@ export async function POST(req: Request) {
 
   const raw = await req.text();
   if (raw.length > 100_000) return NextResponse.json({ error: "too_large" }, { status: 413 });
-  const valid = await verifySignature(raw, req.headers.get("x-heropay-signature"), env.heropayWebhookSecret);
+  // A HeroPay não assina os avisos; por isso cada aviso é cadastrado com uma senha secreta no endereço (?k=).
+  // Também aceitamos a assinatura HMAC, caso a conta passe a enviá-la.
+  const key = new URL(req.url).searchParams.get("k") ?? req.headers.get("x-worthwise-key") ?? "";
+  const valid = (key.length >= 32 && sameKey(key, env.heropayWebhookSecret))
+    || await verifySignature(raw, req.headers.get("x-heropay-signature"), env.heropayWebhookSecret);
   if (!valid) return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
 
   const trigger = new URL(req.url).searchParams.get("trigger") ?? "";
@@ -39,4 +43,12 @@ export async function POST(req: Request) {
     console.error("[heropay-webhook]", e instanceof Error ? e.message : e);
     return NextResponse.json({ error: "processing_failed" }, { status: 500 });
   }
+}
+
+/** Comparação em tempo constante (não revela quantos caracteres batem). */
+function sameKey(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }

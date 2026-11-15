@@ -137,3 +137,14 @@ export function dedupeKey(trigger: string, payload: Record<string, unknown>): st
 export async function getPaymentLink(id: number): Promise<unknown> {
   return call("GET", `/payment_links/${id}`);
 }
+
+/** Lista os avisos (webhooks) cadastrados na conta. */
+export async function listWebhooks(): Promise<{ id: number; name: string; url: string }[]> {
+  const r = await call<{ data?: { actions?: { id: number; name?: string; configurations?: { url?: string } }[] } }>("GET", "/webhook");
+  return (r.data?.actions ?? []).map((a) => ({ id: a.id, name: a.name ?? "", url: a.configurations?.url ?? "" }));
+}
+
+/** Remove um aviso cadastrado (usado ao recadastrar com a senha secreta). */
+export async function deleteWebhook(id: number): Promise<{ ok: boolean; status?: number }> {
+  try { await call("DELETE", `/webhook/${id}`); return { ok: true }; } catch (e) { return { ok: false, status: e instanceof HeroPayError ? e.status : undefined }; }
+}

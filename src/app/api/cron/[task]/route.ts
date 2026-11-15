@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { CONNECTORS, isSourceId } from "@/lib/connectors/registry";
 import { ConnectorError, type ConnectorContext } from "@/lib/connectors/types";
 import { publicEnv, serverEnv } from "@/lib/env";
-import { createSubscriptionLink, getPaymentLink, HANDLED_TRIGGERS, registerWebhook } from "@/lib/billing/heropay";
+import { createSubscriptionLink, deleteWebhook, getPaymentLink, HANDLED_TRIGGERS, listWebhooks, registerWebhook } from "@/lib/billing/heropay";
 import { runMaintenance } from "@/lib/maintenance";
 import { warmAllIdeas } from "@/lib/ai/ideas";
 import { aiProviders } from "@/lib/ai/provider";
@@ -90,6 +90,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
       } catch (e) { results.push({ id: p.id, model: p.model, ok: false, ms: Date.now() - t, error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }); }
     }
     return NextResponse.json({ task, results });
+  }
+  if (task === "heropay-rekey") {
+    // Recadastra os 7 avisos com a senha secreta no endereço e remove os antigos (sem senha).
+    const secret = serverEnv().heropayWebhookSecret;
+    if (secret.length < 32) return NextResponse.json({ error: "HEROPAY_WEBHOOK_SECRET ausente" }, { status: 503 });
+    const before = await listWebhooks();
+    const created = [];
+    for (const trigger of HANDLED_TRIGGERS) {
+      const url = `${publicEnv.appUrl}/api/webhooks/heropay?trigger=${trigger}&k=${encodeURIComponent(secret)}`;
+      const r = await registerWebhook(trigger, url);
+      created.push({ trigger: r.trigger, ok: r.ok, error: r.error });
+    }
+    const removed = [];
+    for (const w of before.filter((x) => x.url.includes("/api/webhooks/heropay") && !x.url.includes("&k="))) removed.push({ id: w.id, ...(await deleteWebhook(w.id)) });
+    const after = await listWebhooks();
+    return NextResponse.json({ task, created, removed, total: after.length, withKey: after.filter((x) => x.url.includes("&k=")).length });
   }
   if (task === "heropay-probe") {
     // Leitura (GET) de endpoints da HeroPay para achar o segredo de assinatura dos webhooks.
