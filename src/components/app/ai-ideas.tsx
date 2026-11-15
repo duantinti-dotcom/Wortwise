@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { SourceMark, sourceName } from "@/components/source-mark";
+import { inStore, SourceMark, sourceName } from "@/components/source-mark";
 import { cn } from "@/lib/utils";
 
 export interface EstimateItem { emoji: string; nome: string; descricao: string; por_que_vende: string; publico: string; preco_min: number; preco_max: number; dica: string; busca: string; imagem?: string; link: string }
@@ -32,7 +32,7 @@ function Details({ item, store, rank, open, onOpenChange }: { item: EstimateItem
           <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[14px]"><Photo item={item} big /></div>
           <div>
             <p className="text-[15.5px] leading-relaxed text-soft">{item.descricao}</p>
-            <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-hi hover:underline">Ver fotos e preços reais em {sourceName(store)}<ArrowUpRight size={14} /></a>
+            <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-hi hover:underline">Ver fotos e preços reais {inStore(store)}<ArrowUpRight size={14} /></a>
           </div>
         </div>
         <ul className="mt-6 space-y-3 text-[14.5px] leading-relaxed">
@@ -41,9 +41,9 @@ function Details({ item, store, rank, open, onOpenChange }: { item: EstimateItem
           {item.dica ? <li className="flex gap-3"><Lightbulb size={17} className="mt-0.5 shrink-0 text-brand-hi" /><span><b className="font-semibold">Dica para vender:</b> <span className="text-muted">{item.dica}</span></span></li> : null}
         </ul>
         <div className="mt-7 grid gap-2.5 sm:grid-cols-3">
-          <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary">Ver ofertas em {name}<ArrowUpRight size={16} /></a>
+          <a href={item.link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary">Ver ofertas {inStore(store)}<ArrowUpRight size={16} /></a>
           <Link href={`/app/calculadora?canal=${PRESET[store] ?? ""}`} className="btn btn-secondary"><Calculator size={16} />Calcular lucro</Link>
-          <Link href={`/app/assistente?q=${encodeURIComponent(`Vale a pena revender "${item.nome}" na ${name}? Como eu começo?`)}`} className="btn btn-secondary"><MessagesSquare size={16} />Perguntar à Wise</Link>
+          <Link href={`/app/assistente?q=${encodeURIComponent(`Vale a pena revender "${item.nome}" ${inStore(store)}? Como eu começo?`)}`} className="btn btn-secondary"><MessagesSquare size={16} />Perguntar à Wise</Link>
         </div>
       </DialogContent>
     </Dialog>
@@ -121,8 +121,8 @@ export function AiIdeas({ store }: { store: string }) {
   const r = useEstimates(`/api/ideas?loja=${store}&categoria=${cat}`);
   const name = sourceName(store);
   return (
-    <section aria-label={`Produtos que vendem bem em ${name}`}>
-      <h2 className="mb-5 text-[19px] font-semibold tracking-tight">Produtos que costumam vender bem em {name}</h2>
+    <section aria-label={`Produtos que vendem bem ${inStore(store)}`}>
+      <h2 className="mb-5 text-[19px] font-semibold tracking-tight">Produtos que costumam vender bem {inStore(store)}</h2>
       <div className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
         <div className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
           {CATS.map((c) => (
@@ -132,7 +132,7 @@ export function AiIdeas({ store }: { store: string }) {
         </div>
       </div>
       <div className="mt-7" aria-live="polite">
-        {r.loading ? <Loading text={`Carregando produtos de ${name}…`} /> : r.error ? <ErrorBox text={r.error} retry={r.retry} /> : <Grid items={r.items ?? []} store={store} k={r.k} />}
+        {r.loading ? <Loading text={`Carregando produtos ${inStore(store).replace(/^n/, "d")}…`} /> : r.error ? <ErrorBox text={r.error} retry={r.retry} /> : <Grid items={r.items ?? []} store={store} k={r.k} />}
       </div>
       <p className="mt-6 text-[12.5px] text-faint">Toque em “Ver ofertas” para ver fotos, preços e vendedores reais na loja.</p>
     </section>

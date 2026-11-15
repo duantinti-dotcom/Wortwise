@@ -1,6 +1,6 @@
 import { ArrowUpRight, Calculator, MessagesSquare } from "lucide-react";
 import Link from "next/link";
-import { SourceMark, sourceName } from "@/components/source-mark";
+import { inStore, SourceMark, sourceName } from "@/components/source-mark";
 
 /**
  * Conteúdo útil de cada loja mesmo antes de os dados dela estarem conectados:
@@ -70,16 +70,16 @@ export function StoreGuide({ store }: { store: string; message?: string }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <Link href={`/app/calculadora?canal=${g.preset}`} className="card card-hover flex items-start gap-4 p-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-tint/[0.06] text-brand-hi"><Calculator size={19} /></span>
-          <span><span className="block text-[16px] font-semibold">Calcular lucro em {name}</span><span className="mt-1 block text-[14px] leading-relaxed text-muted">A calculadora já abre com as taxas de referência de {name}. Você pode ajustar.</span></span>
+          <span><span className="block text-[16px] font-semibold">Calcular lucro {inStore(store)}</span><span className="mt-1 block text-[14px] leading-relaxed text-muted">A calculadora já abre com as taxas de referência {inStore(store).replace(/^n/, "d")}. Você pode ajustar.</span></span>
         </Link>
         <a href={g.seller} target="_blank" rel="noopener noreferrer nofollow" className="card card-hover flex items-start gap-4 p-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-tint/[0.06] text-brand-hi"><ArrowUpRight size={19} /></span>
-          <span><span className="block text-[16px] font-semibold">Abrir a área de vendedor</span><span className="mt-1 block text-[14px] leading-relaxed text-muted">Página oficial de {name} para criar sua conta de vendedor e ver as regras.</span></span>
+          <span><span className="block text-[16px] font-semibold">Abrir a área de vendedor</span><span className="mt-1 block text-[14px] leading-relaxed text-muted">Página oficial {inStore(store).replace(/^n/, "d")} para criar sua conta de vendedor e ver as regras.</span></span>
         </a>
       </div>
 
       <section>
-        <h2 className="text-[17px] font-semibold tracking-tight">Dicas para vender em {name}</h2>
+        <h2 className="text-[17px] font-semibold tracking-tight">Dicas para vender {inStore(store)}</h2>
         <p className="mt-1.5 text-[13.5px] text-faint">Orientação geral. Regras e taxas mudam: confira sempre na página oficial.</p>
         <ul className="mt-5 grid gap-4 md:grid-cols-2">
           {g.tips.map(([t, d]) => (

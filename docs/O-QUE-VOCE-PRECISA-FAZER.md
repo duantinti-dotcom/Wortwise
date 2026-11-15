@@ -33,19 +33,9 @@ Sem isso, a aba Mercado Livre mostra "chegando em breve".
    - `MELI_CLIENT_SECRET`: a Chave secreta
 4. Clique em **Deploy**.
 
-## 3. IA sem parar no meio do dia (2 min · US$ 5/mês)
-A IA busca os produtos da **Shopee, Amazon e TikTok Shop** e responde na **Wise**.
-- **No plano grátis:** a IA para quando o limite do dia acaba e só volta às 21h.
-- **No plano pago:** ela não para. O limite grátis continua incluído, e o que passar dele é cobrado pelo uso (centavos; veja abaixo).
-
-Para assinar:
-1. Abra **dash.cloudflare.com** → **Workers & Pages** → **Plans**.
-2. Escolha **Workers Paid** e pague com seu cartão.
-
-**Quanto custa o uso da IA (estimativa):**
-- Cada lista de produtos fica guardada por 3 dias para todos os clientes: a IA só trabalha 1 vez por loja e categoria.
-- Uma resposta da Wise sai por menos de R$ 0,02.
-- Com uso normal, o extra fica em poucos dólares por mês além dos US$ 5.
+## 3. IA (já resolvido, de graça)
+A IA usa uma fila grátis: **Groq → Gemini → OpenRouter → Cloudflare**. Se uma acabar o limite ou cair, o site passa sozinho para a próxima. Não precisa fazer nada.
+Só se o site crescer muito (centenas de pessoas usando todo dia) vale colocar crédito no Groq (console.groq.com → Billing).
 
 ## 4. Google (2 min)
 1. Abra **console.cloud.google.com** → **Google Auth Platform** → **Público-alvo**.
@@ -61,6 +51,10 @@ Faça quando não precisar mais que eu publique mudanças (ou me mande um token 
   - gere um token novo;
   - coloque em `HEROPAY_JWT_TOKEN` na Cloudflare (mesmo lugar do passo 1) e clique em **Deploy**;
   - apague o token antigo.
+- **Groq, OpenRouter e Gemini** (chaves coladas no chat):
+  - gere chaves novas em console.groq.com, openrouter.ai/keys e aistudio.google.com;
+  - na Cloudflare, troque `GROQ_API_KEY`, `OPENROUTER_API_KEY` e `GEMINI_API_KEY` e clique em **Deploy**;
+  - apague as chaves antigas em cada site.
 - **Google:**
   - em **Clientes** → seu cliente, adicione uma chave secreta nova;
   - me peça para atualizar no Supabase;

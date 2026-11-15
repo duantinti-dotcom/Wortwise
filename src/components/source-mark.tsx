@@ -11,6 +11,12 @@ const MARKS: Record<string, { name: string; file: string | null }> = {
   tiktokshop: { name: "TikTok Shop", file: "/brands/tiktok.svg" },
 };
 
+/** "no Mercado Livre", "na Shopee", "na Amazon", "no TikTok Shop". */
+export function inStore(id: string) {
+  const n = MARKS[id]?.name ?? id;
+  return `${id === "mercadolivre" || id === "tiktokshop" ? "no" : "na"} ${n}`;
+}
+
 export function sourceName(id: string) {
   return MARKS[id]?.name ?? id;
 }
