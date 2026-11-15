@@ -125,6 +125,51 @@ function openAiCompatible(baseUrl: string, apiKey: string, model: string): AiPro
   };
 }
 
+/** Google Gemini pela API nativa (generateContent), com suporte a ferramentas. */
+function geminiNative(apiKey: string, model: string): AiProvider {
+  return {
+    id: "gemini", model,
+    async chat(messages, tools, maxTokens, timeoutMs = TIMEOUT_MS) {
+      const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
+      const contents: unknown[] = [];
+      for (const m of messages) {
+        if (m.role === "system") continue;
+        if (m.role === "user") contents.push({ role: "user", parts: [{ text: m.content }] });
+        else if (m.role === "assistant") {
+          const parts: unknown[] = [];
+          if (m.content) parts.push({ text: m.content });
+          for (const c of m.tool_calls ?? []) parts.push({ functionCall: { name: c.function.name, args: parseArgs(c.function.arguments) } });
+          if (parts.length) contents.push({ role: "model", parts });
+        } else if (m.role === "tool") {
+          contents.push({ role: "user", parts: [{ functionResponse: { name: m.name ?? "ferramenta", response: { content: m.content } } }] });
+        }
+      }
+      const body: Record<string, unknown> = { contents, generationConfig: { maxOutputTokens: maxTokens, temperature: 0.3 } };
+      if (system) body.systemInstruction = { parts: [{ text: system }] };
+      if (tools.length) body.tools = [{ functionDeclarations: tools.map((t) => ({ name: t.name, description: t.description, parameters: t.parameters })) }];
+      let res: Response;
+      try {
+        res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+          method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": apiKey }, body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs),
+        });
+      } catch {
+        throw new AiUnavailable("network");
+      }
+      if (!res.ok) throw new AiUnavailable(`status ${res.status}: ${(await res.text().catch(() => "")).replace(/\s+/g, " ").slice(0, 160)}`);
+      const data = (await res.json()) as {
+        candidates?: { content?: { parts?: { text?: string; thought?: boolean; functionCall?: { name: string; args?: unknown } }[] } }[];
+        usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+      };
+      const parts = data.candidates?.[0]?.content?.parts ?? [];
+      return {
+        content: parts.filter((p) => p.text && !p.thought).map((p) => p.text).join(""),
+        toolCalls: parts.filter((p) => p.functionCall).map((p, i) => ({ id: `gemini_${i}_${Date.now()}`, name: p.functionCall!.name, arguments: parseArgs(p.functionCall!.args) })),
+        tokensIn: data.usageMetadata?.promptTokenCount ?? null, tokensOut: data.usageMetadata?.candidatesTokenCount ?? null,
+      };
+    },
+  };
+}
+
 /** Encadeia provedores: se um falhar (limite grátis, fora do ar, demora), tenta o próximo. */
 function chain(list: AiProvider[]): AiProvider {
   return {
@@ -143,13 +188,13 @@ function chain(list: AiProvider[]): AiProvider {
   };
 }
 
-/** Fila de IAs: Gemini → Groq → OpenRouter → Cloudflare (as que tiverem chave configurada). */
+/** Fila de IAs: Groq → Gemini → OpenRouter → Cloudflare (as que tiverem chave configurada). */
 export function getAiProvider(): AiProvider | null {
   const e = serverEnv();
   const list: AiProvider[] = [];
   const named = (id: string, p: AiProvider): AiProvider => ({ ...p, id });
-  if (e.geminiKey) list.push(named("gemini", openAiCompatible("https://generativelanguage.googleapis.com/v1beta/openai", e.geminiKey, e.geminiModel)));
   if (e.groqKey) list.push(named("groq", openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, e.groqModel)));
+  if (e.geminiKey) list.push(geminiNative(e.geminiKey, e.geminiModel));
   if (e.openrouterKey) list.push(named("openrouter", openAiCompatible("https://openrouter.ai/api/v1", e.openrouterKey, e.openrouterModel)));
   if (e.aiProvider === "openai-compatible" && e.aiBaseUrl) list.push(openAiCompatible(e.aiBaseUrl, e.aiApiKey, e.aiModel));
   else {
@@ -166,8 +211,8 @@ export function getAiProvider(): AiProvider | null {
 export function aiProviders(): { id: string; model: string; provider: AiProvider }[] {
   const e = serverEnv();
   const out: { id: string; model: string; provider: AiProvider }[] = [];
-  if (e.geminiKey) out.push({ id: "gemini", model: e.geminiModel, provider: openAiCompatible("https://generativelanguage.googleapis.com/v1beta/openai", e.geminiKey, e.geminiModel) });
   if (e.groqKey) out.push({ id: "groq", model: e.groqModel, provider: openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, e.groqModel) });
+  if (e.geminiKey) out.push({ id: "gemini", model: e.geminiModel, provider: geminiNative(e.geminiKey, e.geminiModel) });
   if (e.openrouterKey) out.push({ id: "openrouter", model: e.openrouterModel, provider: openAiCompatible("https://openrouter.ai/api/v1", e.openrouterKey, e.openrouterModel) });
   const w = workersAi(e.aiModel);
   if (w) out.push({ id: "cloudflare", model: e.aiModel, provider: w });

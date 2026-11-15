@@ -58,7 +58,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
       const t = Date.now();
       try {
         const r = await p.provider.chat([{ role: "user", content: "Responda apenas: ok" }], [], 400, 30000);
-        results.push({ id: p.id, model: p.model, ok: true, ms: Date.now() - t, reply: r.content.slice(0, 40) });
+        const t2 = Date.now();
+        const tool = await p.provider.chat([{ role: "user", content: "Quanto lucro tenho comprando a 25 e vendendo a 79,90, 50 unidades?" }],
+          [{ name: "calcular_lucro", description: "Calcula lucro.", parameters: { type: "object", properties: { preco_aquisicao: { type: "number" }, preco_venda: { type: "number" }, quantidade: { type: "number" } }, required: ["preco_aquisicao", "preco_venda", "quantidade"] } }], 800, 30000)
+          .then((x) => x.toolCalls.map((c) => `${c.name}(${JSON.stringify(c.arguments)})`).join(" ") || `sem ferramenta: ${x.content.slice(0, 60)}`).catch((er: unknown) => `erro: ${er instanceof Error ? er.message.slice(0, 120) : er}`);
+        results.push({ id: p.id, model: p.model, ok: true, ms: Date.now() - t, reply: r.content.slice(0, 40), tool, toolMs: Date.now() - t2 });
       } catch (e) { results.push({ id: p.id, model: p.model, ok: false, ms: Date.now() - t, error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }); }
     }
     return NextResponse.json({ task, results });
