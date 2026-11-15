@@ -1,6 +1,7 @@
 "use client";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { EasyProfit } from "@/components/easy-profit";
 import { ProfitCalculator } from "@/components/profit-calculator";
 import { ErrorNote, PageHeader, Skeleton } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/toast";
@@ -18,6 +19,7 @@ export function Simulator({ preset, salePrice }: { preset?: string; salePrice?: 
   const [loaded, setLoaded] = useState<Sim | null>(null);
   const [saving, setSaving] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
+  const [advanced, setAdvanced] = useState(false);
   const sims = useLoad<Sim[]>(async () => {
     const { data, error } = await supabaseBrowser().from("simulations").select("id, name, inputs, results, created_at").order("created_at", { ascending: false }).limit(100);
     if (error) throw new Error("Não foi possível carregar as simulações.");
@@ -47,10 +49,17 @@ export function Simulator({ preset, salePrice }: { preset?: string; salePrice?: 
 
   return (
     <>
-      <PageHeader title="Calculadora de lucro" description="Descubra quanto sobra no seu bolso em cada venda, depois de pagar produto, taxas, frete e impostos." help={{ id: "calculadora", steps: ["Responda: quanto paga, quantas unidades e por quanto vai vender", "Escolha onde vai vender — as taxas do marketplace entram sozinhas", "Verde é lucro, vermelho é prejuízo. Arraste o preço para testar"] }} />
-      <ProfitCalculator key={loaded?.id ?? "new"} initial={loaded?.inputs ?? (salePrice ? { salePrice } : undefined)} initialPreset={loaded ? undefined : preset} onSave={save} saving={saving} />
+      <PageHeader title="Calculadora de lucro" description="Responda 3 perguntas e veja quanto sobra no seu bolso em cada venda." />
+      {advanced || loaded ? (
+        <ProfitCalculator key={loaded?.id ?? "new"} initial={loaded?.inputs ?? (salePrice ? { salePrice } : undefined)} initialPreset={loaded ? undefined : preset} onSave={save} saving={saving} />
+      ) : (
+        <EasyProfit initialPrice={salePrice} initialPreset={preset} />
+      )}
+      <div className="mt-6 flex justify-center">
+        <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setAdvanced((v) => !v); setLoaded(null); }}>{advanced || loaded ? "Voltar para a calculadora simples" : "Modo avançado (lotes, cenários e simulações salvas)"}</button>
+      </div>
 
-      <section className="mt-12">
+      {advanced || loaded ? <section className="mt-12">
         <div className="mb-4 flex items-baseline justify-between"><h2 className="text-lg font-semibold tracking-tight">Simulações salvas</h2>
           <span className="text-xs text-faint">Selecione duas ou mais para comparar</span></div>
         {sims.loading ? <Skeleton className="h-28 !rounded-2xl" /> : sims.error ? <ErrorNote onRetry={sims.reload}>{sims.error}</ErrorNote>
@@ -82,7 +91,7 @@ export function Simulator({ preset, salePrice }: { preset?: string; salePrice?: 
             </table>
           </div>
         ) : null}
-      </section>
+      </section> : null}
     </>
   );
 }

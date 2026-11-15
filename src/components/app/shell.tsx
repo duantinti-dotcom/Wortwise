@@ -149,7 +149,7 @@ export function AppShell(props: ShellProps) {
           </aside>
 
           {/* Barra superior */}
-          <header className="sticky top-0 z-20 flex h-16 items-center gap-3 px-4 lg:h-[76px] lg:px-10">
+          <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-tint/[0.06] bg-[color-mix(in_oklab,var(--bg)_82%,transparent)] px-4 backdrop-blur-xl lg:h-[76px] lg:border-0 lg:bg-transparent lg:bg-gradient-to-b lg:from-[var(--bg)] lg:via-[color-mix(in_oklab,var(--bg)_70%,transparent)] lg:to-transparent lg:px-10 lg:backdrop-blur-none">
             <D.Root open={drawer} onOpenChange={setDrawer}>
               <D.Trigger className="btn btn-ghost -ml-2 !px-2.5 lg:hidden" aria-label="Abrir menu"><MenuIcon size={20} /></D.Trigger>
               <D.Portal>
