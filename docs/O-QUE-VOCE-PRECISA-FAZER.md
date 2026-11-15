@@ -21,7 +21,8 @@ Sem isso, quem pagar não recebe o plano.
    - **Value:** cole o segredo
 3. Clique em **Deploy**.
 
-## 2. Produtos reais com foto e preço (10 min)
+## 2. Mercado Livre com produtos reais, foto e preço (10 min)
+Sem isso, a aba Mercado Livre mostra "chegando em breve".
 1. Abra **developers.mercadolivre.com.br/devcenter** → **Criar uma aplicação**.
    - **Nome:** Worthwise
    - **URI de redirect:** `https://worthwise.site`
@@ -32,10 +33,19 @@ Sem isso, quem pagar não recebe o plano.
    - `MELI_CLIENT_SECRET`: a Chave secreta
 4. Clique em **Deploy**.
 
-## 3. IA sem limite diário (2 min · US$ 5/mês)
-O plano grátis da Cloudflare acaba rápido com clientes usando (a pesquisa e a Wise param até as 21h).
+## 3. IA sem parar no meio do dia (2 min · US$ 5/mês)
+A IA busca os produtos da **Shopee, Amazon e TikTok Shop** e responde na **Wise**.
+- **No plano grátis:** a IA para quando o limite do dia acaba e só volta às 21h.
+- **No plano pago:** ela não para. O limite grátis continua incluído, e o que passar dele é cobrado pelo uso (centavos; veja abaixo).
+
+Para assinar:
 1. Abra **dash.cloudflare.com** → **Workers & Pages** → **Plans**.
 2. Escolha **Workers Paid** e pague com seu cartão.
+
+**Quanto custa o uso da IA (estimativa):**
+- Cada lista de produtos fica guardada por 3 dias para todos os clientes: a IA só trabalha 1 vez por loja e categoria.
+- Uma resposta da Wise sai por menos de R$ 0,02.
+- Com uso normal, o extra fica em poucos dólares por mês além dos US$ 5.
 
 ## 4. Google (2 min)
 1. Abra **console.cloud.google.com** → **Google Auth Platform** → **Público-alvo**.
@@ -59,5 +69,8 @@ Faça quando não precisar mais que eu publique mudanças (ou me mande um token 
 ---
 
 ### Opcional, quando quiser
-- **Shopee com produtos reais:** crie a conta em affiliate.shopee.com.br → Open API. Na Cloudflare, adicione `SHOPEE_AFFILIATE_APP_ID` e `SHOPEE_AFFILIATE_SECRET`.
+- **Shopee com foto e preço reais:**
+  1. Crie a conta em affiliate.shopee.com.br → Open API.
+  2. Na Cloudflare, adicione `SHOPEE_AFFILIATE_APP_ID` e `SHOPEE_AFFILIATE_SECRET` (ambas como Secret) e clique em **Deploy**.
+  3. A aba Shopee troca sozinha da IA para os dados oficiais.
 - **Nome e logo na tela do Google:** verificar o domínio no Search Console (o Google pede).
