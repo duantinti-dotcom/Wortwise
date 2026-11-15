@@ -102,6 +102,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
         out.push({ path, status: r.status, keys: t.slice(0, 1).match(/[[{]/) ? Object.keys(((): Record<string, unknown> => { try { const j = JSON.parse(t); return Array.isArray(j) ? (j[0] ?? {}) : (j.data && !Array.isArray(j.data) ? j.data : Array.isArray(j.data) ? j.data[0] ?? {} : j); } catch { return {}; } })()) : [], sample: t.replace(/"(secret|token|signature[a-z_]*|key)"\s*:\s*"[^"]{6,}"/gi, '"$1":"<oculto>"').slice(0, 500) });
       } catch (err) { out.push({ path, error: String(err).slice(0, 100) }); }
     }
+    if (new URL(req.url).searchParams.get("full") === "1") {
+      const r = await fetch(`${e.heropayUrl}/webhook`, { headers: { authorization: `Bearer ${e.heropayToken}`, accept: "application/vnd.herospark.com; version=1" } });
+      const j = (await r.json()) as { data?: { actions?: Record<string, unknown>[] } };
+      const a = j.data?.actions?.[0] ?? {};
+      const cfg = (a.configurations ?? {}) as Record<string, unknown>;
+      return NextResponse.json({ count: j.data?.actions?.length, actionKeys: Object.keys(a), cfgKeys: Object.keys(cfg), headers: cfg.headers ?? null, method: cfg.request_method ?? cfg.method ?? null,
+        names: (j.data?.actions ?? []).map((x) => `${x.id}:${x.name}:${String(((x.configurations ?? {}) as Record<string, unknown>).url ?? "").replace(/^https:\/\/worthwise\.site/, "")}`) });
+    }
     return NextResponse.json(out);
   }
   if (task === "heropay-check") {
