@@ -48,6 +48,29 @@ function parseArgs(raw: unknown): Record<string, unknown> {
 
 const toOpenAiTools = (tools: ToolDef[]) => tools.map((t) => ({ type: "function", function: t }));
 
+type RawCall = { id?: string; name?: string; arguments?: unknown; function?: { name?: string; arguments?: unknown } };
+export interface WorkersAiOutput {
+  /** Formato antigo dos modelos Workers AI. */
+  response?: unknown; tool_calls?: RawCall[];
+  /** Formato compatível com OpenAI (usado pelos modelos mais novos, como gpt-oss). */
+  choices?: { message?: { content?: string | null; tool_calls?: RawCall[] | null } }[];
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
+}
+
+/** Lê a resposta nos dois formatos que o Workers AI devolve. */
+export function parseWorkersAi(out: WorkersAiOutput): ChatResult {
+  const msg = out.choices?.[0]?.message;
+  const content = typeof msg?.content === "string" ? msg.content : typeof out.response === "string" ? out.response : "";
+  const calls = msg?.tool_calls?.length ? msg.tool_calls : out.tool_calls ?? [];
+  return {
+    content,
+    toolCalls: calls.map((c, i) => ({
+      id: c.id ?? `call_${i}`, name: c.function?.name ?? c.name ?? "", arguments: parseArgs(c.function?.arguments ?? c.arguments),
+    })).filter((c) => c.name),
+    tokensIn: out.usage?.prompt_tokens ?? null, tokensOut: out.usage?.completion_tokens ?? null,
+  };
+}
+
 /** Cloudflare Workers AI via binding `AI` (sem chave de API; cobrado por uso na conta Cloudflare). */
 function workersAi(model: string): AiProvider | null {
   let ai: CloudflareEnv["AI"];
@@ -60,19 +83,10 @@ function workersAi(model: string): AiProvider | null {
   return {
     id: "workers-ai", model,
     async chat(messages, tools, maxTokens) {
-      const run = ai.run(model, { messages, tools: tools.length ? toOpenAiTools(tools) : undefined, max_tokens: maxTokens, temperature: 0.2 });
+      const run = ai.run(model, { messages, tools: tools.length ? toOpenAiTools(tools) : undefined, max_tokens: maxTokens, temperature: 0.3 });
       const timeout = new Promise<never>((_, rej) => setTimeout(() => rej(new AiUnavailable("timeout")), TIMEOUT_MS));
-      const out = (await Promise.race([run, timeout])) as {
-        response?: unknown; tool_calls?: { id?: string; name?: string; arguments?: unknown; function?: { name?: string; arguments?: unknown } }[];
-        usage?: { prompt_tokens?: number; completion_tokens?: number };
-      };
-      return {
-        content: typeof out.response === "string" ? out.response : "",
-        toolCalls: (out.tool_calls ?? []).map((c, i) => ({
-          id: c.id ?? `call_${i}`, name: c.name ?? c.function?.name ?? "", arguments: parseArgs(c.arguments ?? c.function?.arguments),
-        })).filter((c) => c.name),
-        tokensIn: out.usage?.prompt_tokens ?? null, tokensOut: out.usage?.completion_tokens ?? null,
-      };
+      const out = (await Promise.race([run, timeout])) as WorkersAiOutput;
+      return parseWorkersAi(out);
     },
   };
 }
@@ -114,5 +128,18 @@ export function getAiProvider(): AiProvider | null {
   if (e.aiProvider === "openai-compatible") {
     return e.aiBaseUrl ? openAiCompatible(e.aiBaseUrl, e.aiApiKey, e.aiModel) : null;
   }
-  return workersAi(e.aiModel);
+  const main = workersAi(e.aiModel);
+  if (!main) return null;
+  const backup = e.aiFallbackModel && e.aiFallbackModel !== e.aiModel ? workersAi(e.aiFallbackModel) : null;
+  if (!backup) return main;
+  // Se o modelo principal falhar (fila cheia, instabilidade), tenta uma vez o modelo reserva.
+  return {
+    id: main.id, model: main.model,
+    async chat(messages, tools, maxTokens) {
+      try { return await main.chat(messages, tools, maxTokens); } catch (err) {
+        console.warn("[ai] modelo principal falhou, usando reserva:", err instanceof Error ? err.message : err);
+        return backup.chat(messages, tools, maxTokens);
+      }
+    },
+  };
 }

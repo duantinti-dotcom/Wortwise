@@ -26,7 +26,8 @@ export function serverEnv() {
     heropayWebhookSecret: e.HEROPAY_WEBHOOK_SECRET ?? "",
     turnstileSecret: e.TURNSTILE_SECRET_KEY ?? "",
     aiProvider: (e.AI_PROVIDER ?? "workers-ai") as "workers-ai" | "openai-compatible",
-    aiModel: e.AI_MODEL ?? "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    aiModel: e.AI_MODEL ?? "@cf/openai/gpt-oss-120b",
+    aiFallbackModel: e.AI_FALLBACK_MODEL ?? "@cf/meta/llama-4-scout-17b-16e-instruct",
     aiBaseUrl: (e.AI_BASE_URL ?? "").replace(/\/$/, ""),
     aiApiKey: e.AI_API_KEY ?? "",
   };

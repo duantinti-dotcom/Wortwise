@@ -1,6 +1,7 @@
 "use client";
 import { CircleAlert, Clock, Lock, Search, SlidersHorizontal, X } from "lucide-react";
 import { SourceMark } from "@/components/source-mark";
+import { STORE_MESSAGE, StoreGuide } from "@/components/app/store-guide";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { activeCount, applyFilters, type SearchFilters, type SortKey } from "@/lib/search/filters";
 import { ActiveChips, RefinePanel, SORTS } from "./refine";
@@ -77,6 +78,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
     } else if (q) void run(q);
   }, [params, run]);
 
+  const blockedStore = selected.length === 1 && sources.some((x) => x.id === selected[0] && x.state !== "connected") ? selected[0]! : null;
   const items = useMemo(() => result?.results ?? [], [result]);
   const filtered = useMemo(() => applyFilters(items, refine), [items, refine]);
   const nActive = activeCount(refine);
@@ -93,7 +95,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
 
       <div role="tablist" aria-label="Lojas" className="-mx-5 mb-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
         <div className="flex w-max gap-2 border-b border-tint/[0.08] lg:w-full">
-          {[{ id: "", name: "Todas as lojas", state: "connected" }, ...sources.filter((x) => x.id !== "tiktokshop")].map((src) => {
+          {[{ id: "", name: "Todas as lojas", state: "connected" }, ...sources].map((src) => {
             const on = src.id ? selected.length === 1 && selected[0] === src.id : selected.length !== 1;
             return (
               <button key={src.id || "all"} type="button" role="tab" aria-selected={on} title={"detail" in src ? (src as SourceInfo).detail : undefined}
@@ -199,7 +201,8 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
           </>
         ) : null}
 
-        {!loading && !result && !error ? (
+        {!loading && !result && blockedStore ? <StoreGuide store={blockedStore} message={STORE_MESSAGE[blockedStore] ?? ""} /> : null}
+        {!loading && !result && !error && !blockedStore ? (
           <div className="space-y-10">
             <section>
               <h2 className="text-[16px] font-semibold tracking-tight">Ideias para começar</h2>

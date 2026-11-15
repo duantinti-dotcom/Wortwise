@@ -82,7 +82,7 @@ export async function loadTrending(categoryId: string | null | undefined): Promi
 
 /* ───────────── Outras lojas ───────────── */
 
-export const STORES = ["mercadolivre", "shopee", "amazon"] as const;
+export const STORES = ["mercadolivre", "shopee", "amazon", "tiktokshop"] as const;
 export type StoreId = (typeof STORES)[number];
 export const isStore = (v: string | undefined | null): v is StoreId => !!v && (STORES as readonly string[]).includes(v);
 
@@ -93,6 +93,10 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
   if (store === "mercadolivre") {
     const d = await loadTrending(categoryId);
     return { ...d, store, storeState: trendingConfigured() ? "connected" : "not_configured" };
+  }
+  if (store === "tiktokshop") {
+    return { state: { ok: false, reason: "not_configured", message: USER_MESSAGES.pending_approval },
+      categories: [], category: { id: "tiktokshop", name: "TikTok Shop" }, products: [], trends: [], updatedAt: null, store, storeState: "not_configured" };
   }
   if (store === "amazon") {
     const cat = { id: "amazon", name: "Amazon" };

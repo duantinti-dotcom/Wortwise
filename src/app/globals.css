@@ -315,3 +315,16 @@ html.theme-vt::view-transition-new(root) { animation: theme-reveal .5s var(--eas
 }
 
 .theme-dark, .theme-light { color: var(--fg); }
+
+/* Respostas da assistente: o mesmo estilo de texto longo, mais compacto */
+.chat-md { font-size: 15.5px; line-height: 1.65; }
+.chat-md > :first-child { margin-top: 0; }
+.chat-md p { margin: .6em 0; }
+.chat-md ul, .chat-md ol { margin: .6em 0; }
+.chat-md li { margin: .3em 0; }
+.chat-md h2, .chat-md h3 { margin: 1em 0 .4em; font-size: 1.05em; }
+.md-table { overflow-x: auto; margin: .8em 0; border: 1px solid var(--line); border-radius: 12px; }
+.md-table table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.md-table th, .md-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.md-table tr:last-child td { border-bottom: 0; }
+.md-table th { font-weight: 600; color: var(--fg); background: rgb(var(--tint) / 0.04); }

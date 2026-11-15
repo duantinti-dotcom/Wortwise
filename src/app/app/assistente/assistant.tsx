@@ -1,8 +1,9 @@
 "use client";
-import { ArrowUp, Calculator, FileText, MessagesSquare, Plus, Search, Sparkles } from "lucide-react";
+import { ArrowUp, FileText, MessagesSquare, Plus, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { renderMarkdown } from "@/lib/markdown";
 import { ProductImage } from "@/components/app/product-bits";
 import { useUpgrade } from "@/components/app/upgrade";
 import { Skeleton } from "@/components/ui/misc";
@@ -17,8 +18,14 @@ const PriceHistoryChart = dynamic(() => import("@/components/charts").then((m) =
 interface Msg { id: string; role: "user" | "assistant"; content: string; blocks: AssistantBlock[]; error?: boolean }
 interface Conv { id: string; title: string; updated_at: string }
 
-const SUGGESTIONS = ["Encontre produtos até R$ 50 com boa oportunidade de margem", "Quanto sobraria de lucro se eu comprasse 100 unidades a R$ 18 e vendesse a R$ 49,90 no Mercado Livre?",
-  "Vale a pena vender garrafa térmica no Mercado Livre?", "Por quanto eu deveria vender um produto que custa R$ 32 para ter 25% de margem?"];
+const SUGGESTIONS = [
+  "Como eu começo a vender na Shopee?",
+  "Comprei um produto a R$ 18 e quero vender a R$ 49,90 no Mercado Livre. Quanto eu lucro em 100 unidades?",
+  "Por quanto devo vender algo que me custa R$ 32 para ter 25% de margem?",
+  "Preciso abrir MEI para vender online?",
+  "Mercado Livre, Shopee ou TikTok Shop: onde começar?",
+  "Como escolher um bom fornecedor?",
+];
 
 function Blocks({ blocks }: { blocks: AssistantBlock[] }) {
   return (
@@ -55,12 +62,12 @@ function Blocks({ blocks }: { blocks: AssistantBlock[] }) {
   );
 }
 
-export function Assistant({ available, remaining: initialRemaining }: { available: boolean; remaining: number | null }) {
+export function Assistant({ available, remaining: initialRemaining, initialQuestion }: { available: boolean; remaining: number | null; initialQuestion?: string }) {
   const toast = useToast();
   const { openUpgrade } = useUpgrade();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState((initialQuestion ?? "").slice(0, 1500));
   const [status, setStatus] = useState<string | null>(null);
   const [remaining, setRemaining] = useState(initialRemaining);
   const endRef = useRef<HTMLDivElement>(null);
@@ -146,21 +153,18 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
       <section className="flex min-h-[calc(100dvh-220px)] flex-col lg:min-h-[calc(100dvh-140px)]">
         <div className="flex-1">
           {!messages.length ? (
-            <div className="mx-auto max-w-2xl pt-6 text-center md:pt-14">
-              <div className="relative mx-auto w-fit">
-                <div aria-hidden className="aurora -inset-8 bg-brand/30" />
-                <div className="relative flex size-16 items-center justify-center rounded-[20px] border border-brand/40 bg-gradient-to-b from-brand/30 to-brand/5 text-brand-hi shadow-[0_0_40px_-8px_rgba(59,130,246,0.7)]"><Sparkles size={28} /></div>
-              </div>
-              <h1 className="text-grad mt-7 text-3xl font-semibold tracking-[-0.035em] md:text-[40px]">Assistente</h1>
-              <p className="mt-2 text-muted">Pergunte em português, como perguntaria a um amigo que entende de vendas. Ele consulta os dados, faz as contas e mostra de onde tirou cada número.</p>
-              {!available ? <div role="status" className="mx-auto mt-6 flex w-fit items-center gap-2.5 rounded-2xl border border-tint/10 bg-tint/[0.04] px-4 py-2.5 text-left text-sm text-muted"><span className="size-2 shrink-0 rounded-full bg-brand" />Assistente ainda não disponível neste ambiente — as demais ferramentas funcionam normalmente.</div> : null}
-              <div className="mt-10 grid gap-3 text-left sm:grid-cols-2">
-                {SUGGESTIONS.map((s, i) => (
-                  <button key={s} disabled={!available} onClick={() => send(s)} className="card card-hover group flex items-start gap-3 !rounded-2xl p-4 text-left text-sm leading-relaxed text-soft hover:text-fg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none">
-                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-tint/[0.06] text-brand-hi">{[<Search key="a" size={14} />, <Calculator key="b" size={14} />, <MessagesSquare key="c" size={14} />, <Sparkles key="d" size={14} />][i]}</span>{s}
-                  </button>
+            <div className="mx-auto max-w-2xl pt-4 md:pt-10">
+              <span className="flex size-12 items-center justify-center rounded-xl bg-tint/[0.06] text-brand-hi"><Sparkles size={22} /></span>
+              <h1 className="display mt-6 text-[30px] md:text-[38px]">Oi! Eu sou a Wise.</h1>
+              <p className="mt-3 text-[16px] leading-relaxed text-muted">Sou sua consultora de vendas online. Pergunte qualquer coisa sobre vender no Mercado Livre, Shopee, Amazon ou TikTok Shop: preço, lucro, taxas, fornecedores, MEI e como começar.</p>
+              {!available ? <div role="status" className="mt-6 rounded-xl border border-tint/10 bg-tint/[0.04] px-4 py-3 text-[14px] text-muted">A assistente ainda não está disponível neste ambiente. As outras ferramentas funcionam normalmente.</div> : null}
+              <h2 className="mt-10 text-[14px] font-medium text-muted">Experimente perguntar</h2>
+              <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                {SUGGESTIONS.map((x) => (
+                  <button key={x} disabled={!available} onClick={() => send(x)} className="card card-hover p-4 text-left text-[14.5px] leading-relaxed text-soft hover:text-fg disabled:cursor-not-allowed disabled:opacity-60">{x}</button>
                 ))}
               </div>
+              <p className="mt-6 text-[13px] text-faint">Cumprimentos não gastam mensagens. Pesquisas de produtos feitas pela Wise usam as pesquisas do seu plano.</p>
             </div>
           ) : (
             <div className="mx-auto max-w-3xl space-y-6 pb-6">
@@ -168,9 +172,11 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
                 <div key={m.id} className="ml-auto w-fit max-w-[85%] animate-fade-up rounded-2xl rounded-br-md bg-surface-3 px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div>
               ) : (
                 <div key={m.id} className="animate-fade-up">
-                  <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-brand-hi"><Sparkles size={13} /> Assistente Worthwise</div>
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[13px] font-medium text-brand-hi"><Sparkles size={13} /> Wise</div>
                   {m.blocks.length ? <Blocks blocks={m.blocks} /> : null}
-                  {m.content ? <div className={cn("mt-3 whitespace-pre-wrap text-[15px] leading-relaxed", m.error ? "rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-danger" : "text-soft")}>{m.content}</div>
+                  {m.content ? (m.error
+                    ? <div className="mt-3 rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-[15px] text-danger">{m.content}</div>
+                    : <div className="prose-ww chat-md mt-2" dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }} />)
                     : <div className="mt-2 flex items-center gap-2.5 text-sm text-muted"><span className="flex gap-1">{[0, 1, 2].map((i) => <span key={i} className="size-1.5 animate-pulse rounded-full bg-brand" style={{ animationDelay: `${i * 160}ms` }} />)}</span>{status}</div>}
                   {m.content && !m.error ? <button onClick={() => saveAnalysis(m)} className="btn btn-ghost btn-sm -ml-2 mt-2"><FileText size={14} /> Salvar análise</button> : null}
                 </div>
@@ -180,16 +186,16 @@ export function Assistant({ available, remaining: initialRemaining }: { availabl
           )}
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="glass sticky bottom-24 mx-auto mt-4 w-full max-w-3xl rounded-2xl p-2 lg:bottom-6">
+        <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="card sticky bottom-24 mx-auto mt-4 w-full max-w-3xl p-2 lg:bottom-6">
           <div className="flex items-end gap-2">
             <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={1} maxLength={1500} disabled={!available} aria-label="Mensagem para o assistente"
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(input); } }}
-              placeholder={available ? "Pergunte sobre produtos, preços ou lucro…" : "Assistente indisponível"}
+              placeholder={available ? "Escreva sua pergunta…" : "Assistente indisponível"}
               className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-faint" />
             <button type="submit" disabled={!available || !input.trim() || Boolean(status)} className="btn btn-primary !size-11 shrink-0 !rounded-xl !p-0" aria-label="Enviar"><ArrowUp size={19} /></button>
           </div>
           <div className="flex items-center justify-between px-3 pb-1 pt-0.5 text-[11px] text-faint">
-            <span className="flex items-center gap-1.5"><MessagesSquare size={11} />{remaining == null ? "Cota do plano" : `${remaining} mensagens restantes`}<span className="hidden sm:inline"> · buscas feitas pelo assistente consomem pesquisas do plano</span></span>
+            <span className="flex items-center gap-1.5"><MessagesSquare size={11} />{remaining == null ? "Cota do plano" : `${remaining} mensagens restantes`}</span>
           </div>
         </form>
       </section>

@@ -81,15 +81,19 @@ function WRow({ label, value, start, width, tone, strong }: { label: string; val
 
 type Tab = "composicao" | "cenarios" | "canais" | "detalhes";
 
-export function ProfitCalculator({ initial, onSave, saving, compact, example = true }: {
-  initial?: Partial<ProfitInputs>; onSave?: (inputs: ProfitInputs) => void; saving?: boolean; compact?: boolean; example?: boolean;
+export function ProfitCalculator({ initial, initialPreset, onSave, saving, compact, example = true }: {
+  initial?: Partial<ProfitInputs>; initialPreset?: string; onSave?: (inputs: ProfitInputs) => void; saving?: boolean; compact?: boolean; example?: boolean;
 }) {
   const useExample = example && !initial;
-  const [i, setI] = useState<ProfitInputs>(useExample ? EXAMPLE_INPUTS : { ...DEFAULT_INPUTS, quantity: 1, ...initial });
+  const startPreset = CHANNEL_PRESETS.find((x) => x.id === initialPreset);
+  const [i, setI] = useState<ProfitInputs>(() => {
+    const base = useExample ? EXAMPLE_INPUTS : { ...DEFAULT_INPUTS, quantity: 1, ...initial };
+    return startPreset ? { ...base, marketplaceFeePct: startPreset.marketplaceFeePct, marketplaceFixedFee: startPreset.marketplaceFixedFee, paymentFeePct: startPreset.paymentFeePct } : base;
+  });
   const [isExample, setIsExample] = useState(useExample);
   const [targetMargin, setTargetMargin] = useState(20);
   const [tab, setTab] = useState<Tab>("composicao");
-  const [preset, setPreset] = useState("");
+  const [preset, setPreset] = useState(startPreset?.id ?? "");
   const [mode, setMode] = useState<"simple" | "full">("simple");
   const set = <K extends keyof ProfitInputs>(k: K) => (v: number) => { setIsExample(false); setI((p) => ({ ...p, [k]: v })); };
 

@@ -22,8 +22,18 @@ export function renderMarkdown(md: string): string {
     if (para.length) { out.push(`<p>${inline(para.join(" "))}</p>`); para = []; }
     if (list) { out.push(`</${list}>`); list = null; }
   };
+  let table: string[][] | null = null;
+  const flushTable = () => {
+    if (!table) return;
+    const rows = table.filter((r) => !r.every((c) => /^:?-{2,}:?$/.test(c)));
+    const [head, ...body] = rows;
+    if (head) out.push(`<div class="md-table"><table><thead><tr>${head.map((c) => `<th>${inline(c)}</th>`).join("")}</tr></thead><tbody>${body.map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
+    table = null;
+  };
   for (const line of md.replace(/\r/g, "").split("\n")) {
     const t = line.trim();
+    if (/^\|.*\|$/.test(t)) { flush(); (table ??= []).push(t.slice(1, -1).split("|").map((c) => c.trim())); continue; }
+    flushTable();
     const h = /^(#{2,3})\s+(.*)$/.exec(t);
     const ul = /^[-*]\s+(.*)$/.exec(t);
     const ol = /^\d+\.\s+(.*)$/.exec(t);
@@ -37,6 +47,7 @@ export function renderMarkdown(md: string): string {
     } else { if (list) { out.push(`</${list}>`); list = null; } para.push(t); }
   }
   flush();
+  flushTable();
   return out.join("\n");
 }
 

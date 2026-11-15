@@ -12,7 +12,7 @@ import { cn, formatDate, formatMoney, formatPercent } from "@/lib/utils";
 
 interface Sim { id: string; name: string; inputs: ProfitInputs; results: ProfitResult; created_at: string }
 
-export function Simulator() {
+export function Simulator({ preset }: { preset?: string }) {
   const toast = useToast();
   const { openUpgrade } = useUpgrade();
   const [loaded, setLoaded] = useState<Sim | null>(null);
@@ -48,7 +48,7 @@ export function Simulator() {
   return (
     <>
       <PageHeader title="Calculadora de lucro" description="Descubra quanto sobra no seu bolso em cada venda, depois de pagar produto, taxas, frete e impostos." help={{ id: "calculadora", steps: ["Responda: quanto paga, quantas unidades e por quanto vai vender", "Escolha onde vai vender — as taxas do marketplace entram sozinhas", "Verde é lucro, vermelho é prejuízo. Arraste o preço para testar"] }} />
-      <ProfitCalculator key={loaded?.id ?? "new"} initial={loaded?.inputs} onSave={save} saving={saving} />
+      <ProfitCalculator key={loaded?.id ?? "new"} initial={loaded?.inputs} initialPreset={loaded ? undefined : preset} onSave={save} saving={saving} />
 
       <section className="mt-12">
         <div className="mb-4 flex items-baseline justify-between"><h2 className="text-lg font-semibold tracking-tight">Simulações salvas</h2>

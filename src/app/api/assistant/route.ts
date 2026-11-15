@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { getUser } from "@/lib/auth";
-import { runAgent, type AssistantBlock, type AssistantEvent } from "@/lib/ai/agent";
+import { runAgent, type AgentContext, type AssistantBlock, type AssistantEvent } from "@/lib/ai/agent";
+import { sourcesOverview } from "@/lib/connectors/registry";
+import { isSmallTalk } from "@/lib/ai/small-talk";
 import { AiUnavailable, getAiProvider, type ChatMessage } from "@/lib/ai/provider";
 import { apiError, parseBody, sameOrigin } from "@/lib/http";
 import { serverRpcSafe, supabaseAnon, supabaseServer } from "@/lib/supabase/server";
@@ -37,11 +39,32 @@ export async function POST(req: Request) {
     conversationId = conv.id as string;
   }
 
-  const { data: quota } = await supabase.rpc("consume_quota", { p_resource: "ai_message" });
-  const q = quota as { allowed: boolean; remaining: number; plan: string } | null;
-  if (!q?.allowed) {
-    return apiError("quota_exceeded", "Você atingiu o limite de mensagens do assistente no seu plano.", { plan: q?.plan ?? "free" });
+  // Cumprimentos e agradecimentos curtos não gastam mensagens do plano.
+  const smallTalk = isSmallTalk(body.message);
+  let q: { allowed: boolean; remaining: number | null; plan: string } | null;
+  if (smallTalk) {
+    q = { allowed: true, remaining: null, plan: "" };
+  } else {
+    const { data: quota } = await supabase.rpc("consume_quota", { p_resource: "ai_message" });
+    q = quota as { allowed: boolean; remaining: number; plan: string } | null;
+    if (!q?.allowed) {
+      return apiError("quota_exceeded", "Você atingiu o limite de mensagens da assistente no seu plano.", { plan: q?.plan ?? "free" });
+    }
   }
+
+  const [{ data: usage }, { data: profile }] = await Promise.all([
+    supabase.rpc("my_usage"),
+    supabase.from("profiles").select("full_name, categories").eq("id", user.id).maybeSingle(),
+  ]);
+  const u = usage as { plan?: string; quotas?: { resource: string; limit: number; used: number }[] } | null;
+  const sq = u?.quotas?.find((x) => x.resource === "search");
+  const context: AgentContext = {
+    firstName: ((profile?.full_name as string | null) ?? user.name ?? "").split(" ")[0] || null,
+    plan: ({ free: "Grátis", pro: "Pro", business: "Business" } as Record<string, string>)[u?.plan ?? "free"] ?? (u?.plan ?? "Grátis"),
+    searchesLeft: sq ? Math.max(0, sq.limit - sq.used) : null,
+    stores: sourcesOverview().map((x) => ({ name: x.name, connected: x.state === "connected" })),
+    interests: ((profile?.categories as string[] | null) ?? []).slice(0, 6),
+  };
 
   const { data: cfg } = await supabaseAnon().from("app_settings").select("value").eq("key", "assistant").maybeSingle();
   const settings = (cfg?.value ?? {}) as AssistantSettings;
@@ -65,12 +88,12 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(JSON.stringify(e) + "\n"));
       };
       try {
-        emit({ type: "status", text: "Analisando sua pergunta…" });
-        const out = await runAgent(provider, history, emit, { maxRounds: settings.max_tool_rounds ?? 4, maxTokens: settings.max_output_tokens ?? 900 });
+        emit({ type: "status", text: "Pensando…" });
+        const out = await runAgent(provider, history, emit, { maxRounds: settings.max_tool_rounds ?? 4, maxTokens: Math.max(settings.max_output_tokens ?? 0, 1600) }, context);
         emit({ type: "text", text: out.text });
         await save("assistant", out.text, blocks, out.tokensIn, out.tokensOut);
         await serverRpcSafe("server_set_source_status", { p_source: "assistant", p_status: "connected", p_detail: `Modelo ${provider.model}` });
-        emit({ type: "done", remaining: q.remaining, conversationId: convId });
+        emit({ type: "done", remaining: q?.remaining ?? null, conversationId: convId });
       } catch (e) {
         console.error("[assistant]", e instanceof Error ? e.message : e);
         const timeout = e instanceof AiUnavailable && e.message === "timeout";
@@ -83,3 +106,4 @@ export async function POST(req: Request) {
   });
   return new Response(stream, { headers: { "content-type": "application/x-ndjson; charset=utf-8", "cache-control": "no-store", "x-accel-buffering": "no" } });
 }
+

@@ -20,7 +20,8 @@
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_MsdNjCNByK2ngy0Tymxa8w_SRPiM1u5",
     "HEROPAY_API_URL": "https://api.beta.heropay.tech",
     "AI_PROVIDER": "workers-ai",
-    "AI_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+    "AI_MODEL": "@cf/openai/gpt-oss-120b",
+    "AI_FALLBACK_MODEL": "@cf/meta/llama-4-scout-17b-16e-instruct"
   }
   // Segredos (wrangler secret put ...): WW_SERVER_SECRET, CRON_SECRET, HEROPAY_JWT_TOKEN,
   // HEROPAY_WEBHOOK_SECRET, MELI_CLIENT_ID, MELI_CLIENT_SECRET, AMAZON_PAAPI_ACCESS_KEY, AMAZON_PAAPI_SECRET_KEY,

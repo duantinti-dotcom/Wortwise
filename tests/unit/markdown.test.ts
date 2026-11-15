@@ -17,3 +17,14 @@ describe("markdown do blog", () => {
     expect(html).not.toContain('href="javascript');
   });
 });
+
+describe("tabelas no Markdown", () => {
+  it("vira tabela HTML e escapa o conteúdo", () => {
+    const html = renderMarkdown("Resultado:\n| Item | Valor |\n|---|---|\n| Lucro | **R$ 10** |\n| <b>x</b> | 1 |");
+    expect(html).toContain("<table>");
+    expect(html).toContain("<th>Item</th>");
+    expect(html).toContain("<td><strong>R$ 10</strong></td>");
+    expect(html).toContain("&lt;b&gt;x&lt;/b&gt;");
+    expect(html).not.toContain("---");
+  });
+});

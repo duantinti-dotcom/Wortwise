@@ -1,6 +1,7 @@
-import { ArrowUpRight, Flame, Search, Settings2, TrendingUp } from "lucide-react";
+import { ArrowUpRight, Flame, Search, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { STORE_MESSAGE, StoreGuide } from "@/components/app/store-guide";
 import { StoreTabs } from "@/components/app/store-tabs";
 import { sourceName } from "@/components/source-mark";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
@@ -18,10 +19,12 @@ async function freeVisible(): Promise<number> {
   return typeof n === "number" && n > 0 ? n : 6;
 }
 
+
 const SOURCE_NOTE: Record<StoreId, { text: string; link: string }> = {
   mercadolivre: { text: "Fonte: API oficial do Mercado Livre (ranking “Mais vendidos” da categoria).", link: "https://www.mercadolivre.com.br/mais-vendidos" },
   shopee: { text: "Fonte: API oficial de Afiliados da Shopee, com os produtos ordenados por quantidade vendida pela própria Shopee.", link: "https://shopee.com.br" },
   amazon: { text: "Fonte: Amazon.", link: "https://www.amazon.com.br/gp/bestsellers" },
+  tiktokshop: { text: "Fonte: TikTok Shop.", link: "https://shop.tiktok.com" },
 };
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ categoria?: string; loja?: string }> }) {
@@ -42,7 +45,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
 
       <StoreTabs stores={STORES} active={store} href={(s) => qs(s)} />
 
-      {data.categories.length ? (
+      {data.state.ok && data.categories.length ? (
         <nav aria-label="Categorias" className="-mx-5 mt-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
           <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
             {data.categories.map((c) => {
@@ -60,22 +63,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
 
       <div className="mt-8">
         {!data.state.ok ? (
-          store === "amazon" ? (
-            <EmptyState icon={Search} title="A Amazon não tem ranking pela API"
-              action={<Link href="/app/descobrir?loja=amazon" className="btn btn-primary">Pesquisar na Amazon</Link>}>
-              A API oficial da Amazon não informa a lista de mais vendidos. Você pode pesquisar qualquer produto da Amazon na tela Pesquisar.
-            </EmptyState>
-          ) : data.state.reason === "not_configured" ? (
-            <EmptyState icon={Flame} title={`Ainda sem conexão com: ${name}`}
-              action={admin ? <Link href="/admin/integracoes" className="btn btn-primary"><Settings2 size={16} /> Configurar integração</Link> : <Link href="/app/calculadora" className="btn btn-secondary">Usar a calculadora enquanto isso</Link>}>
-              {admin
-                ? `Cadastre as chaves da API oficial (${name}). Assim que estiverem configuradas, o ranking aparece aqui com fotos, preços e links.`
-                : `A conexão com ${name} está sendo feita. Assim que estiver pronta, os mais vendidos aparecem aqui.`}
-            </EmptyState>
-          ) : (
+          data.state.reason === "error" && store !== "amazon" ? (
             <EmptyState icon={Flame} title="Não foi possível carregar agora" action={<Link href={qs(store, data.category.id)} className="btn btn-secondary">Tentar de novo</Link>}>
               {data.state.message} Nenhum dado foi inventado para preencher o espaço.
             </EmptyState>
+          ) : (
+            <>
+              {admin && store !== "amazon" ? <p className="mb-6 text-[14px] text-muted">Você é administrador: <Link href="/admin/integracoes" className="text-brand-hi hover:underline">cadastrar as chaves de {name}</Link>.</p> : null}
+              <StoreGuide store={store} message={STORE_MESSAGE[store] ?? ""} />
+            </>
           )
         ) : (
           <>
