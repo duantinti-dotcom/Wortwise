@@ -26,6 +26,32 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
   }
+  if (task === "ai-debug") {
+    // Diagnóstico: modelos grátis do OpenRouter com ferramentas e teste nativo do Gemini.
+    const e = serverEnv();
+    const out: Record<string, unknown> = {};
+    try {
+      const r = await fetch("https://openrouter.ai/api/v1/models", { signal: AbortSignal.timeout(15000) });
+      const j = (await r.json()) as { data?: { id: string; supported_parameters?: string[]; context_length?: number }[] };
+      out.openrouterFree = (j.data ?? []).filter((m) => m.id.endsWith(":free") && (m.supported_parameters ?? []).includes("tools")).map((m) => m.id).slice(0, 40);
+    } catch (err) { out.openrouterFree = String(err); }
+    for (const [name, url, headers] of [
+      ["gemini-native-header", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", { "x-goog-api-key": e.geminiKey }],
+      ["gemini-native-query", `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(e.geminiKey)}`, {}],
+    ] as const) {
+      const t = Date.now();
+      try {
+        const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify({ contents: [{ parts: [{ text: "Responda apenas: ok" }] }] }), signal: AbortSignal.timeout(20000) });
+        out[name] = { status: r.status, ms: Date.now() - t, body: (await r.text()).replace(/\s+/g, " ").slice(0, 300) };
+      } catch (err) { out[name] = { ms: Date.now() - t, error: String(err).slice(0, 200) }; }
+    }
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=50", { headers: { "x-goog-api-key": e.geminiKey }, signal: AbortSignal.timeout(15000) });
+      const j = (await r.json()) as { models?: { name: string }[]; error?: unknown };
+      out.geminiModels = j.models ? j.models.map((m) => m.name).filter((n) => /flash|pro/.test(n)).slice(0, 30) : j.error;
+    } catch (err) { out.geminiModels = String(err); }
+    return NextResponse.json(out);
+  }
   if (task === "ai-check") {
     const results = [];
     for (const p of aiProviders()) {
