@@ -13,7 +13,6 @@ import { isStore, loadOverall, loadStoreTrending, STORES, trendingConfigured, ty
 import { loadHistories } from "@/lib/product";
 import { Trophy } from "lucide-react";
 import { supabaseAnon } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
 import { TrendingGrid } from "./grid";
 
 export const metadata: Metadata = { title: "Mais vendidos" };
@@ -65,7 +64,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
               return (
                 <li key={c.id}>
                   <Link href={qs(store, c.id)} scroll={false} aria-current={on ? "page" : undefined}
-                    className={cn("chip whitespace-nowrap", on && "!border-transparent !bg-none !bg-fg !text-[var(--bg)]")}>{c.name}</Link>
+                    className="chip whitespace-nowrap">{c.name}</Link>
                 </li>
               );
             })}

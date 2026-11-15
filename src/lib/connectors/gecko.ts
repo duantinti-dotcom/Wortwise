@@ -221,6 +221,19 @@ async function mergeCategories(
   return ranked(merged.filter((p) => (seen.has(p.externalId) ? false : (seen.add(p.externalId), true))));
 }
 
+/**
+ * Categorias que dá para mostrar sem travar: as que já estão guardadas e, se ainda houver consulta
+ * disponível hoje, as demais. Não gasta crédito.
+ */
+async function availableCategories(cats: Category[], bodyOf: (id: string) => Json): Promise<Category[]> {
+  const keys = await Promise.all(cats.map((c) => keyOf(bodyOf(c.id))));
+  let st: { have: string[]; left: number } | null = null;
+  try { st = await serverRpc<{ have: string[]; left: number }>("server_gecko_status", { p_keys: keys, p_max_per_day: dailyMax() }); } catch { st = null; }
+  if (!st) return [GERAL, ...cats];
+  const have = new Set(st.have);
+  return [GERAL, ...cats.filter((_c, i) => have.has(keys[i]!) || st!.left > 0)];
+}
+
 /* ───────────── Conectores ───────────── */
 const caps = { search: true, details: true, offers: false, fees: false, bestsellers: true };
 const stateOf = (name: string) => () => geckoConfigured()
@@ -248,7 +261,7 @@ export const geckoMercadoLivre: Connector = {
     if (!p) throw new ConnectorError("mercadolivre", "not_found", "Produto não encontrado no Mercado Livre");
     return detail({ ...p, externalId }, data);
   },
-  async getCategories() { return [GERAL, ...FALLBACK_ML_CATEGORIES]; },
+  async getCategories() { return availableCategories(FALLBACK_ML_CATEGORIES, mlRankBody); },
   async getTrends() { return []; },
   /** Página oficial "Mais vendidos" da categoria: a posição é a do próprio Mercado Livre. "Geral" junta as categorias já guardadas. */
   async getBestsellers(categoryId, ctx) {
@@ -276,7 +289,7 @@ export const geckoShopee: Connector = {
     if (!p) throw new ConnectorError("shopee", "not_found", "Produto não encontrado na Shopee");
     return detail(p, data);
   },
-  async getCategories() { return [GERAL, ...shopeeCats]; },
+  async getCategories() { return availableCategories(shopeeCats, (id) => shopeeRankBody(SHOPEE_CATEGORIES.find((c) => c.id === id)!)); },
   /** Busca da categoria na ordenação "Mais vendidos" da própria Shopee: a posição é a da Shopee. */
   async getBestsellers(categoryId, ctx) {
     if (categoryId === GERAL.id) return mergeCategories(SHOPEE_CATEGORIES.map(shopeeRankBody), shopeeList, "rank", () => geckoShopee.getBestsellers!(SHOPEE_CATEGORIES[0]!.id, ctx));
@@ -317,7 +330,7 @@ export const geckoTikTok: Connector = {
     if (!p) throw new ConnectorError("tiktokshop", "not_found", "Produto não encontrado no TikTok Shop");
     return detail(p, data);
   },
-  async getCategories() { return [GERAL, ...tiktokCats]; },
+  async getCategories() { return availableCategories(tiktokCats, (id) => tiktokBody(TIKTOK_CATEGORIES.find((c) => c.id === id)!.keyword)); },
   /** O TikTok Shop não tem página pública de ranking: mostramos a busca da categoria ordenada pela quantidade vendida que o próprio TikTok informa. */
   async getBestsellers(categoryId, ctx) {
     if (categoryId === GERAL.id) return mergeCategories(TIKTOK_CATEGORIES.map((c) => tiktokBody(c.keyword)), tiktokList, "sold", () => geckoTikTok.getBestsellers!(TIKTOK_CATEGORIES[0]!.id, ctx));

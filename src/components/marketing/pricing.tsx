@@ -36,7 +36,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
         return (
           <StaggerItem key={p.id} className="flex">
           <Spot ref={featured ? featuredRef : undefined} className={cn("card relative flex flex-1 flex-col !overflow-visible p-7 md:p-8", featured && "mt-4 !border-[#3B82F6] lg:mt-0")}>
-                        {featured ? <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-[#2563EB] px-3 py-1 text-xs font-semibold text-white">Mais escolhido</span> : null}
+                        {featured ? <span className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-[#2563EB] px-3 py-1 text-xs font-semibold text-white shadow-[0_0_0_4px_var(--bg)]">Mais escolhido</span> : null}
             <h3 className="text-center text-xl font-semibold tracking-tight">{p.name}</h3>
             <p className="mt-2 text-center text-sm text-muted">{p.description}</p>
             <div className="mt-8 flex items-end justify-center gap-2">

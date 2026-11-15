@@ -71,7 +71,7 @@ export async function loadTrending(categoryId: string | null | undefined): Promi
   const empty = (state: TrendingState): TrendingData => ({ state, categories: FALLBACK_CATEGORIES, category: fallbackCat, products: [], trends: [], updatedAt: null });
   if (!trendingConfigured()) return empty({ ok: false, reason: "not_configured", message: USER_MESSAGES.not_configured });
 
-  const categories = await cached(`cats:${mercadoLivre().state().detail.slice(0, 12)}`, () => mercadoLivre().getCategories!(ctx)).then((r) => r.value).catch(() => FALLBACK_CATEGORIES);
+  const categories = await (trendingSource() === "gecko" ? mercadoLivre().getCategories!(ctx) : cached("cats", () => mercadoLivre().getCategories!(ctx)).then((r) => r.value)).catch(() => FALLBACK_CATEGORIES);
   const list = categories.length ? categories : FALLBACK_CATEGORIES;
   const category = list.find((c) => c.id === categoryId) ?? (list[0]?.id === "geral" ? list[0] : list.find((c) => c.id === DEFAULT_CATEGORY)) ?? list[0]!;
   try {
@@ -81,6 +81,8 @@ export async function loadTrending(categoryId: string | null | undefined): Promi
     ]);
     return { state: { ok: true }, categories: list, category, products: products.value.slice(0, TOP), trends: trends.value, updatedAt: new Date(products.at).toISOString() };
   } catch (e) {
+    // Tópico indisponível agora (sem dados guardados): mostra o "Geral" em vez de travar.
+    if (category.id !== "geral" && list[0]?.id === "geral") return loadTrending("geral");
     return { ...empty(failure(e)), categories: list, category };
   } finally {
     if (ctx.logs.length) await flushLogs(ctx.logs).catch(() => {});
@@ -125,6 +127,7 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
     const r = await cached(`${store}:${c.state().detail.slice(0, 12)}:${category.id}`, () => c.getBestsellers!(category.id, ctx).then(record));
     return { ...base, state: { ok: true }, products: r.value.slice(0, TOP), updatedAt: new Date(r.at).toISOString(), storeState: "connected" };
   } catch (e) {
+    if (category.id !== "geral" && categories[0]?.id === "geral") return loadStoreTrending(store, "geral");
     return { ...base, state: failure(e), storeState: "connected" };
   } finally {
     if (ctx.logs.length) await flushLogs(ctx.logs).catch(() => {});

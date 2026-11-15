@@ -609,3 +609,69 @@ html.theme-vt::view-transition-new(root) { animation: theme-reveal .75s cubic-be
   .btn-secondary:hover:not(:disabled), .btn-glass:hover:not(:disabled), .icon-btn:hover, .chip:hover { background: var(--btn2-bg-hover), var(--glass-base); }
   .icon-btn { color: var(--soft); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v17 · Liquid glass refinado
+   - vidro fosco com borda de luz em degradê (mais forte em cima, como na Apple);
+   - reflexo suave no topo, sombra curta e colorida nos botões principais;
+   - toque com leve "afundar" e volta elástica.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root, [data-theme="dark"], .theme-dark {
+  --lg-fill: linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.05));
+  --lg-fill-hover: linear-gradient(180deg, rgb(255 255 255 / 0.20), rgb(255 255 255 / 0.08));
+  --lg-rim: linear-gradient(180deg, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.10) 45%, rgb(255 255 255 / 0.06) 70%, rgb(255 255 255 / 0.18));
+  --lg-spec: radial-gradient(120% 90% at 50% -30%, rgb(255 255 255 / 0.22), transparent 60%);
+  --lg-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 10px 24px -14px rgb(0 0 0 / 0.75);
+}
+[data-theme="light"], .theme-light {
+  --lg-fill: linear-gradient(180deg, rgb(255 255 255 / 0.92), rgb(246 246 249 / 0.78));
+  --lg-fill-hover: linear-gradient(180deg, #ffffff, rgb(240 240 245 / 0.9));
+  --lg-rim: linear-gradient(180deg, rgb(255 255 255 / 1), rgb(24 24 27 / 0.10) 55%, rgb(24 24 27 / 0.16));
+  --lg-spec: radial-gradient(120% 90% at 50% -30%, rgb(255 255 255 / 0.9), transparent 60%);
+  --lg-shadow: 0 1px 2px rgb(24 24 27 / 0.08), 0 8px 20px -12px rgb(24 24 27 / 0.28);
+}
+@layer components {
+  .btn, .chip, .icon-btn { position: relative; isolation: isolate; transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, background .2s, color .15s; }
+  .btn:hover:not(:disabled), .chip:hover, .icon-btn:hover { transform: translateY(-1px); }
+  .btn:active:not(:disabled), .chip:active, .icon-btn:active { transform: scale(.97); transition-duration: .1s; }
+
+  /* Vidro: preenchimento + reflexo + borda de luz (máscara de 1px) */
+  .btn-secondary, .btn-glass, .chip, .icon-btn {
+    background: var(--lg-spec), var(--lg-fill), var(--glass-base);
+    box-shadow: var(--lg-shadow);
+    -webkit-backdrop-filter: blur(24px) saturate(190%); backdrop-filter: blur(24px) saturate(190%);
+  }
+  .btn-secondary:hover:not(:disabled), .btn-glass:hover:not(:disabled), .chip:hover, .icon-btn:hover { background: var(--lg-spec), var(--lg-fill-hover), var(--glass-base); }
+  .btn-secondary::before, .btn-glass::before, .chip::before, .icon-btn::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: var(--lg-rim);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+
+  /* Botões coloridos: vidro azul com reflexo e brilho na borda */
+  .btn-primary {
+    background: radial-gradient(120% 100% at 50% -40%, rgb(255 255 255 / 0.35), transparent 55%), linear-gradient(180deg, #3F86F8, #1C5BDB);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 -2px 6px rgb(10 30 110 / 0.30), 0 0 0 1px rgb(29 78 216 / 0.85),
+      0 2px 4px rgb(0 0 0 / 0.18), 0 12px 26px -12px rgb(37 99 235 / 0.9);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: radial-gradient(120% 100% at 50% -40%, rgb(255 255 255 / 0.42), transparent 55%), linear-gradient(180deg, #4D90F9, #2463E2);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -2px 6px rgb(10 30 110 / 0.30), 0 0 0 1px rgb(29 78 216 / 0.85),
+      0 3px 6px rgb(0 0 0 / 0.18), 0 16px 32px -12px rgb(37 99 235 / 0.95);
+  }
+  .btn-upgrade {
+    background: radial-gradient(120% 100% at 50% -40%, rgb(255 255 255 / 0.35), transparent 55%), linear-gradient(135deg, #6157F2, #3D5BF0 55%, #2E8BEA);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 -2px 6px rgb(30 20 110 / 0.30), 0 0 0 1px rgb(67 56 202 / 0.85),
+      0 2px 4px rgb(0 0 0 / 0.18), 0 12px 28px -12px rgb(99 102 241 / 0.95);
+  }
+  .btn-upgrade:hover:not(:disabled) { background: radial-gradient(120% 100% at 50% -40%, rgb(255 255 255 / 0.42), transparent 55%), linear-gradient(135deg, #6D64F4, #4A66F2 55%, #3A96EE); }
+
+  /* Chip/aba selecionada: vidro azul */
+  .chip[aria-pressed="true"], .chip[aria-current="page"] {
+    color: #fff !important; background: radial-gradient(120% 100% at 50% -40%, rgb(255 255 255 / 0.3), transparent 55%), linear-gradient(180deg, #3F86F8, #1C5BDB) !important;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), 0 0 0 1px rgb(29 78 216 / 0.8), 0 8px 18px -10px rgb(37 99 235 / 0.9) !important;
+  }
+  .chip[aria-pressed="true"]::before, .chip[aria-current="page"]::before { content: none; }
+}
+@media (prefers-reduced-motion: reduce) { .btn, .chip, .icon-btn { transition: none; } }
