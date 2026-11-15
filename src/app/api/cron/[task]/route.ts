@@ -26,6 +26,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
   }
+  if (task === "amz-sample") {
+    const r = await fetch("https://www.amazon.com.br/gp/bestsellers/kitchen", { headers: { accept: "text/html", "accept-language": "pt-BR,pt;q=0.9", "user-agent": "Mozilla/5.0 (compatible; WorthwiseBot/1.0; +https://worthwise.site)" }, signal: AbortSignal.timeout(12000) });
+    const t = await r.text();
+    const i = t.indexOf('id="gridItemRoot"');
+    const j = t.indexOf('data-client-recs-list');
+    return NextResponse.json({ status: r.status, grid: i, count: t.split('id="gridItemRoot"').length - 1, block: i >= 0 ? t.slice(i, i + 4500) : t.slice(0, 1500), recs: j >= 0 ? t.slice(j, j + 600) : null });
+  }
   if (task === "robots") {
     const r = await fetch("https://www.amazon.com.br/robots.txt", { signal: AbortSignal.timeout(10000) });
     const t = await r.text();
