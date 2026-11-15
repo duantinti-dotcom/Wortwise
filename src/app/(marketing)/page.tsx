@@ -82,7 +82,7 @@ export default function HomePage() {
         <div className="container-page mt-14">
           <ul className="glass-cells grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-tint/10 md:grid-cols-4">
             {SOURCES.map((s) => (
-              <li key={s.label} className="flex items-center gap-3 px-5 py-4 text-[13.5px] text-soft"><s.icon size={16} className="shrink-0 text-brand" />{s.label}</li>
+              <li key={s.label} className="flex items-center justify-center gap-2.5 px-4 py-4 text-center text-[13.5px] text-soft"><s.icon size={16} className="shrink-0 text-brand" />{s.label}</li>
             ))}
           </ul>
         </div>
@@ -160,12 +160,12 @@ export default function HomePage() {
           <Stagger as="ol" className="snap-row md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
             {STEPS.map((s, i) => (
               <StaggerItem as="li" key={s.title} className="h-full">
-                <Spot className="lg card-hover flex h-full flex-col rounded-2xl p-6 md:p-7">
-                  <div className="flex items-center justify-between">
+                <Spot className="lg card-hover relative flex h-full flex-col items-center rounded-2xl p-6 text-center md:p-7">
+                  <div className="flex justify-center">
                     <span className="flex size-10 items-center justify-center rounded-[10px] border border-tint/10 bg-tint/[0.04] text-brand"><s.icon size={18} /></span>
-                    <span className="font-mono text-[12px] text-faint">0{i + 1}</span>
+                    <span className="absolute right-5 top-5 font-mono text-[12px] text-faint">0{i + 1}</span>
                   </div>
-                  <h3 className="mt-8 text-xl font-semibold tracking-tight">{s.title}</h3>
+                  <h3 className="mt-6 text-xl font-semibold tracking-tight">{s.title}</h3>
                   <p className="mt-3 text-[15px] leading-relaxed text-muted">{s.text}</p>
                 </Spot>
               </StaggerItem>

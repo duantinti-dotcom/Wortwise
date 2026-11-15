@@ -27,14 +27,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
 
   return (
     <>
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-5">
+      <div className="mb-7 flex flex-col items-center gap-4 text-center">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-[13px] font-semibold text-brand-hi">
+          <div className="flex items-center justify-center gap-2 text-[13px] font-semibold text-brand-hi">
             <span className="relative flex size-2"><span className="absolute inset-0 animate-ping rounded-full bg-brand/60" /><span className="relative size-2 rounded-full bg-brand" /></span>
             Ranking oficial do Mercado Livre
           </div>
           <h1 className="display mt-2 text-[36px] md:text-[48px]">Mais vendidos</h1>
-          <p className="mt-2 max-w-2xl text-[15px] text-muted">O que mais está vendendo agora em cada categoria, com foto, preço e link do anúncio. A posição vem do próprio Mercado Livre.</p>
+          <p className="mx-auto mt-2 max-w-2xl text-[15px] text-muted">O que mais está vendendo agora em cada categoria, com foto, preço e link do anúncio. A posição vem do próprio Mercado Livre.</p>
         </div>
         {data.updatedAt ? <span className="badge"><TrendingUp size={13} className="text-brand" />atualizado {relativeTime(data.updatedAt)}</span> : null}
       </div>
@@ -43,7 +43,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
 
       {/* Categorias */}
       <nav aria-label="Categorias" className="-mx-4 mb-6 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-        <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
+        <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap lg:justify-center">
           {data.categories.map((c) => {
             const on = c.id === data.category.id;
             return (
@@ -73,8 +73,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
         <>
           {data.trends.length ? (
             <section aria-label="Buscas em alta" className="lg mb-6 rounded-2xl p-4 sm:p-5">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><Flame size={16} className="text-brand" />Buscas que mais cresceram em {data.category.name}</div>
-              <ul className="flex flex-wrap gap-2">
+              <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold"><Flame size={16} className="text-brand" />Buscas que mais cresceram em {data.category.name}</div>
+              <ul className="flex flex-wrap justify-center gap-2">
                 {data.trends.slice(0, 16).map((t, i) => (
                   <li key={t.keyword} className="flex">
                     <Link href={`/app/descobrir?q=${encodeURIComponent(t.keyword)}`} className="chip !h-9 !pr-3">

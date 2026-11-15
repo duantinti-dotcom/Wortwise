@@ -36,14 +36,12 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
         const featured = p.id === "pro";
         return (
           <StaggerItem key={p.id} className={cn("flex", featured && "lg:-my-4")}>
-          <Spot ref={featured ? featuredRef : undefined} className={cn("lg card-hover relative flex flex-1 flex-col rounded-2xl p-8", featured && "edge-brand lg:py-12")}>
+          <Spot ref={featured ? featuredRef : undefined} className={cn("lg card-hover relative flex flex-1 flex-col !overflow-visible rounded-2xl p-8", featured && "edge-brand mt-4 lg:mt-0 lg:py-12")}>
             {featured ? <BorderBeam /> : null}
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>
-              {featured ? <span className="rounded-full bg-gradient-to-r from-[#22D3EE] to-brand px-3 py-1 text-xs font-bold text-[#FFFFFF]">Mais escolhido</span> : null}
-            </div>
-            <p className="mt-2 text-sm text-muted">{p.description}</p>
-            <div className="mt-8 flex items-end gap-2">
+            {featured ? <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-[#22D3EE] via-brand to-[#6366F1] px-3.5 py-1 text-xs font-bold text-white shadow-[0_6px_18px_-6px_rgba(59,130,246,0.9)]">Mais escolhido</span> : null}
+            <h3 className="text-center text-xl font-semibold tracking-tight">{p.name}</h3>
+            <p className="mt-2 text-center text-sm text-muted">{p.description}</p>
+            <div className="mt-8 flex items-end justify-center gap-2">
               <div className="flex items-start">
                 <span className="mr-1 mt-1.5 text-base text-muted">R$</span>
                 <span className="tabular text-6xl font-semibold leading-none tracking-[-0.05em]">{int(p.price_cents)}</span>
@@ -55,7 +53,7 @@ export function Pricing({ initial }: { initial?: PlanInfo[] }) {
               {p.price_cents > 0 ? `Assinar ${p.name}` : "Começar grátis"} <ArrowRight className="btn-arrow" size={16} />
             </Link>
             <div className="hairline my-8" />
-            <ul className="space-y-3.5 text-[14.5px]">
+            <ul className="mx-auto w-fit space-y-3.5 text-[14.5px]">
               {p.features.map((f) => (
                 <li key={f} className="flex gap-3 text-soft"><span className={cn("mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full", featured ? "bg-brand text-black" : "bg-tint/10 text-fg")}><Check size={12} strokeWidth={3} /></span>{f}</li>
               ))}

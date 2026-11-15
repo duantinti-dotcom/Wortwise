@@ -19,15 +19,15 @@ export function HowTo({ id, steps }: { id: string; steps: string[] }) {
     <AnimatePresence initial={false} mode="wait">
       {hidden ? (
         <motion.button key="show" type="button" onClick={() => write(id, false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="mb-6 inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-fg">
+          className="mx-auto mb-6 flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-fg">
           <HelpCircle size={14} className="text-brand" />Como usar esta tela?
         </motion.button>
       ) : (
         <motion.section key="steps" aria-label="Como usar esta tela" className="card relative mb-6 overflow-hidden p-4 sm:p-5"
           initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }} transition={{ type: "spring", stiffness: 260, damping: 26 }}>
-          <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="relative mb-3 flex items-center justify-center gap-3">
             <span className="flex items-center gap-2 text-[13px] font-semibold"><HelpCircle size={15} className="text-brand" />Como usar<span className="font-normal text-faint md:hidden">· deslize →</span></span>
-            <button type="button" onClick={() => write(id, true)} className="icon-btn !size-7" aria-label="Fechar ajuda"><X size={14} /></button>
+            <button type="button" onClick={() => write(id, true)} className="icon-btn absolute right-0 !size-7" aria-label="Fechar ajuda"><X size={14} /></button>
           </div>
           <ol className="snap-row !-mx-4 !px-4 !pb-1 md:grid md:grid-cols-3 md:gap-2.5">
             {steps.map((s, i) => (

@@ -31,7 +31,7 @@ export function Navbar() {
       <nav aria-label="Principal"
         className={cn("nav-bar grid h-[60px] w-full grid-cols-[1fr_auto_1fr] items-center rounded-full border px-2.5 pl-5 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
           scrolled ? "glass glass-lens max-w-[1180px]" : "max-w-[1280px] border-transparent bg-transparent")}>
-        <Link href="/" aria-label="Worthwise — página inicial" className="justify-self-start"><Logo /></Link>
+        <Link href="/" aria-label="Worthwise — página inicial" className="flex items-center justify-self-start"><Logo /></Link>
         <ul className="hidden items-center justify-center gap-0.5 xl:flex">
           {LINKS.map((l) => (
             <li key={l.href}><Link href={l.href} className="rounded-lg px-3 py-2 text-[14px] text-muted transition-colors hover:bg-tint/[0.06] hover:text-fg">{l.label}</Link></li>

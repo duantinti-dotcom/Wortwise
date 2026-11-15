@@ -37,11 +37,11 @@ export function EmptyState({ icon: Icon, title, children, action }: { icon: Luci
 export function PageHeader({ title, description, action, eyebrow, help }: { title: string; description?: string; action?: ReactNode; eyebrow?: string; help?: { id: string; steps: string[] } }) {
   return (
     <>
-      <div className={cn("flex flex-wrap items-end justify-between gap-5", help ? "mb-5" : "mb-8")}>
+      <div className={cn("flex flex-col items-center gap-5 text-center", help ? "mb-6" : "mb-8")}>
         <div className="min-w-0">
           {eyebrow ? <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-hi">{eyebrow}</div> : null}
           <h1 className="display text-[34px] md:text-[44px]">{title}</h1>
-          {description ? <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{description}</p> : null}
+          {description ? <p className="mx-auto mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{description}</p> : null}
         </div>
         {action}
       </div>
