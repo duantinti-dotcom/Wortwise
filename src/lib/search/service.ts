@@ -103,7 +103,7 @@ export async function runSearch(rawQuery: string, filters: SearchFilters): Promi
   if (all.length === 0) return { status: "empty", remaining: precheck.remaining, plan: precheck.plan, sources: reports };
 
   const { data: rec, error: recErr } = await supabase.rpc("record_search", {
-    p_fingerprint: fingerprint, p_query: query, p_filters: {}, p_results: all, p_sources: reports,
+    p_fingerprint: fingerprint, p_query: query, p_filters: {}, p_results: all.map(({ attributes: _a, ...rest }) => rest), p_sources: reports,
   });
   if (recErr) throw new Error(recErr.message);
   const recorded = rec as { status: "charged" | "cached" | "quota_exceeded" | "empty"; search_id?: string; remaining: number };

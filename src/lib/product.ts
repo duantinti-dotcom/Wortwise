@@ -1,3 +1,4 @@
+import { loadArchivedHistory } from "@/lib/maintenance";
 import "server-only";
 import { CONNECTORS } from "@/lib/connectors/registry";
 import type { ConnectorContext, FeeQuote, ProductDetail, SourceId } from "@/lib/connectors/types";
@@ -34,8 +35,14 @@ export async function loadHistory(source: string, externalId: string): Promise<P
   const supabase = await supabaseServer();
   const { data: row } = await supabase.from("products").select("id").eq("source", source).eq("external_id", externalId).maybeSingle();
   if (!row) return [];
-  const { data } = await supabase.from("price_observations").select("price, collected_at, metric_type, offers_count")
-    .eq("product_id", row.id).order("collected_at", { ascending: true }).limit(1000);
-  return (data ?? []).map((o) => ({ date: o.collected_at as string, price: Number(o.price), metric: o.metric_type as string,
+  const [{ data }, archived] = await Promise.all([
+    supabase.from("price_observations").select("price, collected_at, metric_type, offers_count")
+      .eq("product_id", row.id).order("collected_at", { ascending: true }).limit(1000),
+    loadArchivedHistory(row.id as string),
+  ]);
+  // Observações arquivadas no R2 (mais antigas) + as que estão no banco, em ordem de data.
+  const all = [...archived.map((o) => ({ price: o.price, collected_at: o.collected_at, metric_type: o.metric_type, offers_count: o.offers_count })), ...(data ?? [])]
+    .sort((a, b) => String(a.collected_at).localeCompare(String(b.collected_at)));
+  return all.map((o) => ({ date: o.collected_at as string, price: Number(o.price), metric: o.metric_type as string,
     offersCount: (o.offers_count as number | null) ?? null }));
 }

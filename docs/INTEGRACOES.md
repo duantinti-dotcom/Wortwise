@@ -101,3 +101,41 @@ Planejado para uma etapa posterior; depende de uma fonte que aceite busca por im
 - Plano grátis vê as primeiras posições (mesmo limite de `trial_policy.free_visible_results`); o restante não é enviado ao navegador.
 - Sem credenciais, o app mostra o aviso de integração pendente. A página inicial mostra itens ilustrativos com o selo "Demonstração". Nada é inventado como se fosse real.
 - O Mercado Livre não informa a terceiros a quantidade vendida de anúncios de outros vendedores. Por isso a vitrine mostra a **posição** no ranking oficial, não um número de vendas.
+
+## Armazenamento e manutenção do banco (Supabase Free, 500 MB)
+
+- **Rotina diária:** Cloudflare Cron às 06:17 UTC (03:17 em Brasília) → `/api/cron/maintenance` → `server_maintenance` (no banco) + arquivamento no R2 (no Worker). O agendamento antigo `purge` continua funcionando como sinônimo.
+- **No banco** (`app_private.maintenance_core`), em lotes de até 5.000 linhas:
+  - limites de requisição com mais de 1 dia;
+  - intenções de checkout não usadas com mais de 30 dias;
+  - logs de API com mais de 30 dias;
+  - IPs de cadastro com mais de 90 dias;
+  - histórico da própria rotina com mais de 180 dias;
+  - observações de preço repetidas em sequência (mesmo preço, estoque e número de ofertas, menos de 6 h depois);
+  - remoção da lista de atributos do cache das pesquisas (não é exibida);
+  - `ANALYZE`;
+  - foto diária do tamanho do banco;
+  - alertas de 70%, 85% e 95% para os administradores.
+- **Nunca apaga:** contas, assinaturas, pagamentos, eventos de webhook, créditos, favoritos, coleções, simulações, relatórios, conversas, auditoria.
+- **Na gravação:** trava por produto (`pg_advisory_xact_lock`) evita observações duplicadas em chamadas simultâneas. O cache das pesquisas é salvo sem atributos. JSON grandes usam compressão LZ4.
+- **Arquivamento (R2):**
+  - observações com mais de `archive_after_days` (padrão 365; mínimo 90) são gravadas como `price-history/AAAA/MM/*.ndjson.gz`;
+  - a cópia é lida de volta e conferida (SHA-256 e contagem) antes de `server_archive_commit` apagar as linhas e registrar o manifesto (`app_private.archive_manifest`);
+  - o gráfico de histórico junta R2 e banco;
+  - `server_archive_restore` devolve as linhas com os mesmos ids.
+  - **Requer:** ativar o R2 no painel da Cloudflare, criar o bucket `worthwise-archive` e adicionar ao `wrangler.jsonc`:
+    `"r2_buckets": [{ "binding": "ARCHIVE", "bucket_name": "worthwise-archive" }]`
+  - Sem o binding, nada é arquivado nem apagado.
+- **Imagens:** o banco guarda só a URL de cada foto. As imagens continuam nos servidores dos marketplaces, sem cópia.
+- **Painel:** Administração → Saúde do Banco mostra:
+  - uso e cota;
+  - maiores tabelas;
+  - índices;
+  - crescimento diário;
+  - últimas execuções;
+  - erros;
+  - arquivo no R2.
+  - Também permite ligar ou desligar cada tarefa e "Executar agora".
+- **Testes:**
+  - `tests/db/maintenance.test.ts`: preservação de dados, retenção, deduplicação, concorrência, arquivamento com restauração idêntica, alertas, permissões;
+  - `tests/unit/maintenance.test.ts`: R2 com conferência de checksum.

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { CONNECTORS, isSourceId } from "@/lib/connectors/registry";
 import { ConnectorError, type ConnectorContext } from "@/lib/connectors/types";
 import { serverEnv } from "@/lib/env";
+import { runMaintenance } from "@/lib/maintenance";
 import { flushLogs, toMarketItem } from "@/lib/search/service";
 import { serverRpc, serverRpcSafe, supabaseAnon } from "@/lib/supabase/server";
 
@@ -10,7 +11,7 @@ interface DueWatch { id: string; source: string; external_id: string }
 /**
  * Tarefas agendadas (Cloudflare Cron Trigger → custom-worker.ts → esta rota).
  *  monitor: verifica produtos monitorados, em lotes, uma consulta por produto distinto.
- *  purge:   retenção de dados (IPs, logs, rate limit) e expiração de assinaturas vencidas.
+ *  maintenance (antes "purge"): limpeza e otimização do banco + arquivamento no R2 (ver lib/maintenance.ts).
  */
 export async function POST(req: Request, { params }: { params: Promise<{ task: string }> }) {
   const env = serverEnv();
@@ -18,8 +19,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (!env.cronSecret || auth !== `Bearer ${env.cronSecret}`) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   const { task } = await params;
 
-  if (task === "purge") {
-    return NextResponse.json({ task, result: await serverRpc("server_purge") });
+  // "purge" (nome antigo do agendamento) e "maintenance" executam a mesma rotina.
+  if (task === "purge" || task === "maintenance") {
+    return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
   }
   if (task !== "monitor") return NextResponse.json({ error: "unknown_task" }, { status: 404 });
 
