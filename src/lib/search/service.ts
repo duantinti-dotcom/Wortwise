@@ -125,6 +125,6 @@ export function toMarketItem(p: ProductResult) {
     price: p.price == null ? "" : String(p.price), currency: p.currency ?? "BRL",
     metric_type: p.kind === "catalog_product" ? "buy_box" : "listing",
     offers_count: p.offersCount == null ? "" : String(p.offersCount), available: p.available == null ? "" : String(p.available),
-    observed_at: p.collectedAt, provenance: { collected_by: "worthwise", method: "official_api", kind: p.kind },
+    observed_at: p.collectedAt, provenance: { collected_by: "worthwise", method: p.provider ?? "official_api", kind: p.kind },
   };
 }

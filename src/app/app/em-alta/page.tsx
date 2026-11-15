@@ -25,12 +25,16 @@ async function freeVisible(): Promise<number> {
 }
 
 
-const SOURCE_NOTE: Record<StoreId, { text: string; link: string }> = {
-  mercadolivre: { text: "Fonte: API oficial do Mercado Livre (ranking “Mais vendidos” da categoria).", link: "https://www.mercadolivre.com.br/mais-vendidos" },
-  shopee: { text: "Fonte: API oficial de Afiliados da Shopee, com os produtos ordenados por quantidade vendida pela própria Shopee.", link: "https://shopee.com.br" },
-  amazon: { text: "Fonte: Amazon.", link: "https://www.amazon.com.br/gp/bestsellers" },
-  tiktokshop: { text: "Fonte: TikTok Shop.", link: "https://shop.tiktok.com" },
+const SOURCE_NOTE: Record<StoreId, { official: string; gecko: string; link: string }> = {
+  mercadolivre: { official: "Fonte: API oficial do Mercado Livre (ranking “Mais vendidos” da categoria).",
+    gecko: "Fonte: página oficial “Mais vendidos” do Mercado Livre, na ordem do próprio Mercado Livre.", link: "https://www.mercadolivre.com.br/mais-vendidos" },
+  shopee: { official: "Fonte: API oficial de Afiliados da Shopee, com os produtos ordenados por quantidade vendida pela própria Shopee.",
+    gecko: "Fonte: busca da Shopee na ordenação “Mais vendidos” da própria Shopee.", link: "https://shopee.com.br" },
+  amazon: { official: "Fonte: Amazon.", gecko: "Fonte: Amazon.", link: "https://www.amazon.com.br/gp/bestsellers" },
+  tiktokshop: { official: "Fonte: TikTok Shop.",
+    gecko: "Fonte: busca do TikTok Shop na categoria, ordenada pela quantidade vendida que o próprio TikTok Shop informa.", link: "https://www.tiktok.com/shop" },
 };
+const noteFor = (store: StoreId, products: { provider?: string | null }[]) => (products.some((p) => p.provider === "geckoapi") ? SOURCE_NOTE[store].gecko : SOURCE_NOTE[store].official);
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ categoria?: string; loja?: string }> }) {
   const { categoria, loja } = await searchParams;
@@ -114,7 +118,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
             )}
 
             <p className="mt-10 text-[13px] leading-relaxed text-faint">
-              {SOURCE_NOTE[store].text} Preços e fotos são os do anúncio no momento da coleta.{" "}
+              {noteFor(store, data.products)} Preços e fotos são os do anúncio no momento da coleta.{" "}
               <a href={SOURCE_NOTE[store].link} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-0.5 text-brand-hi hover:underline">Abrir em {name} <ArrowUpRight size={12} /></a>
             </p>
           </>
@@ -153,7 +157,7 @@ async function Overall() {
             </>
           ) : (
             <EmptyState icon={Trophy} title="Ranking geral chegando">
-              Aqui aparecem os produtos que mais vendem em todas as lojas juntas, com foto, preço e link reais. Ele liga assim que o Mercado Livre ou a Shopee estiverem com os dados oficiais.
+              Aqui aparecem os produtos que mais vendem em todas as lojas juntas, com foto, preço e link reais. Ele aparece assim que as lojas responderem.
             </EmptyState>
           )}
         </div>

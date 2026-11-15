@@ -1,4 +1,5 @@
 import { amazon } from "./amazon";
+import { geckoConfigured, geckoMercadoLivre, geckoShopee, geckoTikTok } from "./gecko";
 import { mercadoLivre } from "./mercadolivre";
 import { shopee } from "./shopee";
 import { ConnectorError, type Connector, type SourceId, type SourceState } from "./types";
@@ -18,12 +19,20 @@ function pending(id: SourceId, name: string, detail: string): Connector {
   };
 }
 
+/** Usa a API oficial da loja quando ela está configurada; senão, a GeckoAPI (se GECKO_API_KEY existir). */
+function preferOfficial(official: Connector, gecko: Connector): Connector {
+  const pick = () => (official.state().state !== "connected" && geckoConfigured() ? gecko : official);
+  return new Proxy(official, { get: (_t, prop) => Reflect.get(pick(), prop) });
+}
+
+const tiktokPending = pending("tiktokshop", "TikTok Shop",
+    "A API do TikTok Shop só dá acesso à loja que autorizou o aplicativo; a busca de produtos de outras lojas depende de aplicativo de afiliado aprovado pelo TikTok.");
+
 export const CONNECTORS: Record<SourceId, Connector> = {
-  mercadolivre: mercadoLivre,
-  shopee,
+  mercadolivre: preferOfficial(mercadoLivre, geckoMercadoLivre),
+  shopee: preferOfficial(shopee, geckoShopee),
   amazon,
-  tiktokshop: pending("tiktokshop", "TikTok Shop",
-    "A API do TikTok Shop só dá acesso à loja que autorizou o aplicativo; a busca de produtos de outras lojas depende de aplicativo de afiliado aprovado pelo TikTok."),
+  tiktokshop: preferOfficial(tiktokPending, geckoTikTok),
 };
 
 export const SOURCE_IDS = Object.keys(CONNECTORS) as SourceId[];

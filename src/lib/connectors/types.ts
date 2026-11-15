@@ -34,6 +34,8 @@ export interface ProductResult {
   soldQuantity?: number | null;
   /** Texto de vendas como a loja mostra (ex.: "Mais de 5 mil compras no mês passado"). */
   soldLabel?: string | null;
+  /** De onde o dado veio quando não é a API oficial da loja (ex.: "geckoapi"). */
+  provider?: string | null;
   /** Selo de entrega rápida da fonte (ex.: Prime). */
   fastDelivery?: boolean | null;
 }
@@ -103,7 +105,7 @@ export interface ConnectorContext {
   logs: ApiCallLog[];
 }
 
-export type ConnectorErrorCode = "not_configured" | "pending_approval" | "unauthorized" | "rate_limited" | "unavailable" | "timeout" | "not_found" | "bad_response";
+export type ConnectorErrorCode = "not_configured" | "pending_approval" | "unauthorized" | "rate_limited" | "unavailable" | "timeout" | "not_found" | "bad_response" | "no_credits";
 
 export class ConnectorError extends Error {
   constructor(public source: SourceId, public code: ConnectorErrorCode, message: string, public httpStatus?: number) {
@@ -136,4 +138,5 @@ export const USER_MESSAGES: Record<ConnectorErrorCode, string> = {
   timeout: "A fonte demorou demais para responder.",
   not_found: "Produto não encontrado na fonte.",
   bad_response: "A fonte respondeu em formato inesperado.",
+  no_credits: "Os créditos da fonte de dados acabaram. Os dados voltam assim que os créditos forem renovados.",
 };

@@ -59,21 +59,45 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     const body = await r.text();
     return NextResponse.json({ actor, status: r.status, ms: Date.now() - t, sample: body.slice(0, 4000) });
   }
+  if (task === "gecko-check") {
+    // Testa o caminho real do site: top 10, busca e produto, por loja. Só leitura (grava o histórico de preço, como o site).
+    const { loadStoreTrending } = await import("@/lib/trending");
+    const u = new URL(req.url);
+    const store = (u.searchParams.get("store") ?? "mercadolivre") as "mercadolivre" | "shopee" | "tiktokshop";
+    const what = u.searchParams.get("what") ?? "top";
+    const t = Date.now();
+    const ctx: ConnectorContext = { logs: [] };
+    const brief = (p: { rank?: number; title: string; price: number | null; rating: number | null; reviewsCount: number | null; soldQuantity?: number | null; imageUrl: string | null; permalink: string | null; externalId: string }) =>
+      ({ rank: p.rank, id: p.externalId, title: p.title.slice(0, 60), price: p.price, rating: p.rating, reviews: p.reviewsCount, sold: p.soldQuantity ?? null, img: p.imageUrl, link: p.permalink });
+    try {
+      if (what === "top") {
+        const d = await loadStoreTrending(store, u.searchParams.get("cat"));
+        return NextResponse.json({ ms: Date.now() - t, state: d.state, category: d.category, categories: d.categories.length, n: d.products.length, products: d.products.map(brief) });
+      }
+      if (what === "search") {
+        const r = await CONNECTORS[store].search({ query: u.searchParams.get("q") ?? "garrafa termica", limit: 40, offset: 0 }, ctx);
+        return NextResponse.json({ ms: Date.now() - t, n: r.length, products: r.slice(0, 5).map(brief) });
+      }
+      const p = await CONNECTORS[store].getProduct(u.searchParams.get("id") ?? "", ctx);
+      return NextResponse.json({ ms: Date.now() - t, ...brief(p), description: p.description?.slice(0, 200) ?? null, images: p.images.length, attributes: p.attributes.length, available: p.available, seller: p.sellerName });
+    } catch (e) {
+      return NextResponse.json({ ms: Date.now() - t, error: e instanceof Error ? `${e.name}: ${e.message}` : String(e), logs: ctx.logs }, { status: 500 });
+    }
+  }
   if (task === "gecko-probe") {
     // Descobre o que a GeckoAPI entrega (tipos e campos) para ligar o Mercado Livre. Só leitura.
     const token = serverEnv().geckoToken;
     if (!token) return NextResponse.json({ error: "GECKO_API_KEY ausente" }, { status: 503 });
-    // Parâmetros do teste: target (ex.: mercadolivre.com.br, shopee.com.br), types (plp,pdp,review) e url.
+    // Teste: "body" é o JSON exato enviado à GeckoAPI (sempre para api.geckoapi.com.br/v1/extract).
     const u = new URL(req.url);
-    const target = u.searchParams.get("target") ?? "mercadolivre.com.br";
-    const url = u.searchParams.get("url") ?? "https://produto.mercadolivre.com.br/MLB-4997536398-acrilico-toque-de-seda-premium-leve-brilho-162l-suvinil-_JM";
-    const tries: Record<string, unknown>[] = (u.searchParams.get("types") ?? "pdp").split(",").map((type) => ({ target, type, region: "BR", url, page: 0 }));
+    const tries: Record<string, unknown>[] = JSON.parse(u.searchParams.get("body") ?? "[]");
+    const max = Number(u.searchParams.get("max") ?? 6000);
     const out = [];
     for (const body of tries) {
       const t = Date.now();
       try {
-        const r = await fetch("https://api.geckoapi.com.br/v1/extract", { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(45000) });
-        out.push({ type: body.type, status: r.status, ms: Date.now() - t, body: (await r.text()).slice(0, 2500) });
+        const r = await fetch("https://api.geckoapi.com.br/v1/extract", { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(120000) });
+        out.push({ type: body.type, status: r.status, ms: Date.now() - t, body: (await r.text()).slice(0, max) });
       } catch (e) { out.push({ type: body.type, error: String(e).slice(0, 120) }); }
     }
     return NextResponse.json(out);

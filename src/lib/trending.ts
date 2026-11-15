@@ -1,7 +1,9 @@
 import "server-only";
 import { AMAZON_CATEGORIES, getAmazonBestsellers } from "@/lib/connectors/amazon-bestsellers";
-import { mercadoLivre } from "@/lib/connectors/mercadolivre";
-import { shopee, SHOPEE_CATEGORIES } from "@/lib/connectors/shopee";
+import { FALLBACK_ML_CATEGORIES } from "@/lib/connectors/ml-categories";
+import { CONNECTORS } from "@/lib/connectors/registry";
+import { SHOPEE_CATEGORIES } from "@/lib/connectors/shopee";
+import { TIKTOK_CATEGORIES } from "@/lib/connectors/gecko";
 import { ConnectorError, USER_MESSAGES, type Category, type ConnectorContext, type RankedProduct, type TrendKeyword } from "@/lib/connectors/types";
 import { flushLogs, toMarketItem } from "@/lib/search/service";
 import { serverRpcSafe } from "@/lib/supabase/server";
@@ -24,18 +26,9 @@ async function cached<T>(key: string, load: () => Promise<T>): Promise<{ value: 
   return { value, at };
 }
 
-/** Categorias principais do Mercado Livre Brasil (usadas se a lista da API não puder ser carregada). */
-export const FALLBACK_CATEGORIES: Category[] = [
-  { id: "MLB1000", name: "Eletrônicos, Áudio e Vídeo" }, { id: "MLB1051", name: "Celulares e Telefones" },
-  { id: "MLB1648", name: "Informática" }, { id: "MLB1574", name: "Casa, Móveis e Decoração" },
-  { id: "MLB5726", name: "Eletrodomésticos" }, { id: "MLB1246", name: "Beleza e Cuidado Pessoal" },
-  { id: "MLB1276", name: "Esportes e Fitness" }, { id: "MLB1430", name: "Calçados, Roupas e Bolsas" },
-  { id: "MLB1132", name: "Brinquedos e Hobbies" }, { id: "MLB1384", name: "Bebês" },
-  { id: "MLB1071", name: "Animais" }, { id: "MLB263532", name: "Ferramentas" },
-  { id: "MLB1144", name: "Games" }, { id: "MLB5672", name: "Acessórios para Veículos" },
-  { id: "MLB3937", name: "Joias e Relógios" }, { id: "MLB264586", name: "Saúde" },
-];
+export const FALLBACK_CATEGORIES = FALLBACK_ML_CATEGORIES;
 export const DEFAULT_CATEGORY = "MLB1000";
+const trendingSource = () => (CONNECTORS.mercadolivre.state().detail.includes("Gecko") ? "gecko" : "api");
 
 /** Quantos produtos mostrar por ranking. */
 export const TOP = 10;
@@ -65,8 +58,11 @@ function failure(e: unknown): TrendingState {
   return { ok: false, reason: "error", message: USER_MESSAGES.unavailable };
 }
 
+const mercadoLivre = () => CONNECTORS.mercadolivre;
+const connected = (s: "mercadolivre" | "shopee" | "tiktokshop") => CONNECTORS[s].state().state === "connected";
+
 export function trendingConfigured() {
-  return mercadoLivre.state().state === "connected";
+  return connected("mercadolivre");
 }
 
 export async function loadTrending(categoryId: string | null | undefined): Promise<TrendingData> {
@@ -75,13 +71,13 @@ export async function loadTrending(categoryId: string | null | undefined): Promi
   const empty = (state: TrendingState): TrendingData => ({ state, categories: FALLBACK_CATEGORIES, category: fallbackCat, products: [], trends: [], updatedAt: null });
   if (!trendingConfigured()) return empty({ ok: false, reason: "not_configured", message: USER_MESSAGES.not_configured });
 
-  const categories = await cached("cats", () => mercadoLivre.getCategories!(ctx)).then((r) => r.value).catch(() => FALLBACK_CATEGORIES);
+  const categories = await cached(`cats:${mercadoLivre().state().detail.slice(0, 12)}`, () => mercadoLivre().getCategories!(ctx)).then((r) => r.value).catch(() => FALLBACK_CATEGORIES);
   const list = categories.length ? categories : FALLBACK_CATEGORIES;
   const category = list.find((c) => c.id === categoryId) ?? list.find((c) => c.id === DEFAULT_CATEGORY) ?? list[0]!;
   try {
     const [products, trends] = await Promise.all([
-      cached(`best:${category.id}`, () => mercadoLivre.getBestsellers!(category.id, ctx).then(record)),
-      cached(`trends:${category.id}`, () => mercadoLivre.getTrends!(category.id, ctx)).catch(() => ({ value: [] as TrendKeyword[], at: Date.now() })),
+      cached(`best:${trendingSource()}:${category.id}`, () => mercadoLivre().getBestsellers!(category.id, ctx).then(record)),
+      cached(`trends:${category.id}`, () => mercadoLivre().getTrends?.(category.id, ctx) ?? Promise.resolve([] as TrendKeyword[])).catch(() => ({ value: [] as TrendKeyword[], at: Date.now() })),
     ]);
     return { state: { ok: true }, categories: list, category, products: products.value.slice(0, TOP), trends: trends.value, updatedAt: new Date(products.at).toISOString() };
   } catch (e) {
@@ -105,10 +101,6 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
     const d = await loadTrending(categoryId);
     return { ...d, store, storeState: trendingConfigured() ? "connected" : "not_configured" };
   }
-  if (store === "tiktokshop") {
-    return { state: { ok: false, reason: "not_configured", message: USER_MESSAGES.pending_approval },
-      categories: [], category: { id: "tiktokshop", name: "TikTok Shop" }, products: [], trends: [], updatedAt: null, store, storeState: "not_configured" };
-  }
   if (store === "amazon") {
     const categories = AMAZON_CATEGORIES.map(({ id, name }) => ({ id, name }));
     const category = categories.find((c) => c.id === categoryId) ?? categories[0]!;
@@ -121,13 +113,16 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
       return { ...base, state: { ok: false, reason: "error", message: e instanceof Error ? e.message : USER_MESSAGES.unavailable }, storeState: "connected" };
     }
   }
-  const categories = SHOPEE_CATEGORIES.map(({ id, name }) => ({ id, name }));
+  // Shopee e TikTok Shop: conector configurado (API oficial ou GeckoAPI).
+  const list = store === "shopee" ? SHOPEE_CATEGORIES : TIKTOK_CATEGORIES;
+  const categories = list.map(({ id, name }) => ({ id, name }));
   const category = categories.find((c) => c.id === categoryId) ?? categories[0]!;
   const base = { categories, category, trends: [] as TrendKeyword[], store, products: [] as RankedProduct[], updatedAt: null };
-  if (shopee.state().state !== "connected") return { ...base, state: { ok: false, reason: "not_configured", message: USER_MESSAGES.not_configured }, storeState: "not_configured" };
+  const c = CONNECTORS[store];
+  if (!connected(store) || !c.getBestsellers) return { ...base, state: { ok: false, reason: "not_configured", message: USER_MESSAGES.not_configured }, storeState: "not_configured" };
   const ctx: ConnectorContext = { logs: [] };
   try {
-    const r = await cached(`shopee:${category.id}`, () => shopee.getBestsellers!(category.id, ctx).then(record));
+    const r = await cached(`${store}:${c.state().detail.slice(0, 12)}:${category.id}`, () => c.getBestsellers!(category.id, ctx).then(record));
     return { ...base, state: { ok: true }, products: r.value.slice(0, TOP), updatedAt: new Date(r.at).toISOString(), storeState: "connected" };
   } catch (e) {
     return { ...base, state: failure(e), storeState: "connected" };
@@ -140,7 +135,8 @@ export async function loadStoreTrending(store: StoreId, categoryId: string | nul
 export async function loadOverall(): Promise<{ products: RankedProduct[]; stores: string[]; updatedAt: string | null }> {
   const parts = await Promise.all([
     trendingConfigured() ? loadTrending(DEFAULT_CATEGORY) : null,
-    shopee.state().state === "connected" ? loadStoreTrending("shopee", SHOPEE_CATEGORIES[0]!.id) : null,
+    connected("shopee") ? loadStoreTrending("shopee", SHOPEE_CATEGORIES[0]!.id) : null,
+    connected("tiktokshop") ? loadStoreTrending("tiktokshop", TIKTOK_CATEGORIES[0]!.id) : null,
     loadStoreTrending("amazon", "electronics"),
   ]);
   const lists = parts.filter((p): p is TrendingData => Boolean(p?.state.ok && p.products.length));
