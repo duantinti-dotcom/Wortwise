@@ -91,6 +91,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     }
     return NextResponse.json({ task, results });
   }
+  if (task === "heropay-probe") {
+    // Leitura (GET) de endpoints da HeroPay para achar o segredo de assinatura dos webhooks.
+    const e = serverEnv();
+    const out = [];
+    for (const path of ["/webhook", "/webhooks", "/webhook/list", "/account", "/me", "/settings/webhook"]) {
+      try {
+        const r = await fetch(`${e.heropayUrl}${path}`, { headers: { authorization: `Bearer ${e.heropayToken}`, accept: "application/vnd.herospark.com; version=1" }, signal: AbortSignal.timeout(10000) });
+        const t = await r.text();
+        out.push({ path, status: r.status, keys: t.slice(0, 1).match(/[[{]/) ? Object.keys(((): Record<string, unknown> => { try { const j = JSON.parse(t); return Array.isArray(j) ? (j[0] ?? {}) : (j.data && !Array.isArray(j.data) ? j.data : Array.isArray(j.data) ? j.data[0] ?? {} : j); } catch { return {}; } })()) : [], sample: t.replace(/"(secret|token|signature[a-z_]*|key)"\s*:\s*"[^"]{6,}"/gi, '"$1":"<oculto>"').slice(0, 500) });
+      } catch (err) { out.push({ path, error: String(err).slice(0, 100) }); }
+    }
+    return NextResponse.json(out);
+  }
   if (task === "heropay-check") {
     const ids = (new URL(req.url).searchParams.get("ids") ?? "").split(",").map(Number).filter((n) => Number.isFinite(n) && n > 0).slice(0, 5);
     const out = [];
