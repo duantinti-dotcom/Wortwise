@@ -35,7 +35,10 @@ export function parseAmazonBestsellers(html: string, now = new Date().toISOStrin
     const img = /<img[^>]+alt="([^"]*)"[^>]+src="(https:\/\/[^"]+)"/.exec(b);
     const title = decode(/line-clamp[^"]*">([^<]+)</.exec(b)?.[1] ?? img?.[1] ?? "");
     if (!title) continue;
-    const image = img?.[2]?.replace(/\._AC_[^.]+_\./, "._AC_UL600_.") ?? null;
+    // Usa o maior tamanho que a própria página oferece (data-a-dynamic-image); senão, a foto original.
+    const sizes = /data-a-dynamic-image="([^"]+)"/.exec(b)?.[1];
+    let image = img?.[2] ?? null;
+    if (sizes) { try { const urls = Object.keys(JSON.parse(decode(sizes)) as Record<string, unknown>); image = urls.at(-1) ?? image; } catch { /* mantém a original */ } }
     const ratingLabel = /aria-label="([\d,]+) de 5 estrelas, ([\d.]+) classifica/.exec(b);
     const whole = /a-price-whole">([\d.]+)/.exec(b)?.[1];
     const fraction = /a-price-fraction">(\d{2})/.exec(b)?.[1];
@@ -76,7 +79,7 @@ export async function fetchAmazonBestsellers(categoryId: string): Promise<Ranked
 /** Com cache compartilhado de 6 horas: no máximo 4 leituras por dia por categoria. */
 export async function getAmazonBestsellers(categoryId: string): Promise<{ products: RankedProduct[]; at: string; fresh: boolean }> {
   const edge = (globalThis as { caches?: { default?: Cache } }).caches?.default;
-  const key = new Request(`https://cache.worthwise.site/amazon-bs/v2/${encodeURIComponent(categoryId)}`);
+  const key = new Request(`https://cache.worthwise.site/amazon-bs/v3/${encodeURIComponent(categoryId)}`);
   const hit = await edge?.match(key).catch(() => undefined);
   if (hit) return { ...((await hit.json()) as { products: RankedProduct[]; at: string }), fresh: false };
   const products = await fetchAmazonBestsellers(categoryId);

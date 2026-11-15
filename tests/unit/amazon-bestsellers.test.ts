@@ -12,7 +12,7 @@ describe("mais vendidos da Amazon (página pública)", () => {
       permalink: "https://www.amazon.com.br/dp/B0F256HPZJ",
     });
     expect(out[0]!.title).toContain("Filtro/Refil Original");
-    expect(out[0]!.imageUrl).toMatch(/^https:\/\/images-na\.ssl-images-amazon\.com\/images\/I\/61Wa-avvnwL\._AC_UL600_\.jpg$/);
+    expect(out[0]!.imageUrl).toBe("https://images-na.ssl-images-amazon.com/images/I/61Wa-avvnwL._AC_UL900_SR900,600_.jpg");
   });
   it("não inventa nada quando a página não tem produtos", () => {
     expect(parseAmazonBestsellers("<html>verificação</html>")).toEqual([]);
