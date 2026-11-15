@@ -9,12 +9,16 @@ const worker = {
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext) {
     // O cron chama a própria aplicação por dentro, autenticado pelo segredo do cron.
     const base = env.APP_URL ?? "https://worthwise.internal";
-    const task = event.cron === "17 6 * * *" ? "purge" : "monitor";
-    const req = new Request(`${base}/api/cron/${task}`, {
-      method: "POST",
-      headers: { authorization: `Bearer ${env.CRON_SECRET ?? ""}` },
-    });
-    ctx.waitUntil(handler.fetch(req, env, ctx));
+    const daily = event.cron === "17 6 * * *";
+    // Diário: manutenção do banco e preparo das ideias da IA (para ninguém esperar durante o dia).
+    const tasks = daily ? ["purge", "ideas"] : ["monitor"];
+    for (const task of tasks) {
+      const req = new Request(`${base}/api/cron/${task}`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${env.CRON_SECRET ?? ""}` },
+      });
+      ctx.waitUntil(handler.fetch(req, env, ctx));
+    }
   },
 } satisfies ExportedHandler<Env>;
 

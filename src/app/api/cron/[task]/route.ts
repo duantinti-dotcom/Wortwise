@@ -3,6 +3,7 @@ import { CONNECTORS, isSourceId } from "@/lib/connectors/registry";
 import { ConnectorError, type ConnectorContext } from "@/lib/connectors/types";
 import { serverEnv } from "@/lib/env";
 import { runMaintenance } from "@/lib/maintenance";
+import { warmAllIdeas } from "@/lib/ai/ideas";
 import { flushLogs, toMarketItem } from "@/lib/search/service";
 import { serverRpc, serverRpcSafe, supabaseAnon } from "@/lib/supabase/server";
 
@@ -22,6 +23,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   // "purge" (nome antigo do agendamento) e "maintenance" executam a mesma rotina.
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
+  }
+  if (task === "ideas") {
+    return NextResponse.json({ task: "ideas", result: await warmAllIdeas() });
   }
   if (task !== "monitor") return NextResponse.json({ error: "unknown_task" }, { status: 404 });
 

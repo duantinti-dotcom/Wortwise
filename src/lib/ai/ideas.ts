@@ -85,3 +85,32 @@ preco_min e preco_max são uma faixa de preço de venda ESTIMADA ao consumidor.`
   if (memory.size > 100) memory.delete(memory.keys().next().value!);
   return { ideas, generatedAt: new Date().toISOString() };
 }
+
+const STORE_IDS = ["mercadolivre", "shopee", "amazon", "tiktokshop"] as const;
+type IdeasResult = { ideas: Idea[]; generatedAt: string };
+const edgeCache = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
+const cacheKey = (store: string, cat: string) => new Request(`https://cache.worthwise.site/ideas/${store}/${cat}/${new Date().toISOString().slice(0, 10)}`);
+
+/** Lê do cache compartilhado do Cloudflare; se não houver, pede à IA e guarda por 24 h. */
+export async function getIdeasCached(store: string, cat: string): Promise<IdeasResult | null> {
+  const edge = edgeCache();
+  const key = cacheKey(store, cat);
+  const hit = await edge?.match(key).catch(() => undefined);
+  if (hit) return (await hit.json()) as IdeasResult;
+  const out = await generateIdeas(store, cat);
+  if (edge && out?.ideas.length) {
+    await edge.put(key, new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": "public, max-age=86400" } })).catch(() => {});
+  }
+  return out;
+}
+
+/** Prepara todas as combinações de loja e categoria (usado pelo agendamento diário). */
+export async function warmAllIdeas(): Promise<{ ok: number; failed: number }> {
+  let ok = 0, failed = 0;
+  const combos = STORE_IDS.flatMap((s) => IDEA_CATEGORIES.map((c) => [s, c.id] as const));
+  for (let i = 0; i < combos.length; i += 4) {
+    const batch = await Promise.allSettled(combos.slice(i, i + 4).map(([s, c]) => getIdeasCached(s, c)));
+    for (const r of batch) (r.status === "fulfilled" && r.value?.ideas.length ? ok++ : failed++);
+  }
+  return { ok, failed };
+}
