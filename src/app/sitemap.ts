@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"; // inclui automaticamente os posts publi
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = publicEnv.appUrl;
-  const pages = ["", "/precos", "/mais-vendidos/mercado-livre", "/mais-vendidos/shopee", "/mais-vendidos/tiktok-shop", "/mais-vendidos/amazon", "/calculadora-de-lucro", "/metodologia", "/fontes-de-dados", "/blog", "/privacidade", "/termos"];
+  const pages = ["", "/precos", "/mais-vendidos/mercado-livre", "/mais-vendidos/shopee", "/mais-vendidos/tiktok-shop", "/mais-vendidos/amazon", "/calculadora-de-lucro", "/calculadora-de-lucro/mercado-livre", "/calculadora-de-lucro/shopee", "/calculadora-de-lucro/amazon", "/calculadora-de-lucro/tiktok-shop", "/metodologia", "/fontes-de-dados", "/blog", "/privacidade", "/termos"];
   const out: MetadataRoute.Sitemap = pages.map((p) => ({ url: `${base}${p}`, changeFrequency: p === "" ? "weekly" : "monthly", priority: p === "" ? 1 : 0.7 }));
   if (isSupabaseConfigured()) {
     try {

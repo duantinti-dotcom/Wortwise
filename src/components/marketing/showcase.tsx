@@ -1,51 +1,56 @@
 "use client";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export interface ShowcaseItem { id: string; title: string; text: string; visual: ReactNode }
+/**
+ * Vitrine no estilo das páginas de produto da Apple: cada função ocupa a tela, com título grande,
+ * texto curto e a demonstração que cresce e entra em foco conforme a pessoa rola a página.
+ */
+export interface ShowcaseItem { eyebrow: string; title: string; text: string; visual: ReactNode; glow: string }
 
-/** Vitrine interativa: troca sozinha a cada 7 s (com barra de progresso), pausa no hover, troca no clique. */
-export function Showcase({ items }: { items: ShowcaseItem[] }) {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+function Panel({ item, flip }: { item: ShowcaseItem; flip: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-  useEffect(() => {
-    if (paused || reduce) return;
-    const t = setTimeout(() => setActive((a) => (a + 1) % items.length), 7000);
-    return () => clearTimeout(t);
-  }, [active, paused, reduce, items.length]);
-  const cur = items[active]!;
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
+  const scale = useTransform(scrollYProgress, [0, 1], reduce ? [1, 1] : [0.86, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 0.55, 1], reduce ? [1, 1, 1] : [0, 0.7, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [60, 0]);
   return (
-    <div className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-      <div role="tablist" aria-label="Funcionalidades" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
-        {items.map((it, i) => {
-          const on = i === active;
-          return (
-            <button key={it.id} role="tab" aria-selected={on} aria-controls="showcase-panel" onClick={() => setActive(i)}
-              className={cn("group relative shrink-0 overflow-hidden rounded-2xl px-4 py-2.5 text-left transition-all duration-500 lg:shrink lg:px-5 lg:py-4", on ? "lg glass-strong" : "border border-tint/10 hover:bg-tint/[0.04] lg:border-transparent")}>
-              <div className={cn("whitespace-nowrap text-sm font-semibold tracking-tight transition-colors lg:whitespace-normal lg:text-xl", on ? "text-fg" : "text-muted group-hover:text-fg")}>{it.title}</div>
-              <div className={cn("hidden transition-[grid-template-rows,opacity] duration-500 lg:grid", on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
-                <p className="overflow-hidden pt-1.5 text-[14.5px] leading-relaxed text-muted">{it.text}</p>
-              </div>
-              {on && !reduce ? <span key={`${active}-${paused}`} aria-hidden className="absolute inset-x-4 bottom-0 lg:inset-x-5 h-[2px] origin-left rounded-full bg-brand"
-                style={{ animation: paused ? "none" : "fill 7s linear forwards", transform: paused ? "scaleX(0.35)" : undefined }} /> : null}
-            </button>
-          );
-        })}
-      </div>
-      <div id="showcase-panel" role="tabpanel" className="lg relative min-h-[360px] overflow-hidden rounded-2xl p-5 md:p-8 lg:min-h-[380px]">
-        <AnimatePresence mode="wait">
-          <motion.div key={cur.id}
-            initial={reduce ? false : { opacity: 0, y: 14, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={reduce ? undefined : { opacity: 0, y: -10, filter: "blur(6px)" }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>
-            <p className="mb-5 text-[14.5px] leading-relaxed text-muted lg:hidden">{cur.text}</p>
-            {cur.visual}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+    <div ref={ref} className={cn("grid items-center gap-10 md:gap-16 lg:grid-cols-2", flip && "lg:[&>*:first-child]:order-2")}>
+      <motion.div style={{ opacity, y }} className="text-center lg:text-left">
+        <p className="eyebrow">{item.eyebrow}</p>
+        <h3 className="display mt-3 text-[34px] leading-[1.05] sm:text-[46px] lg:text-[56px]">{item.title}</h3>
+        <p className="mx-auto mt-5 max-w-md text-[17px] leading-relaxed text-muted lg:mx-0 md:text-[19px]">{item.text}</p>
+      </motion.div>
+      <motion.div style={{ scale, opacity }} className="relative">
+        <div aria-hidden className="pointer-events-none absolute inset-[-12%] -z-10 rounded-full blur-3xl" style={{ background: item.glow }} />
+        <div className="card overflow-hidden p-4 shadow-[0_40px_120px_-40px_rgba(37,99,235,0.45)] md:p-6">{item.visual}</div>
+      </motion.div>
+    </div>
+  );
+}
+
+export function Showcase({ items }: { items: ShowcaseItem[] }) {
+  return (
+    <div className="space-y-28 md:space-y-44">
+      {items.map((it, i) => <Panel key={it.title} item={it} flip={i % 2 === 1} />)}
+    </div>
+  );
+}
+
+/** Faixa de números grandes, que sobem ao aparecer. */
+export function BigStats({ stats }: { stats: { value: string; label: string }[] }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+      {stats.map((s, i) => (
+        <motion.div key={s.label} initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }} className="text-center">
+          <div className="display bg-gradient-to-b from-fg to-fg/55 bg-clip-text text-[44px] leading-none text-transparent md:text-[64px]">{s.value}</div>
+          <div className="mt-3 text-[14.5px] text-muted">{s.label}</div>
+        </motion.div>
+      ))}
     </div>
   );
 }

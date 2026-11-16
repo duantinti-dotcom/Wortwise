@@ -4,7 +4,7 @@ import { Logo } from "@/components/logo";
 import { contactEmail } from "@/lib/env";
 
 const COLS = [
-  { title: "Produto", links: [["/#funcionalidades", "Funcionalidades"], ["/precos", "Preços"], ["/calculadora-de-lucro", "Calculadora de lucro"], ["/cadastro", "Começar por R$ 9,90"]] },
+  { title: "Produto", links: [["/#funcionalidades", "Funcionalidades"], ["/precos", "Preços"], ["/calculadora-de-lucro", "Calculadora de lucro"], ["/calculadora-de-lucro/shopee", "Calculadora Shopee"], ["/calculadora-de-lucro/mercado-livre", "Calculadora Mercado Livre"], ["/cadastro", "Começar por R$ 9,90"]] },
   { title: "Mais vendidos", links: [["/mais-vendidos/mercado-livre", "Mercado Livre"], ["/mais-vendidos/shopee", "Shopee"], ["/mais-vendidos/tiktok-shop", "TikTok Shop"], ["/mais-vendidos/amazon", "Amazon"]] },
   { title: "Transparência", links: [["/metodologia", "Metodologia"], ["/fontes-de-dados", "Fontes de dados"], ["/blog", "Blog"]] },
   { title: "Legal", links: [["/privacidade", "Privacidade"], ["/termos", "Termos de uso"]] },

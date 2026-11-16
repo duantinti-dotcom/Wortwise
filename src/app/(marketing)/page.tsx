@@ -1,10 +1,10 @@
-import { ArrowRight, Bell, Calculator, Check, LineChart, MessagesSquare, Scale, Search } from "lucide-react";
+import { ArrowRight, Calculator, Check, Search } from "lucide-react";
 import Link from "next/link";
 import { Faq } from "@/components/marketing/faq";
-import { FeatureTile } from "@/components/marketing/feature-tile";
+import { BigStats, Showcase } from "@/components/marketing/showcase";
 import { LiveTrending } from "@/components/marketing/live-trending";
 import { Pricing } from "@/components/marketing/pricing";
-import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualCompare, VisualSearch, VisualWatch } from "@/components/marketing/visuals";
+import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualCompare, VisualSearch } from "@/components/marketing/visuals";
 import { ProfitCalculator } from "@/components/profit-calculator";
 import { SourceMark, sourceName } from "@/components/source-mark";
 import { Reveal } from "@/components/ui/reveal";
@@ -94,19 +94,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Ferramentas */}
-      <section id="funcionalidades" className="scroll-mt-24 pt-28 md:pt-40">
+      {/* Números */}
+      <section aria-label="Worthwise em números" className="pt-28 md:pt-40">
+        <div className="container-page"><BigStats stats={[
+          { value: "4", label: "lojas em um só lugar" }, { value: "Top 20", label: "mais vendidos por tópico" },
+          { value: "3 dias", label: "atualização automática" }, { value: "R$ 9,90", label: "o primeiro mês" },
+        ]} /></div>
+      </section>
+
+      {/* Ferramentas (vitrine no estilo Apple) */}
+      <section id="funcionalidades" className="scroll-mt-24 pt-28 md:pt-44">
         <div className="container-page">
-          <SectionHead label="Ferramentas" title="Tudo o que você precisa para decidir" text="Cada ferramenta mostra de onde veio o dado." />
-          <div className="snap-row md:grid md:grid-cols-2 md:gap-6">
-            <FeatureTile tone="" icon={<Search />} title="Pesquise produtos" text="Preço, avaliações e quem vende, com foto e link para o anúncio."><VisualSearch /></FeatureTile>
-            <FeatureTile tone="" icon={<Scale />} title="Compare fornecedores" text="Some preço, frete e impostos e veja quem sai mais barato. E confira o CNPJ na Receita."><VisualCompare /></FeatureTile>
-            <FeatureTile tone="" icon={<LineChart />} title="Entenda o preço" text="Veja se o preço está subindo ou caindo e quantos vendedores disputam o produto."><VisualChart id="ft" /></FeatureTile>
-            <FeatureTile tone="" icon={<Calculator />} title="Calcule o lucro" text="Responda 6 perguntas e veja quanto fica no seu bolso, e o menor preço sem prejuízo."><VisualCalc /></FeatureTile>
-            <FeatureTile tone="" icon={<Bell />} title="Receba alertas" text="Escolha um preço e seja avisado quando o produto chegar nele."><VisualWatch /></FeatureTile>
-            <FeatureTile tone="" icon={<MessagesSquare />} title="Pergunte ao assistente" text="Tire dúvidas em português. Ele faz as contas e mostra de onde tirou cada número."><VisualAssistant /></FeatureTile>
-          </div>
-          <div className="mt-8 flex justify-center"><DemoTag /></div>
+          <SectionHead label="Ferramentas" title="Tudo para decidir o que vender." text="Cada número mostra de onde veio. Sem achismo." />
+          <Showcase items={[
+            { eyebrow: "Mais vendidos", title: "Veja o que mais sai em cada loja.", text: "Mercado Livre, Shopee, Amazon e TikTok Shop lado a lado, com foto, preço, vendidos, nota e link direto.", visual: <VisualSearch />, glow: "radial-gradient(closest-side, rgba(59,130,246,0.35), transparent)" },
+            { eyebrow: "Histórico de preço", title: "Saiba se o preço sobe ou cai.", text: "Cada produto ganha um gráfico com os preços que o Worthwise observou ao longo do tempo.", visual: <VisualChart id="sc" />, glow: "radial-gradient(closest-side, rgba(16,185,129,0.30), transparent)" },
+            { eyebrow: "Lucro real", title: "Quanto sobra no seu bolso.", text: "Já com as taxas de cada loja, frete e imposto. E o preço recomendado para a margem que você quer.", visual: <VisualCalc />, glow: "radial-gradient(closest-side, rgba(245,158,11,0.30), transparent)" },
+            { eyebrow: "Wise, assistente com IA", title: "Pergunte. Ela responde com dados.", text: "“O que eu vendo?” A Wise olha os mais vendidos, compara e recomenda, com os números de cada produto.", visual: <VisualAssistant />, glow: "radial-gradient(closest-side, rgba(139,92,246,0.35), transparent)" },
+            { eyebrow: "Fornecedores", title: "Compre de quem sai mais barato.", text: "Some preço, frete e impostos de cada fornecedor e confira o CNPJ na Receita.", visual: <VisualCompare />, glow: "radial-gradient(closest-side, rgba(59,130,246,0.30), transparent)" },
+          ]} />
+          <div className="mt-16 flex justify-center"><DemoTag /></div>
         </div>
       </section>
 
