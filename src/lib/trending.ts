@@ -31,7 +31,9 @@ export const DEFAULT_CATEGORY = "MLB1000";
 const trendingSource = () => (CONNECTORS.mercadolivre.state().detail.includes("Gecko") ? "gecko" : "api");
 
 /** Quantos produtos mostrar por ranking. */
-export const TOP = 10;
+export const TOP = 20;
+/** Quantos produtos no ranking "Geral" de todas as lojas. */
+export const TOP_OVERALL = 30;
 
 /** Guarda o preço real de cada produto do ranking: é assim que o gráfico de preço vai se formando. */
 async function record<T extends RankedProduct[]>(products: T): Promise<T> {
@@ -145,11 +147,11 @@ export async function loadOverall(): Promise<{ products: RankedProduct[]; stores
   const lists = parts.filter((p): p is TrendingData => Boolean(p?.state.ok && p.products.length));
   // Intercala por posição (1º de cada loja, depois 2º...); empate: quem informa mais vendas vem antes.
   const merged: RankedProduct[] = [];
-  for (let i = 0; i < TOP; i++) {
+  for (let i = 0; i < TOP_OVERALL; i++) {
     const round = lists.map((l) => l.products[i]).filter((p): p is RankedProduct => Boolean(p))
       .sort((a, b) => (b.soldQuantity ?? 0) - (a.soldQuantity ?? 0));
     merged.push(...round);
   }
-  const top = merged.slice(0, TOP).map((p, i) => ({ ...p, rank: i + 1 }));
+  const top = merged.slice(0, TOP_OVERALL).map((p, i) => ({ ...p, rank: i + 1 }));
   return { products: top, stores: [...new Set(lists.flatMap((l) => l.products.map((p) => p.source)))], updatedAt: lists[0]?.updatedAt ?? null };
 }

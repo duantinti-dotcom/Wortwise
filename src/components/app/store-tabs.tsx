@@ -2,7 +2,8 @@
 import { Trophy } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { createContext, useContext, useState, useTransition, type ReactNode } from "react";
 import { SourceMark, sourceName } from "@/components/source-mark";
 import { cn } from "@/lib/utils";
 
@@ -14,19 +15,33 @@ export function StorePill({ id }: { id: string }) {
   );
 }
 
+/** Navegação entre lojas: a aba escolhida muda na hora e o conteúdo atual esmaece enquanto o próximo carrega. */
+const NavCtx = createContext<{ pending: string | null; go: (id: string, href: string) => void } | null>(null);
+
+export function StoreNav({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const [isPending, start] = useTransition();
+  const [target, setTarget] = useState<string | null>(null);
+  const go = (id: string, href: string) => { setTarget(id); start(() => router.push(href, { scroll: false })); };
+  return <NavCtx.Provider value={{ pending: isPending ? target : null, go }}>{children}</NavCtx.Provider>;
+}
+
 /** Abas de loja (Mercado Livre, Shopee, Amazon, TikTok Shop) com logo e animação de troca. */
 export function StoreTabs({ stores, active, links }: { stores: readonly string[]; active: string; links: Record<string, string> }) {
+  const nav = useContext(NavCtx);
+  const shown = nav?.pending ?? active;
   return (
     <nav aria-label="Lojas" className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
       <ul className="glass flex w-max gap-1 rounded-[14px] p-1">
         {stores.map((s) => {
-          const on = s === active;
+          const on = s === shown;
           return (
             <li key={s}>
-              <Link href={links[s] ?? "#"} scroll={false} aria-current={on ? "page" : undefined}
+              <Link href={links[s] ?? "#"} scroll={false} aria-current={s === active ? "page" : undefined}
+                onClick={(e) => { if (!nav || e.metaKey || e.ctrlKey || s === active) return; e.preventDefault(); nav.go(s, links[s] ?? "#"); }}
                 className={cn("relative isolate flex h-10 items-center gap-2.5 rounded-[10px] px-3.5 text-[15px] font-medium transition-colors", on ? "text-fg" : "text-muted hover:text-fg")}>
                 {on ? <StorePill id="tabs" /> : null}
-                <motion.span animate={on ? { scale: [1, 1.18, 1], rotate: [0, -8, 0] } : { scale: 1, rotate: 0 }} transition={{ duration: 0.45 }} className="flex">
+                <motion.span animate={on ? { scale: [1, 1.12, 1] } : { scale: 1 }} transition={{ duration: 0.3 }} className="flex">
                   {s === "geral" ? <span className="flex size-[22px] items-center justify-center rounded-[6px] bg-gradient-to-br from-[#F59E0B] to-[#EF4444] text-white"><Trophy size={13} /></span> : <SourceMark source={s} size={22} />}
                 </motion.span>
                 {s === "geral" ? "Geral" : sourceName(s)}
@@ -39,13 +54,17 @@ export function StoreTabs({ stores, active, links }: { stores: readonly string[]
   );
 }
 
-/** Conteúdo da loja escolhida entra com um leve deslize e desfoque. */
+/** Conteúdo da loja: esmaece na hora do clique e entra com um deslize curto (sem desfoque, que pesa no celular). */
 export function StoreSwitch({ store, children }: { store: string; children: ReactNode }) {
   const reduce = useReducedMotion();
+  const nav = useContext(NavCtx);
+  const leaving = Boolean(nav?.pending && nav.pending !== store);
   return (
-    <motion.div key={store} initial={reduce ? false : { opacity: 0, y: 14, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>
-      {children}
-    </motion.div>
+    <div className={cn("transition-opacity duration-200", leaving && "pointer-events-none opacity-40")} aria-busy={leaving || undefined}>
+      <motion.div key={store} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: "transform, opacity" }}>
+        {children}
+      </motion.div>
+    </div>
   );
 }

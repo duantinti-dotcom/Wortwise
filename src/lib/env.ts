@@ -44,4 +44,4 @@ export function serverEnv() {
 export const isSupabaseConfigured = () => Boolean(publicEnv.supabaseUrl && publicEnv.supabaseKey);
 
 /** E-mail de contato/encarregado de dados exibido nas páginas legais (defina antes do lançamento). */
-export const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "";
+export const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contato@worthwise.site";

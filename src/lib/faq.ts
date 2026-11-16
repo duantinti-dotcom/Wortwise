@@ -7,4 +7,5 @@ export const FAQ_ITEMS = [
   { q: "O histórico de preços é real?", a: "Sim. Ele é formado só pelos preços que o Worthwise observou ao longo do tempo. Um produto que começou a ser acompanhado agora mostra poucos pontos: não preenchemos o gráfico com dados artificiais." },
   { q: "Como cancelo a assinatura?", a: "Em Planos e configurações, a qualquer momento. O acesso continua até o fim do período já pago e não há novas cobranças. Para trocar de plano, você cancela o atual e assina o novo." },
   { q: "Quais dados pessoais vocês guardam?", a: "O mínimo para a conta funcionar: e-mail, nome e suas preferências. Para garantir que o primeiro mês promocional seja usado uma vez por pessoa, guardamos por até 90 dias um código derivado do IP e do navegador (nunca o IP em si). Não vendemos dados e você pode excluir sua conta quando quiser." },
+  { q: "Como falo com o Worthwise?", a: "Pelo e-mail contato@worthwise.site. Respondemos dúvidas sobre planos, pagamentos, dados e a sua conta." },
 ];

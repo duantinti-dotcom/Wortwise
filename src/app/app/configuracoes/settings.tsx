@@ -12,7 +12,7 @@ import { PERIOD_LABELS, RESOURCE_LABELS } from "@/lib/plans";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { cn, formatDate, formatMoney } from "@/lib/utils";
 
-interface Sub { plan_id: string; status: string; current_period_end: string; cancel_at_period_end: boolean; payment_method: string | null }
+interface Sub { plan_id: string; status: string; current_period_end: string; cancel_at_period_end: boolean; payment_method: string | null; provider_subscription_id?: string | null }
 interface Pay { id: string; amount_cents: number | null; status: string; method: string | null; occurred_at: string | null; created_at: string; refused_message: string | null }
 
 const SUB_STATUS: Record<string, { label: string; cls: string }> = {
@@ -42,6 +42,8 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
   const [working, setWorking] = useState(false);
   const auto = useRef(false);
   const live = subscription && subscription.status !== "expired" && new Date(subscription.current_period_end) > new Date();
+  // Primeiro mês (pagamento único): assinatura sem id de recorrência na HeroPay.
+  const intro = Boolean(live && !subscription!.provider_subscription_id && subscription!.plan_id === "pro");
 
   // Vindo da página de preços (/cadastro?plano=pro): abre o checkout do plano escolhido.
   useEffect(() => {
@@ -91,7 +93,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
         <Card icon={CreditCard} title="Assinatura">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div><div className="text-2xl font-semibold tracking-tight">Plano {PLAN_NAMES[usage.plan] ?? usage.plan}</div>
-              {live ? <p className="mt-1 text-sm text-muted">{subscription!.cancel_at_period_end || subscription!.status === "canceled" ? `Cancelada — acesso até ${formatDate(subscription!.current_period_end)}` : `Próxima renovação prevista para ${formatDate(subscription!.current_period_end)}`}
+              {live ? <p className="mt-1 text-sm text-muted">{intro ? `Primeiro mês: acesso até ${formatDate(subscription!.current_period_end)}. Não renova sozinho.` : subscription!.cancel_at_period_end || subscription!.status === "canceled" ? `Cancelada — acesso até ${formatDate(subscription!.current_period_end)}` : `Próxima renovação prevista para ${formatDate(subscription!.current_period_end)}`}
                 {subscription!.payment_method ? ` · ${METHOD[subscription!.payment_method] ?? subscription!.payment_method}` : ""}</p>
                 : <p className="mt-1 text-sm text-muted">Você ainda não tem um plano ativo. Comece pelo primeiro mês por R$ 9,90.</p>}</div>
             {live ? <span className={cn("badge", SUB_STATUS[subscription!.status]?.cls)}>{SUB_STATUS[subscription!.status]?.label ?? subscription!.status}</span> : null}
@@ -109,8 +111,10 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
           </ul>
           <div className="mt-6 flex flex-wrap gap-2 border-t border-line pt-5">
             {usage.plan === "free" || !live ? (<>
-              <button className="btn btn-primary" disabled={Boolean(busy)} onClick={() => subscribe("pro")}>{busy === "pro" ? <Loader2 size={15} className="animate-spin" /> : null}Assinar Pro</button>
-              <button className="btn btn-secondary" disabled={Boolean(busy)} onClick={() => subscribe("business")}>{busy === "business" ? <Loader2 size={15} className="animate-spin" /> : null}Assinar Business</button>
+              <button className="btn btn-primary" onClick={() => openUpgrade("Escolha seu plano")}>Ver planos</button>
+            </>) : intro ? (<>
+              <button className="btn btn-primary" disabled={Boolean(busy)} onClick={() => subscribe("pro")}>{busy === "pro" ? <Loader2 size={15} className="animate-spin" /> : null}Continuar no Essencial · R$ 19,90/mês</button>
+              <button className="btn btn-secondary" disabled={Boolean(busy)} onClick={() => subscribe("business")}>{busy === "business" ? <Loader2 size={15} className="animate-spin" /> : null}Profissional · R$ 39,90/mês</button>
             </>) : subscription!.status === "active" || subscription!.status === "past_due" ? <button className="btn btn-danger" onClick={() => setCancelOpen(true)}>Cancelar assinatura</button>
               : <button className="btn btn-primary" onClick={() => openUpgrade("Reative sua assinatura")}>Assinar novamente</button>}
           </div>
@@ -147,7 +151,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
       </div>
 
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
-        <DialogContent title="Cancelar assinatura?" description={live ? `Não haverá novas cobranças. Você mantém o plano ${PLAN_NAMES[usage.plan]} até ${formatDate(subscription!.current_period_end)}; depois a conta volta ao plano grátis. O cancelamento é definitivo: para voltar, será preciso assinar de novo.` : undefined}>
+        <DialogContent title="Cancelar assinatura?" description={live ? `Não haverá novas cobranças. Você mantém o plano ${PLAN_NAMES[usage.plan]} até ${formatDate(subscription!.current_period_end)}; depois a conta fica sem plano. O cancelamento é definitivo: para voltar, será preciso assinar de novo.` : undefined}>
           <div className="flex gap-2"><button className="btn btn-secondary flex-1" onClick={() => setCancelOpen(false)}>Manter assinatura</button>
             <button className="btn btn-danger flex-1" disabled={working} onClick={cancel}>{working ? <Loader2 size={15} className="animate-spin" /> : null}Confirmar cancelamento</button></div>
         </DialogContent>

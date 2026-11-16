@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AiIdeas } from "@/components/app/ai-ideas";
 import { StoreGuide } from "@/components/app/store-guide";
-import { StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
+import { StoreNav, StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
 import { inStore, sourceName } from "@/components/source-mark";
 import { CuratedGrid } from "@/components/app/curated-grid";
 import { loadCurated } from "@/lib/curated";
@@ -49,7 +49,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
   const qs = (s: string, c?: string) => `/app/em-alta?loja=${s}${c ? `&categoria=${c}` : ""}`;
 
   return (
-    <>
+    <StoreNav>
       <PageHeader title="Mais vendidos" description="Os produtos que mais saem em cada loja, por categoria."
 />
 
@@ -124,7 +124,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
         )}
       </div>
       </StoreSwitch>
-    </>
+    </StoreNav>
   );
 }
 
@@ -137,7 +137,7 @@ async function Overall() {
   const locked = Math.max(0, data.products.length - shown.length);
   const qs = (s: string) => `/app/em-alta?loja=${s}`;
   return (
-    <>
+    <StoreNav>
       <PageHeader title="Mais vendidos" description="Os produtos que mais saem em cada loja, por categoria."
 />
       <StoreTabs stores={["geral", ...STORES]} active="geral" links={Object.fromEntries(["geral", ...STORES].map((s) => [s, qs(s)]))} />
@@ -161,6 +161,6 @@ async function Overall() {
           )}
         </div>
       </StoreSwitch>
-    </>
+    </StoreNav>
   );
 }

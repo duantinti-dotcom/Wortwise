@@ -39,7 +39,7 @@ export function Navbar() {
         <div className="col-start-3 flex items-center justify-self-end gap-1.5">
           <ThemeToggle size="sm" className="mr-1 hidden sm:inline-flex" />
           <Link href="/entrar" className="hidden rounded-[10px] px-3 py-2 text-[14px] font-medium text-soft transition-colors hover:text-fg sm:inline-flex">Entrar</Link>
-          <Link href="/cadastro" className="btn btn-primary btn-sm">Começar por R$ 9,90</Link>
+          <Link href="/cadastro" className="btn btn-primary btn-sm whitespace-nowrap"><span className="sm:hidden">Começar</span><span className="hidden sm:inline">Começar por R$ 9,90</span></Link>
           <D.Root open={open} onOpenChange={setOpen}>
             <D.Trigger className="btn btn-ghost btn-sm !px-2 lg:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>
             <D.Portal>
