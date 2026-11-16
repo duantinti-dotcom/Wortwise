@@ -60,13 +60,20 @@ async function call<T>(method: string, path: string, body?: unknown): Promise<T>
 
 export interface PaymentLink { id: number; url: string }
 
+/** Nome e descrição mostrados no checkout da HeroSpark (a API não permite editar depois: muda-se criando um novo link). */
+export const CHECKOUT_TEXT: Record<string, { name: string; description: string }> = {
+  inicial: { name: "Worthwise · Primeiro mês", description: "30 dias do Essencial: mais vendidos de 4 lojas, lucro real e a Wise. Pagamento único, não renova." },
+  pro: { name: "Worthwise · Essencial", description: "Mais vendidos de 4 lojas, 150 pesquisas/mês, lucro real, histórico de preço e a Wise. Cancele quando quiser." },
+  business: { name: "Worthwise · Profissional", description: "Tudo do Essencial com mais limites: 500 pesquisas e 500 mensagens/mês, 60 monitorados. Cancele quando quiser." },
+};
+
 /** Cria o link de pagamento de um plano: assinatura mensal ou, no "Primeiro mês", pagamento único (sem "period"). */
 export async function createSubscriptionLink(plan: { id: string; name: string; description: string | null; price_cents: number }): Promise<PaymentLink> {
   const once = plan.id === "inicial";
   const r = await call<{ data?: { id?: number; offer?: { url?: string } } }>("POST", "/payment_links", {
     payment_link: {
-      name: `Worthwise ${plan.name}`,
-      description: plan.description ?? (once ? `Plano ${plan.name}` : `Assinatura mensal do plano ${plan.name}`),
+      name: CHECKOUT_TEXT[plan.id]?.name ?? `Worthwise ${plan.name}`,
+      description: CHECKOUT_TEXT[plan.id]?.description ?? plan.description ?? (once ? `Plano ${plan.name}` : `Assinatura mensal do plano ${plan.name}`),
       price_cents: plan.price_cents,
       absorbs_fees: true,
       // Sem "period" o link é de pagamento único (documentação HeroPay).
