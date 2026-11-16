@@ -9,6 +9,24 @@ export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const { pathname } = request.nextUrl;
+
+  // Um só endereço (sem www): o login começa e termina no mesmo domínio, então o cookie do Google não se perde.
+  // (O retorno /auth/callback não é redirecionado, para não perder o cookie de quem já começou pelo www.)
+  const host = request.headers.get("host") ?? "";
+  if (host.startsWith("www.") && !pathname.startsWith("/auth/")) {
+    const to = request.nextUrl.clone();
+    to.host = host.slice(4);
+    to.port = "";
+    return NextResponse.redirect(to, 308);
+  }
+  // Plano B do login com Google: se o retorno cair na página inicial com o código, termina o login no lugar certo.
+  if (pathname === "/") {
+    const code = request.nextUrl.searchParams.get("code");
+    if (!code) return NextResponse.next();
+    const cb = new URL("/auth/callback", request.url);
+    cb.searchParams.set("code", code);
+    return NextResponse.redirect(cb);
+  }
   const isPrivate = pathname.startsWith("/app") || pathname.startsWith("/admin");
 
   if (!url || !key) {
@@ -47,5 +65,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Apenas rotas que dependem de sessão; páginas públicas ficam estáticas e em cache.
-  matcher: ["/app/:path*", "/admin/:path*", "/api/((?!webhooks|cron|health).*)", "/entrar", "/cadastro", "/auth/:path*"],
+  matcher: ["/", "/app/:path*", "/admin/:path*", "/api/((?!webhooks|cron|health).*)", "/entrar", "/cadastro", "/auth/:path*"],
 };

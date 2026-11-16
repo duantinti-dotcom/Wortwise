@@ -15,7 +15,12 @@ export async function GET(request: Request) {
 
   const supabase = await supabaseServer();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error || !data.user) return NextResponse.redirect(`${origin}/entrar?erro=oauth`);
+  if (error || !data.user) {
+    // O código pode já ter sido usado (a página abriu duas vezes): se a sessão já existe, segue em frente.
+    const { data: current } = await supabase.auth.getUser();
+    if (current.user) return NextResponse.redirect(`${origin}${next}`);
+    return NextResponse.redirect(`${origin}/entrar?erro=oauth${next !== "/app" ? `&next=${encodeURIComponent(next)}` : ""}`);
+  }
 
   // Uma conta grátis por aparelho e por rede (só hashes, nunca o IP puro).
   await registerSignup(request, data.user.id);

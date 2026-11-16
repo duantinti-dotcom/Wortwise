@@ -6,6 +6,7 @@ import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import { publicEnv } from "@/lib/env";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 type Mode = "login" | "signup" | "recover" | "reset";
 
@@ -17,8 +18,17 @@ const ERRORS: Record<string, string> = {
   "email rate limit exceeded": "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
   "captcha verification process failed": "Não foi possível validar a verificação de segurança. Tente novamente.",
 };
+function inAppBrowser(ua: string): string | null {
+  if (/Instagram/i.test(ua)) return "Instagram";
+  if (/FBAN|FBAV|FB_IAB/i.test(ua)) return "Facebook";
+  if (/musical_ly|BytedanceWebview|TikTok/i.test(ua)) return "TikTok";
+  if (/WhatsApp/i.test(ua)) return "WhatsApp";
+  if (/\bLine\//i.test(ua)) return "Line";
+  return null;
+}
+
 const QUERY_ERRORS: Record<string, string> = {
-  oauth: "Não foi possível concluir o login. Tente novamente.",
+  oauth: "Não foi possível concluir o login com o Google. Tente de novo pelo Safari ou Chrome (não pelo navegador do Instagram/TikTok), ou entre com e-mail e senha.",
   link: "Este link expirou ou já foi usado. Solicite um novo.",
   configuracao: "A autenticação ainda não está configurada neste ambiente.",
 };
@@ -58,6 +68,8 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
   const configured = Boolean(publicEnv.supabaseUrl);
   // Marca a hidratação: antes dela o botão fica desabilitado, para o formulário nunca ser enviado sem o JavaScript.
   const [hydrated, setHydrated] = useState(false);
+  // Navegadores de dentro de apps (Instagram, Facebook, TikTok…): o Google bloqueia o login neles.
+  const inApp = hydrated ? inAppBrowser(navigator.userAgent) : null;
   // eslint-disable-next-line react-hooks/set-state-in-effect -- sinaliza a hidratação uma única vez
   useEffect(() => setHydrated(true), []);
 
@@ -150,7 +162,12 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
 
       {mode === "login" || mode === "signup" ? (
         <>
-          <button type="button" onClick={google} disabled={Boolean(busy) || !configured} className="btn btn-secondary btn-lg mt-8 w-full">
+          {inApp ? (
+            <div role="note" className="mt-8 rounded-xl border border-[#F59E0B]/40 bg-[#F59E0B]/10 px-4 py-3 text-[13.5px] leading-relaxed text-soft">
+              <b className="font-semibold text-fg">Você está no navegador do {inApp}.</b> O Google não deixa entrar por aqui. Toque em <b>⋯</b> no canto da tela e escolha <b>“Abrir no navegador”</b> (Safari ou Chrome), ou crie a conta com e-mail logo abaixo.
+            </div>
+          ) : null}
+          <button type="button" onClick={google} disabled={Boolean(busy) || !configured} className={cn("btn btn-secondary btn-lg w-full", inApp ? "mt-4" : "mt-8")}>
             {busy === "google" ? <Loader2 size={18} className="animate-spin" /> : <GoogleIcon />} Continuar com Google
           </button>
           <div className="my-6 flex items-center gap-4 text-xs text-faint"><span className="h-px flex-1 bg-line" />ou com e-mail<span className="h-px flex-1 bg-line" /></div>
