@@ -93,7 +93,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
         <Card icon={CreditCard} title="Assinatura">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div><div className="text-2xl font-semibold tracking-tight">Plano {PLAN_NAMES[usage.plan] ?? usage.plan}</div>
-              {live ? <p className="mt-1 text-sm text-muted">{intro ? `Primeiro mês: acesso até ${formatDate(subscription!.current_period_end)}. Não renova sozinho.` : subscription!.cancel_at_period_end || subscription!.status === "canceled" ? `Cancelada — acesso até ${formatDate(subscription!.current_period_end)}` : `Próxima renovação prevista para ${formatDate(subscription!.current_period_end)}`}
+              {live ? <p className="mt-1 text-sm text-muted">{usage.plan === "ilimitado" ? "Acesso ilimitado liberado pelo Worthwise." : intro ? `Primeiro mês: acesso até ${formatDate(subscription!.current_period_end)}. Não renova sozinho.` : subscription!.cancel_at_period_end || subscription!.status === "canceled" ? `Cancelada — acesso até ${formatDate(subscription!.current_period_end)}` : `Próxima renovação prevista para ${formatDate(subscription!.current_period_end)}`}
                 {subscription!.payment_method ? ` · ${METHOD[subscription!.payment_method] ?? subscription!.payment_method}` : ""}</p>
                 : <p className="mt-1 text-sm text-muted">Você ainda não tem um plano ativo. Comece pelo primeiro mês por R$ 9,90.</p>}</div>
             {live ? <span className={cn("badge", SUB_STATUS[subscription!.status]?.cls)}>{SUB_STATUS[subscription!.status]?.label ?? subscription!.status}</span> : null}
@@ -110,7 +110,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
             })}
           </ul>
           <div className="mt-6 flex flex-wrap gap-2 border-t border-line pt-5">
-            {usage.plan === "free" || !live ? (<>
+            {usage.plan === "ilimitado" ? null : usage.plan === "free" || !live ? (<>
               <button className="btn btn-primary" onClick={() => openUpgrade("Escolha seu plano")}>Ver planos</button>
             </>) : intro ? (<>
               <button className="btn btn-primary" disabled={Boolean(busy)} onClick={() => subscribe("pro")}>{busy === "pro" ? <Loader2 size={15} className="animate-spin" /> : null}Continuar no Essencial · R$ 19,90/mês</button>
