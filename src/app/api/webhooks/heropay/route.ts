@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { dedupeKey, HEROPAY_TRIGGERS, verifySignature } from "@/lib/billing/heropay";
 import { serverEnv } from "@/lib/env";
 import { serverRpc } from "@/lib/supabase/server";
+import { logControlEvent } from "@/lib/control/events";
 
 /**
  * Webhook HeroPay. Cada gatilho é cadastrado apontando para /api/webhooks/heropay?trigger=<gatilho>,
@@ -21,7 +22,10 @@ export async function POST(req: Request) {
   const key = new URL(req.url).searchParams.get("k") ?? req.headers.get("x-worthwise-key") ?? "";
   const valid = (key.length >= 32 && sameKey(key, env.heropayWebhookSecret))
     || await verifySignature(raw, req.headers.get("x-heropay-signature"), env.heropayWebhookSecret);
-  if (!valid) return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
+  if (!valid) {
+    await logControlEvent(req.headers, { kind: "webhook_invalid_signature", severity: "high", class: "blocked", path: "/api/webhooks/heropay" });
+    return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
+  }
 
   const trigger = new URL(req.url).searchParams.get("trigger") ?? "";
   if (!(HEROPAY_TRIGGERS as readonly string[]).includes(trigger)) return NextResponse.json({ error: "unknown_trigger" }, { status: 400 });
@@ -41,6 +45,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true, outcome: result.outcome });
   } catch (e) {
     console.error("[heropay-webhook]", e instanceof Error ? e.message : e);
+    await logControlEvent(req.headers, { category: "ops", kind: "webhook_failed", severity: "high", class: "info", path: trigger });
     return NextResponse.json({ error: "processing_failed" }, { status: 500 });
   }
 }
