@@ -26,7 +26,7 @@ function preferOfficial(official: Connector, gecko: Connector): Connector {
 }
 
 const tiktokPending = pending("tiktokshop", "TikTok Shop",
-    "A API do TikTok Shop só dá acesso à loja que autorizou o aplicativo; a busca de produtos de outras lojas depende de aplicativo de afiliado aprovado pelo TikTok.");
+    "Indisponível no momento.");
 
 export const CONNECTORS: Record<SourceId, Connector> = {
   mercadolivre: preferOfficial(mercadoLivre, geckoMercadoLivre),

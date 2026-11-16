@@ -239,7 +239,7 @@ export function Discover({ sources, recent }: { sources: SourceInfo[]; recent: {
 }
 
 function SourceList({ sources, compact }: { sources: SourceReport[]; compact?: boolean }) {
-  const label: Record<string, string> = { ok: "respondeu", empty: "sem resultados", not_configured: "não configurado", pending_approval: "em credenciamento", error: "indisponível", skipped: "não consultado" };
+  const label: Record<string, string> = { ok: "respondeu", empty: "sem resultados", not_configured: "indisponível", pending_approval: "indisponível", error: "indisponível", skipped: "não consultado" };
   return (
     <ul className={cn("flex flex-wrap gap-2", !compact && "pl-7")}>
       {sources.filter((s) => s.status === "ok" || s.status === "empty" || s.status === "error").map((s) => (

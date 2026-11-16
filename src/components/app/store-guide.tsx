@@ -55,10 +55,10 @@ const GUIDES: Record<string, { preset: string; seller: string; tips: [string, st
 };
 
 export const STORE_MESSAGE: Record<string, string> = {
-  mercadolivre: "Falta cadastrar as chaves do aplicativo do Mercado Livre.",
-  shopee: "Falta cadastrar as chaves de afiliado da Shopee.",
-  amazon: "A API oficial da Amazon não informa a lista de mais vendidos, e o acesso depende de uma conta de Associado aprovada.",
-  tiktokshop: "O TikTok Shop só libera dados de produtos para parceiros aprovados por ele. O pedido de acesso ainda precisa ser feito.",
+  mercadolivre: "Os produtos desta loja estão sendo atualizados. Volte em instantes.",
+  shopee: "Os produtos desta loja estão sendo atualizados. Volte em instantes.",
+  amazon: "Os produtos desta loja estão sendo atualizados. Volte em instantes.",
+  tiktokshop: "Os produtos desta loja estão sendo atualizados. Volte em instantes.",
 };
 
 export function StoreGuide({ store }: { store: string; message?: string }) {

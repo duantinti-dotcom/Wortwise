@@ -1,57 +1,38 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageShell } from "@/components/marketing/page-shell";
-import { isSupabaseConfigured } from "@/lib/env";
-import { supabaseAnon } from "@/lib/supabase/server";
-import { cn, formatDate } from "@/lib/utils";
+import { SourceMark } from "@/components/source-mark";
 
 export const metadata: Metadata = {
   title: "Fontes de dados",
-  description: "Estado atual das integrações do Worthwise com Mercado Livre, Amazon, Shopee e TikTok Shop, e o que cada fonte permite consultar.",
+  description: "De onde vêm os dados do Worthwise: mais vendidos do Mercado Livre, Shopee, Amazon e TikTok Shop, consulta de CNPJ e a assistente Wise.",
   alternates: { canonical: "/fontes-de-dados" },
 };
-export const dynamic = "force-dynamic";
 
-const STATUS: Record<string, [string, string]> = {
-  connected: ["Em operação", "badge-pos"], not_configured: ["Em implantação", "badge-brand"], pending_approval: ["Aguardando credenciamento", ""], error: ["Instabilidade", "badge-neg"], planned: ["Planejado", ""],
-};
-const DETAILS: Record<string, { gives: string; lacks: string }> = {
-  mercadolivre: { gives: "Busca de anúncios e fichas de catálogo, preço, vendedor, frete, atributos, ofertas concorrentes, avaliações, ranking de mais vendidos por categoria e tarifas oficiais de venda.", lacks: "Unidades vendidas e faturamento de anúncios de terceiros; histórico de preços anterior ao início do nosso acompanhamento." },
-  shopee: { gives: "Após o credenciamento: dados das lojas que autorizarem o aplicativo e ofertas do programa de afiliados.", lacks: "Não há API pública de busca de catálogo para terceiros sem aprovação." },
-  amazon: { gives: "Após aprovação como Associado: busca de produtos, preços e ofertas pela Product Advertising API.", lacks: "Volume de vendas; o acesso depende de manter vendas qualificadas no programa." },
-  tiktokshop: { gives: "Após aprovação do aplicativo: dados das lojas que concederem autorização.", lacks: "Busca pública de catálogo e dados de vendedores que não autorizaram o aplicativo." },
-  brasilapi: { gives: "Situação cadastral, razão social, atividade e município de um CNPJ (dados públicos da Receita Federal).", lacks: "Não avalia reputação, qualidade ou capacidade de entrega." },
-  assistant: { gives: "Respostas em linguagem natural fundamentadas nas ferramentas da plataforma.", lacks: "Não possui dados próprios de preços ou vendas." },
-};
+const SOURCES: { id: string | null; name: string; gives: string }[] = [
+  { id: "mercadolivre", name: "Mercado Livre", gives: "Ranking de mais vendidos por categoria, na ordem do próprio Mercado Livre, com preço, quantidade vendida informada pela loja, foto e link do anúncio." },
+  { id: "shopee", name: "Shopee", gives: "Produtos na ordem “Mais vendidos” da própria Shopee, por tópico, com preço, nota, número de avaliações, foto e link." },
+  { id: "amazon", name: "Amazon", gives: "Lista de mais vendidos da Amazon Brasil por categoria e busca de produtos, com preço, nota, avaliações, foto e link." },
+  { id: "tiktokshop", name: "TikTok Shop", gives: "Produtos do TikTok Shop Brasil por tópico, com a quantidade vendida informada pelo TikTok Shop, preço, nota, foto e link." },
+  { id: null, name: "Consulta de CNPJ", gives: "Situação cadastral, razão social, atividade e município de um CNPJ, a partir dos dados públicos da Receita Federal." },
+  { id: null, name: "Wise, assistente com IA", gives: "Respostas em português baseadas nos dados acima e nas ferramentas do Worthwise. Ela não inventa preços nem vendas." },
+];
 
-export default async function Page() {
-  let rows: { id: string; name: string; kind: string; status: string; status_detail: string | null; last_ok_at: string | null }[] = [];
-  if (isSupabaseConfigured()) {
-    try {
-      const { data } = await supabaseAnon().from("data_sources").select("id, name, kind, status, status_detail, last_ok_at").order("kind").order("name");
-      rows = (data ?? []) as typeof rows;
-    } catch { /* lista vazia */ }
-  }
+export default function Page() {
   return (
-    <PageShell narrow eyebrow="Transparência" title="Fontes de dados" lead="O Worthwise usa as páginas públicas das lojas (diretamente ou pela GeckoAPI) e bases públicas. Esta página mostra, sem maquiagem, o que está funcionando agora.">
-      {rows.length ? (
-        <ul className="space-y-4">
-          {rows.map((s) => {
-            const [label, cls] = STATUS[s.status] ?? [s.status, ""];
-            const d = DETAILS[s.id];
-            return (
-              <li key={s.id} className="card p-6">
-                <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">{s.name}</h2><span className={cn("badge", cls)}>{label}</span></div>
-                {s.status_detail ? <p className="mt-2 text-sm leading-relaxed text-muted">{s.status_detail}</p> : null}
-                {d ? <dl className="mt-4 grid gap-4 border-t border-line pt-4 text-sm sm:grid-cols-2">
-                  <div><dt className="text-xs font-medium text-faint">O que a fonte permite</dt><dd className="mt-1 leading-relaxed text-muted">{d.gives}</dd></div>
-                  <div><dt className="text-xs font-medium text-faint">O que não é possível obter</dt><dd className="mt-1 leading-relaxed text-muted">{d.lacks}</dd></div></dl> : null}
-                {s.last_ok_at ? <p className="mt-3 text-xs text-faint">Última resposta bem-sucedida: {formatDate(s.last_ok_at, true)}</p> : null}
-              </li>
-            );
-          })}
-        </ul>
-      ) : <p className="card p-6 text-muted">O estado das fontes está temporariamente indisponível.</p>}
-      <p className="mt-8 text-sm leading-relaxed text-faint">Quando uma fonte não está em operação, a pesquisa informa isso claramente e nenhum crédito é consumido. Nunca substituímos uma fonte indisponível por dados fictícios.</p>
+    <PageShell narrow eyebrow="Transparência" title="Fontes de dados" lead="Os números do Worthwise vêm das páginas públicas das próprias lojas e de bases públicas. Veja o que cada fonte mostra.">
+      <ul className="space-y-4">
+        {SOURCES.map((s) => (
+          <li key={s.name} className="card flex gap-4 p-6">
+            {s.id ? <SourceMark source={s.id} size={28} /> : <span className="size-7 shrink-0 rounded-[8px] bg-tint/10" />}
+            <div><h2 className="text-lg font-semibold">{s.name}</h2><p className="mt-1.5 text-[15px] leading-relaxed text-muted">{s.gives}</p></div>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-8 text-sm leading-relaxed text-faint">
+        Os rankings são atualizados automaticamente a cada 3 dias. Quando a loja não informa um dado (por exemplo, a quantidade vendida), o campo fica vazio: nunca preenchemos com números inventados.
+        Veja também a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link>.
+      </p>
     </PageShell>
   );
 }

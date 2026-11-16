@@ -130,9 +130,9 @@ export interface Connector {
 }
 
 export const USER_MESSAGES: Record<ConnectorErrorCode, string> = {
-  not_configured: "Fonte ainda não configurada.",
-  pending_approval: "Integração aguardando credenciamento junto ao marketplace.",
-  unauthorized: "A fonte recusou as credenciais configuradas.",
+  not_configured: "Esta loja está indisponível no momento.",
+  pending_approval: "Esta loja está indisponível no momento.",
+  unauthorized: "Esta loja está indisponível no momento.",
   rate_limited: "A fonte limitou temporariamente as consultas. Tente novamente em instantes.",
   unavailable: "A fonte está indisponível no momento.",
   timeout: "A fonte demorou demais para responder.",
