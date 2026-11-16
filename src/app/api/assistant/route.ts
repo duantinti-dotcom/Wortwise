@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getUser } from "@/lib/auth";
-import { runAgent, type AgentContext, type AssistantBlock, type AssistantEvent } from "@/lib/ai/agent";
+import { fallbackAnswer, runAgent, type AgentContext, type AssistantBlock, type AssistantEvent } from "@/lib/ai/agent";
 import { sourcesOverview } from "@/lib/connectors/registry";
 import { isSmallTalk } from "@/lib/ai/small-talk";
-import { AiUnavailable, getAiProvider, type ChatMessage } from "@/lib/ai/provider";
+import { getAiProvider, type ChatMessage } from "@/lib/ai/provider";
 import { apiError, parseBody, sameOrigin } from "@/lib/http";
 import { serverRpcSafe, supabaseAnon, supabaseServer } from "@/lib/supabase/server";
 
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
   const sq = u?.quotas?.find((x) => x.resource === "search");
   const context: AgentContext = {
     firstName: ((profile?.full_name as string | null) ?? user.name ?? "").split(" ")[0] || null,
-    plan: ({ free: "Grátis", pro: "Pro", business: "Business", ilimitado: "Ilimitado (dono do Worthwise)" } as Record<string, string>)[u?.plan ?? "free"] ?? (u?.plan ?? "Grátis"),
+    plan: ({ free: "Sem plano", pro: "Essencial", business: "Profissional", ilimitado: "Ilimitado" } as Record<string, string>)[u?.plan ?? "free"] ?? (u?.plan ?? "Sem plano"),
     searchesLeft: sq ? Math.max(0, sq.limit - sq.used) : null,
     stores: sourcesOverview().map((x) => ({ name: x.name, connected: x.state === "connected" })),
     interests: ((profile?.categories as string[] | null) ?? []).slice(0, 6),
@@ -68,9 +68,16 @@ export async function POST(req: Request) {
 
   const { data: cfg } = await supabaseAnon().from("app_settings").select("value").eq("key", "assistant").maybeSingle();
   const settings = (cfg?.value ?? {}) as AssistantSettings;
-  const { data: prior } = await supabase.from("ai_messages").select("role, content").eq("conversation_id", conversationId)
+  const { data: prior } = await supabase.from("ai_messages").select("role, content, blocks").eq("conversation_id", conversationId)
     .order("created_at", { ascending: false }).limit(settings.max_history_messages ?? 12);
-  const history: ChatMessage[] = [...(prior ?? [])].reverse().map((m) => ({ role: m.role as "user" | "assistant", content: (m.content as string).slice(0, 2000) }));
+  // A memória inclui os produtos que já apareceram na conversa, para qualquer IA da fila seguir no mesmo ritmo.
+  const shown = (blocks: unknown) => {
+    const list = (Array.isArray(blocks) ? blocks : []) as { kind?: string; items?: { title?: string; price?: number | null; source?: string; soldQuantity?: number | null }[] }[];
+    const items = list.filter((b) => b.kind === "products").flatMap((b) => b.items ?? []).slice(0, 8);
+    return items.length ? `\n[Produtos mostrados: ${items.map((p, i) => `${i + 1}) ${String(p.title ?? "").slice(0, 60)} · ${p.source} · R$ ${p.price ?? "?"}${p.soldQuantity ? ` · ${p.soldQuantity} vendidos` : ""}`).join("; ")}]` : "";
+  };
+  const history: ChatMessage[] = [...(prior ?? [])].reverse().map((m) => ({ role: m.role as "user" | "assistant",
+    content: ((m.content as string).slice(0, 1800) + (m.role === "assistant" ? shown(m.blocks) : "")) }));
   history.push({ role: "user", content: body.message });
 
   const convId = conversationId;
@@ -95,11 +102,16 @@ export async function POST(req: Request) {
         await serverRpcSafe("server_set_source_status", { p_source: "assistant", p_status: "connected", p_detail: `Modelo ${provider.model}` });
         emit({ type: "done", remaining: q?.remaining ?? null, conversationId: convId });
       } catch (e) {
+        // Todas as IAs ocupadas: responde com os dados reais dos mais vendidos, sem mensagem de erro.
         console.error("[assistant]", e instanceof Error ? e.message : e);
-        const timeout = e instanceof AiUnavailable && e.message === "timeout";
-        const quota = e instanceof AiUnavailable && e.message === "quota";
-        emit({ type: "error", code: timeout ? "timeout" : "unavailable",
-          message: quota ? "A IA atingiu o limite de uso de hoje. A Wise volta às 21h (horário de Brasília)." : timeout ? "O assistente demorou demais para responder. Tente novamente." : "O assistente está indisponível no momento. Tente novamente em instantes." });
+        try {
+          const text = await fallbackAnswer(body.message, emit);
+          emit({ type: "text", text });
+          await save("assistant", text, blocks, null, null);
+          emit({ type: "done", remaining: q?.remaining ?? null, conversationId: convId });
+        } catch {
+          emit({ type: "error", code: "unavailable", message: "Não consegui responder agora. Me manda de novo em um minutinho." });
+        }
       } finally {
         controller.close();
       }

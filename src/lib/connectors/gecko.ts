@@ -73,6 +73,13 @@ async function claim(key: string) {
   try { return await serverRpc<boolean>("server_gecko_claim", { p_key: key, p_max_per_day: dailyMax() }); } catch { return false; }
 }
 
+/** Várias respostas guardadas numa chamada só (o Worker tem limite de chamadas externas por pedido). */
+async function peekMany(bodies: Json[]): Promise<Stored[]> {
+  const keys = await Promise.all(bodies.map(keyOf));
+  const map = await serverRpc<Record<string, Stored>>("server_gecko_get_many", { p_keys: keys }).catch(() => ({} as Record<string, Stored>));
+  return keys.map((k) => map[k]).filter((x): x is Stored => Boolean(x));
+}
+
 /** Só lê o que já está guardado (não gasta crédito). */
 async function peek(body: Json): Promise<Stored | null> { return dbGet(await keyOf(body)); }
 
@@ -266,7 +273,7 @@ export const GERAL: Category = { id: "geral", name: "Geral (todos)" };
 async function mergeCategories(
   bodies: Json[], toItems: (data: Json, at: string) => ProductResult[], order: "rank" | "sold", first: () => Promise<RankedProduct[]>,
 ): Promise<RankedProduct[]> {
-  const lists = (await Promise.all(bodies.map(peek))).filter((x): x is { data: Json; at: string } => Boolean(x)).map((x) => toItems(x.data, x.at));
+  const lists = (await peekMany(bodies)).map((x) => toItems(x.data, x.at));
   if (!lists.length) return first();
   const seen = new Set<string>();
   let merged: ProductResult[] = [];

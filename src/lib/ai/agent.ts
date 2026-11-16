@@ -26,9 +26,11 @@ const SYSTEM = `Você é a Wise, assistente do Worthwise: uma consultora de vend
 
 COMO CONVERSAR
 - Fale como uma pessoa: português do Brasil simples, frases curtas, sem jargão. Use listas curtas e **negrito** para destacar; não use tabelas. Se usar um termo técnico, explique em poucas palavras.
-- Cumprimentos ("oi", "boa noite", "tudo bem?") são respondidos com simpatia: cumprimente de volta, diga em uma frase o que você consegue fazer e pergunte o que a pessoa vende ou quer vender.
+- Só cumprimente se a pessoa cumprimentar (ex.: "oi", "boa noite"). Em qualquer outra mensagem, NÃO comece com "Oi", "Olá" ou "Tudo bem?": vá direto à resposta.
+- Continue a conversa: leia as mensagens anteriores e os produtos já mostrados. Se a pessoa disser "esse", "desses", "o melhor mesmo", ela está falando do que já apareceu: escolha entre eles e explique por quê.
 - Responda a pergunta de verdade. Comece pela resposta e depois dê os passos ou detalhes (no máximo 5 itens curtos). Termine com UMA sugestão de próximo passo concreta.
-- Se faltar informação para ajudar bem (ex.: o produto, o preço de compra), pergunte de forma objetiva — no máximo 2 perguntas por vez.
+- Quando a pessoa perguntar o que vender, o que está vendendo ou qual o melhor produto, NÃO faça perguntas antes: chame mais_vendidos (loja "geral", ou a loja que ela citar) e responda JÁ com uma recomendação concreta (1 a 3 produtos, com os números que vieram e o motivo). Só depois, no final, pergunte algo para refinar.
+- Se faltar informação para outras coisas (ex.: o preço de compra para calcular lucro), pergunte de forma objetiva — no máximo 2 perguntas por vez.
 - Assuntos gerais de vender online são com você: como começar em cada marketplace, cadastro de produtos, títulos e fotos, precificação, taxas e comissões, frete e envios, MEI e impostos, fornecedores e importação, anúncios patrocinados, reputação, devoluções, estratégias. Responda com seu conhecimento, de forma prática.
 - Só redirecione com gentileza quando o assunto não tiver nada a ver com comércio (ex.: receita de bolo); nesse caso, diga em uma frase que você é especialista em vendas e ofereça ajuda nisso.
 
@@ -54,7 +56,7 @@ O WORTHWISE (não invente telas ou botões além destes)
 - A pessoa NÃO conecta a loja dela ao Worthwise e não existe tela de "conectar loja". Os dados das lojas vêm de conexões oficiais feitas pela equipe do Worthwise. Se uma loja não estiver conectada, diga apenas que os produtos dela aparecem aqui quando a conexão estiver ativa.
 
 FERRAMENTAS
-- mais_vendidos mostra os rankings que o Worthwise já tem (por loja e tópico), com preço, quantidade vendida informada pela loja, nota, link e histórico de preço de cada produto. Não gasta pesquisa: use sempre que a pessoa perguntar o que está vendendo, o que vale a pena vender, ou citar um produto da tela Mais vendidos. Use "geral" para todas as lojas juntas.
+- mais_vendidos (USE PRIMEIRO para "o que vender") mostra os rankings que o Worthwise já tem (por loja e tópico), com preço, quantidade vendida informada pela loja, nota, link e histórico de preço de cada produto. Não gasta pesquisa: use sempre que a pessoa perguntar o que está vendendo, o que vale a pena vender, ou citar um produto da tela Mais vendidos. Use "geral" para todas as lojas juntas.
 - Ao comentar produtos, cite os números que vieram (preço, vendidos, nota, variação de preço) e dê uma opinião prática: concorrência, margem possível (use calcular_lucro), público, sazonalidade.
 - pesquisar_produtos gasta 1 pesquisa do plano da pessoa: use quando ela pedir para ver produtos, preços ou concorrência de algo específico. Não use para cumprimentos nem para dúvidas gerais.
 - Depois de pesquisar, resuma: faixa de preço, o que se destaca, e o que observar. Os cartões dos produtos já aparecem na tela; não repita a lista inteira.`;
@@ -120,10 +122,10 @@ const n = (v: unknown, d = 0) => (typeof v === "number" && Number.isFinite(v) ? 
 /** Texto de terceiros entra no contexto truncado e sem quebras, para reduzir a superfície de prompt injection. */
 const clean = (s: string | null | undefined, max = 140) => (s ?? "").replace(/[\r\n\t`<>{}]+/g, " ").slice(0, max);
 
+/** Versão enxuta do produto para a IA (dados demais estouram o limite por minuto das IAs grátis). */
 const compact = (p: ProductResult) => ({
-  fonte: p.source, id: p.externalId, titulo: clean(p.title), preco: p.price, preco_antes: p.originalPrice, moeda: p.currency, avaliacao: p.rating,
-  avaliacoes: p.reviewsCount, vendidos_segundo_a_loja: p.soldQuantity ?? null, vendas_texto: clean(p.soldLabel, 60) || null, vendedor: clean(p.sellerName, 50) || null,
-  frete_gratis: p.freeShipping, marca: clean(p.brand, 40) || null, link: p.permalink, coletado_em: p.collectedAt,
+  fonte: p.source, id: p.externalId, titulo: clean(p.title, 80), preco: p.price, nota: p.rating, avaliacoes: p.reviewsCount,
+  vendidos: p.soldQuantity ?? null, vendas_texto: clean(p.soldLabel, 50) || null, frete_gratis: p.freeShipping,
 });
 
 /** Resumo do histórico de preço observado (para a IA comentar se subiu ou caiu). */
@@ -160,14 +162,18 @@ async function runTool(name: string, args: Record<string, unknown>, emit: (e: As
         const topico = args.topico ? String(args.topico) : "geral";
         emit({ type: "status", text: "Lendo os mais vendidos…" });
         const data = loja === "geral" || !isStore(loja) ? await loadOverall() : await loadStoreTrending(loja, topico);
-        const products = data.products;
+        const products = data.products.slice(0, 10);
         if (!products.length) return { produtos: [], observacao: "Ainda não há ranking guardado para essa loja/tópico." };
         const hist = await loadHistories(products);
         emit({ type: "block", block: { kind: "products", query: `Mais vendidos${"category" in data ? ` · ${data.category.name}` : ""}`, items: products, collectedAt: new Date().toISOString() } });
         return {
           loja, topico: "category" in data ? data.category : { id: "geral", name: "Todas as lojas" },
-          topicos_disponiveis: "categories" in data ? data.categories.map((c) => c.id) : undefined,
-          produtos: products.map((p) => ({ posicao: p.rank, ...compact(p), historico_de_preco: trend(hist[`${p.source}:${p.externalId}`]) })),
+          topicos_disponiveis: "categories" in data ? data.categories.map((c) => c.id).slice(0, 20) : undefined,
+          produtos: products.map((p) => {
+            const t = trend(hist[`${p.source}:${p.externalId}`]);
+            return { pos: p.rank, loja: p.source, titulo: clean(p.title, 70), preco: p.price, vendidos: p.soldQuantity ?? null, nota: p.rating,
+              avaliacoes: p.reviewsCount, preco_variacao_pct: t && t.observacoes > 1 ? t.variacao_pct : null };
+          }),
           natureza: "ranking e números informados pela própria loja; histórico = preços que o Worthwise observou",
         };
       }
@@ -225,6 +231,27 @@ async function runTool(name: string, args: Record<string, unknown>, emit: (e: As
   } finally {
     await flushLogs(ctx.logs);
   }
+}
+
+/**
+ * Resposta de emergência quando todas as IAs estão ocupadas: monta a resposta com os dados reais dos
+ * mais vendidos (sem inventar nada), para a conversa nunca parar com mensagem de erro.
+ */
+export async function fallbackAnswer(question: string, emit: (e: AssistantEvent) => void): Promise<string> {
+  const data = await loadOverall().catch(() => null);
+  const items = (data?.products ?? []).slice(0, 8);
+  if (!items.length) return "Estou com muita gente me chamando agora. Me manda a pergunta de novo em um minutinho que eu te respondo com calma. 🙂";
+  emit({ type: "block", block: { kind: "products", query: "Mais vendidos agora", items, collectedAt: new Date().toISOString() } });
+  const name: Record<string, string> = { mercadolivre: "Mercado Livre", shopee: "Shopee", amazon: "Amazon", tiktokshop: "TikTok Shop" };
+  const lines = items.slice(0, 5).map((p, i) => `${i + 1}. **${clean(p.title, 70)}** (${name[p.source] ?? p.source})${p.price != null ? ` — R$ ${p.price.toFixed(2).replace(".", ",")}` : ""}${p.soldQuantity ? ` · ${p.soldQuantity.toLocaleString("pt-BR")} vendidos` : ""}`);
+  void question;
+  return [
+    "Separei o que mais está vendendo agora em todas as lojas:",
+    "",
+    ...lines,
+    "",
+    "Para escolher, olhe três coisas: **muita venda** (demanda), **preço que você consegue bater** comprando do fornecedor, e **lucro depois das taxas**. Toque em um produto e use “Calcular lucro e preço recomendado”, ou me diga quanto você pagaria no fornecedor que eu faço a conta.",
+  ].join("\n");
 }
 
 const FINAL_NUDGE = "Escreva agora a resposta final para a pessoa, em português, com base no que já foi conversado e nos dados acima.";

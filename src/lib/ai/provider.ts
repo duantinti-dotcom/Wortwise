@@ -180,11 +180,17 @@ function chain(list: AiProvider[]): AiProvider {
     id: list.map((p) => p.id).join(">"), model: list[0]!.model,
     async chat(messages, tools, maxTokens, timeoutMs) {
       let last: unknown;
-      for (const p of list) {
-        try { return await p.chat(messages, tools, maxTokens, Math.min(timeoutMs ?? TIMEOUT_MS, 50000)); } catch (err) {
-          last = err;
-          console.warn(`[ai] ${p.id}/${p.model} falhou, tentando o próximo:`, err instanceof Error ? err.message : err);
+      const started = Date.now();
+      for (let pass = 0; pass < 2; pass++) {
+        for (const p of list) {
+          if (Date.now() - started > 80000) break;
+          try { return await p.chat(messages, tools, maxTokens, Math.min(timeoutMs ?? TIMEOUT_MS, p.id === "gemini" ? 20000 : 40000)); } catch (err) {
+            last = err;
+            console.warn(`[ai] ${p.id}/${p.model} falhou, tentando o próximo:`, err instanceof Error ? err.message : err);
+          }
         }
+        // Limites por minuto costumam liberar em poucos segundos: espera um pouco e tenta a fila de novo.
+        if (pass === 0) await new Promise((r) => setTimeout(r, 4000));
       }
       const m = last instanceof Error ? last.message : String(last);
       throw new AiUnavailable(/quota|429|allocation|limit/i.test(m) ? "quota" : m || "unavailable");
@@ -198,6 +204,8 @@ export function getAiProvider(): AiProvider | null {
   const list: AiProvider[] = [];
   const named = (id: string, p: AiProvider): AiProvider => ({ ...p, id });
   if (e.groqKey) list.push(named("groq", openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, e.groqModel)));
+  // Outros modelos do Groq têm limites separados: entram quando o principal estoura o limite por minuto.
+  if (e.groqKey) for (const m of ["openai/gpt-oss-20b"]) if (m !== e.groqModel) list.push(named("groq", openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, m)));
   if (e.geminiKey) list.push(geminiNative(e.geminiKey, e.geminiModel));
   if (e.openrouterKey) list.push(named("openrouter", openAiCompatible("https://openrouter.ai/api/v1", e.openrouterKey, e.openrouterModel)));
   if (e.aiProvider === "openai-compatible" && e.aiBaseUrl) list.push(openAiCompatible(e.aiBaseUrl, e.aiApiKey, e.aiModel));
@@ -216,6 +224,7 @@ export function aiProviders(): { id: string; model: string; provider: AiProvider
   const e = serverEnv();
   const out: { id: string; model: string; provider: AiProvider }[] = [];
   if (e.groqKey) out.push({ id: "groq", model: e.groqModel, provider: openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, e.groqModel) });
+  if (e.groqKey) for (const m of ["openai/gpt-oss-20b"]) out.push({ id: "groq", model: m, provider: openAiCompatible("https://api.groq.com/openai/v1", e.groqKey, m) });
   if (e.geminiKey) out.push({ id: "gemini", model: e.geminiModel, provider: geminiNative(e.geminiKey, e.geminiModel) });
   if (e.openrouterKey) out.push({ id: "openrouter", model: e.openrouterModel, provider: openAiCompatible("https://openrouter.ai/api/v1", e.openrouterKey, e.openrouterModel) });
   const w = workersAi(e.aiModel);

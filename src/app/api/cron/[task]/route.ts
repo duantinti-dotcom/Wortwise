@@ -166,6 +166,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
     }
     return NextResponse.json(out);
   }
+  if (task === "ai-agent") {
+    // Testa cada IA com a mesma pergunta e as ferramentas reais (só leitura; não gasta crédito da Gecko).
+    const { runAgent } = await import("@/lib/ai/agent");
+    const q = new URL(req.url).searchParams.get("q") ?? "qual é a melhor coisa que eu posso vender agora?";
+    const only = new URL(req.url).searchParams.get("model");
+    const res = await Promise.all(aiProviders().filter((p) => !only || p.model === only).map(async (p) => {
+      const t = Date.now(); const tools: string[] = [];
+      try {
+        const out = await runAgent(p.provider, [{ role: "user", content: q }], (ev) => { if (ev.type === "status") tools.push(ev.text); }, { maxRounds: 3, maxTokens: 1200 });
+        return { model: p.model, ok: true, ms: Date.now() - t, tokensIn: out.tokensIn, tools, text: out.text.slice(0, 300) };
+      } catch (e) { return { model: p.model, ok: false, ms: Date.now() - t, tools, error: e instanceof Error ? e.message.slice(0, 300) : String(e) }; }
+    }));
+    return NextResponse.json(res);
+  }
   if (task === "ai-debug") {
     // Diagnóstico: modelos grátis do OpenRouter com ferramentas e teste nativo do Gemini.
     const e = serverEnv();
