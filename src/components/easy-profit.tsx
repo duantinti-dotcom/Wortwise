@@ -57,8 +57,10 @@ function Pct({ id, label, help, value, onChange }: { id: string; label: string; 
 }
 
 function PriceSlider({ price, cost, minPrice, recommended, onChange }: { price: number; cost: number; minPrice: number | null; recommended: number | null; onChange: (v: number) => void }) {
-  const lo = Math.max(0, Math.floor(cost * 0.8));
-  const hi = Math.max(Math.ceil(Math.max(cost * 4, price * 1.5, (recommended ?? 0) * 1.3)), lo + 10);
+  // A barra tem tamanho fixo pelo custo (não muda enquanto se arrasta): de 0 até 5x o custo.
+  // Se a pessoa digitar um preço maior, a barra vai até ele.
+  const lo = 0;
+  const hi = Math.max(Math.ceil(Math.max(cost * 5, (recommended ?? 0) * 1.5, 20)), Math.ceil(price));
   const pct = (v: number) => Math.min(100, Math.max(0, ((v - lo) / (hi - lo)) * 100));
   const fill = pct(price);
   const mark = (v: number | null, cls: string, text: string) => v != null && v >= lo && v <= hi ? (
