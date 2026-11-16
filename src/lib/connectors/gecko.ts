@@ -138,11 +138,20 @@ async function economicSearch(source: SourceId, target: string, query: string, l
   }
 }
 
+/** Grava o preço de cada produto que acabou de chegar (é o que forma o gráfico de histórico). */
+async function recordPrices(source: SourceId, data: Json) {
+  const at = new Date().toISOString();
+  const items = source === "mercadolivre" ? mlRanked(data, at) : source === "shopee" ? shopeeList(data, at) : tiktokList(data, at);
+  const { toMarketItem } = await import("@/lib/search/service");
+  const rows = items.filter((p) => p.price != null).map(toMarketItem);
+  if (rows.length) await serverRpcSafe("server_upsert_market_data", { p_items: rows });
+}
+
 const SOURCE_OF: Record<string, SourceId> = { "mercadolivre.com.br": "mercadolivre", "shopee.com.br": "shopee", "tiktok.com": "tiktokshop" };
 
-/** Tarefa diária: atualiza os rankings guardados há mais de 3 dias (dentro do limite diário de consultas). */
-export async function refreshStaleGecko(): Promise<{ refreshed: number; skipped: number; errors: string[] }> {
-  const out = { refreshed: 0, skipped: 0, errors: [] as string[] };
+/** Tarefa diária: atualiza os rankings guardados há mais de 3 dias e carrega tópicos novos (tudo dentro do limite diário de consultas). */
+export async function refreshStaleGecko(): Promise<{ refreshed: number; added: number; skipped: number; errors: string[] }> {
+  const out = { refreshed: 0, added: 0, skipped: 0, errors: [] as string[] };
   if (!geckoConfigured()) return out;
   const stale = await serverRpc<{ key: string; req: Json }[]>("server_gecko_stale", { p_hours: 72, p_limit: dailyMax() }).catch(() => []);
   const ctx: ConnectorContext = { logs: [] };
@@ -151,11 +160,41 @@ export async function refreshStaleGecko(): Promise<{ refreshed: number; skipped:
     if (!source) { out.skipped++; continue; }
     if (!(await claim(key))) { out.skipped++; continue; }
     try {
-      await dbPut(key, await call(source, req, ctx), req);
+      const data = await call(source, req, ctx);
+      await dbPut(key, data, req);
+      await recordPrices(source, data);
       out.refreshed++;
     } catch (e) {
       out.errors.push(e instanceof ConnectorError ? `${source}: ${e.code}` : String(e).slice(0, 80));
       if (e instanceof ConnectorError && e.code === "no_credits") break;
+    }
+  }
+  // Com o que sobrar do limite do dia, carrega tópicos que ainda não têm dados (um de cada loja por vez).
+  const lists: { source: SourceId; body: Json }[][] = [
+    FALLBACK_ML_CATEGORIES.map((c) => ({ source: "mercadolivre" as SourceId, body: mlRankBody(c.id) })),
+    SHOPEE_CATEGORIES.map((c) => ({ source: "shopee" as SourceId, body: shopeeRankBody(c) })),
+    TIKTOK_CATEGORIES.map((c) => ({ source: "tiktokshop" as SourceId, body: tiktokBody(c.keyword) })),
+  ];
+  const order: { source: SourceId; body: Json }[] = [];
+  for (let i = 0; i < Math.max(...lists.map((l) => l.length)); i++) for (const l of lists) if (l[i]) order.push(l[i]!);
+  const keys = await Promise.all(order.map((o) => keyOf(o.body)));
+  const st = await serverRpc<{ have: string[]; left: number }>("server_gecko_status", { p_keys: keys, p_max_per_day: dailyMax() }).catch(() => null);
+  if (st && st.left > 0) {
+    const have = new Set(st.have);
+    let budget = st.left;
+    for (let i = 0; i < order.length && budget > 0; i++) {
+      if (have.has(keys[i]!)) continue;
+      if (!(await claim(keys[i]!))) break;
+      budget--;
+      try {
+        const data = await call(order[i]!.source, order[i]!.body, ctx);
+        await dbPut(keys[i]!, data, order[i]!.body);
+        await recordPrices(order[i]!.source, data);
+        out.added++;
+      } catch (e) {
+        out.errors.push(e instanceof ConnectorError ? `${order[i]!.source}: ${e.code}` : String(e).slice(0, 80));
+        if (e instanceof ConnectorError && e.code === "no_credits") break;
+      }
     }
   }
   if (ctx.logs.length) {
@@ -290,9 +329,10 @@ async function availableCategories(cats: Category[], bodyOf: (id: string) => Jso
   const keys = await Promise.all(cats.map((c) => keyOf(bodyOf(c.id))));
   let st: { have: string[]; left: number } | null = null;
   try { st = await serverRpc<{ have: string[]; left: number }>("server_gecko_status", { p_keys: keys, p_max_per_day: dailyMax() }); } catch { st = null; }
-  if (!st) return [GERAL, ...cats];
+  if (!st) return [GERAL];
+  // Só tópicos já guardados: abrem na hora. Os novos entram pela atualização automática diária.
   const have = new Set(st.have);
-  return [GERAL, ...cats.filter((_c, i) => have.has(keys[i]!) || st!.left > 0)];
+  return [GERAL, ...cats.filter((_c, i) => have.has(keys[i]!))];
 }
 
 /* ───────────── Conectores ───────────── */

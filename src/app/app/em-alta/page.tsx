@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AiIdeas } from "@/components/app/ai-ideas";
 import { StoreGuide } from "@/components/app/store-guide";
-import { StoreNav, StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
+import { CategoryChips, StoreNav, StoreSwitch, StoreTabs } from "@/components/app/store-tabs";
 import { inStore, sourceName } from "@/components/source-mark";
 import { CuratedGrid } from "@/components/app/curated-grid";
 import { loadCurated } from "@/lib/curated";
@@ -56,20 +56,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
       <StoreTabs stores={["geral", ...STORES]} active={store} links={Object.fromEntries(["geral", ...STORES].map((s) => [s, qs(s)]))} />
 
       <StoreSwitch store={store}>
-      {data.state.ok && data.categories.length ? (
-        <nav aria-label="Categorias" className="-mx-5 mt-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-          <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
-            {data.categories.map((c) => {
-              const on = c.id === data.category.id;
-              return (
-                <li key={c.id}>
-                  <Link href={qs(store, c.id)} scroll={false} aria-current={on ? "page" : undefined}
-                    className="chip whitespace-nowrap">{c.name}</Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+      {data.state.ok && data.categories.length > 1 ? (
+        <CategoryChips active={data.category.id} items={data.categories.map((c) => ({ id: c.id, name: c.name, href: qs(store, c.id) }))} />
       ) : null}
 
       <div className="mt-8">

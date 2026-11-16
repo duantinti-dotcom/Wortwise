@@ -37,7 +37,9 @@ export const TOP_OVERALL = 30;
 
 /** Guarda o preço real de cada produto do ranking: é assim que o gráfico de preço vai se formando. */
 async function record<T extends RankedProduct[]>(products: T): Promise<T> {
-  const items = products.filter((p) => p.price != null).map(toMarketItem);
+  // Só grava quando o dado acabou de ser coletado (dados guardados já foram gravados quando chegaram).
+  const fresh = Date.now() - 15 * 60 * 1000;
+  const items = products.filter((p) => p.price != null && Date.parse(p.collectedAt) > fresh).map(toMarketItem);
   if (items.length) await serverRpcSafe("server_upsert_market_data", { p_items: items });
   return products;
 }

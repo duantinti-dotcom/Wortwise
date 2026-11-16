@@ -22,14 +22,17 @@ export function StoreNav({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isPending, start] = useTransition();
   const [target, setTarget] = useState<string | null>(null);
-  const go = (id: string, href: string) => { setTarget(id); start(() => router.push(href, { scroll: false })); };
+  const go = (id: string, href: string) => {
+    if (isPending && target === id) return; // ignora cliques repetidos no mesmo item
+    setTarget(id); start(() => router.push(href, { scroll: false }));
+  };
   return <NavCtx.Provider value={{ pending: isPending ? target : null, go }}>{children}</NavCtx.Provider>;
 }
 
 /** Abas de loja (Mercado Livre, Shopee, Amazon, TikTok Shop) com logo e animação de troca. */
 export function StoreTabs({ stores, active, links }: { stores: readonly string[]; active: string; links: Record<string, string> }) {
   const nav = useContext(NavCtx);
-  const shown = nav?.pending ?? active;
+  const shown = nav?.pending && !nav.pending.startsWith("cat:") ? nav.pending : active;
   return (
     <nav aria-label="Lojas" className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
       <ul className="glass flex w-max gap-1 rounded-[14px] p-1">
@@ -54,11 +57,33 @@ export function StoreTabs({ stores, active, links }: { stores: readonly string[]
   );
 }
 
+/** Tópicos (Eletrônicos, Casa…): o escolhido fica marcado na hora e cliques repetidos são ignorados. */
+export function CategoryChips({ items, active }: { items: { id: string; name: string; href: string }[]; active: string }) {
+  const nav = useContext(NavCtx);
+  const pendingCat = nav?.pending?.startsWith("cat:") ? nav.pending.slice(4) : null;
+  const shown = pendingCat ?? active;
+  return (
+    <nav aria-label="Categorias" className="-mx-5 mt-6 overflow-x-auto px-5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+      <ul className="flex w-max gap-2 lg:w-auto lg:flex-wrap">
+        {items.map((c) => (
+          <li key={c.id}>
+            <Link href={c.href} scroll={false} aria-current={c.id === shown ? "page" : undefined} className="chip whitespace-nowrap"
+              onClick={(e) => { if (!nav || e.metaKey || e.ctrlKey) return; e.preventDefault(); if (c.id !== active) nav.go(`cat:${c.id}`, c.href); }}>
+              {c.name}{pendingCat === c.id ? <span className="ml-1 size-3 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden /> : null}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 /** Conteúdo da loja: esmaece na hora do clique e entra com um deslize curto (sem desfoque, que pesa no celular). */
 export function StoreSwitch({ store, children }: { store: string; children: ReactNode }) {
   const reduce = useReducedMotion();
   const nav = useContext(NavCtx);
   const leaving = Boolean(nav?.pending && nav.pending !== store);
+  // (inclui troca de tópico: "cat:…")
   return (
     <div className={cn("transition-opacity duration-200", leaving && "pointer-events-none opacity-40")} aria-busy={leaving || undefined}>
       <motion.div key={store} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
