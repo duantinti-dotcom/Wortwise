@@ -29,9 +29,10 @@ async function sha(text: string) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 40);
 }
 
-const label = (body: Json) => `POST /v1/extract ${String(body.target)} ${String(body.type)}`;
+/** O último termo indica a funcionalidade (painel administrativo: créditos por funcionalidade). */
+const label = (body: Json, feature?: string) => `POST /v1/extract ${String(body.target)} ${String(body.type)}${feature ? ` [${feature}]` : ""}`;
 
-async function call(source: SourceId, body: Json, ctx: ConnectorContext): Promise<Json> {
+async function call(source: SourceId, body: Json, ctx: ConnectorContext, feature?: string): Promise<Json> {
   const token = serverEnv().geckoToken;
   if (!token) throw new ConnectorError(source, "not_configured", "GECKO_API_KEY ausente");
   const started = Date.now();
@@ -48,13 +49,13 @@ async function call(source: SourceId, body: Json, ctx: ConnectorContext): Promis
         : status === 404 ? "not_found" : status === 400 ? "bad_response" : "unavailable";
       throw new ConnectorError(source, kind, json?.message ?? `GeckoAPI respondeu ${status}`, status ?? undefined);
     }
-    ctx.logs.push({ source, endpoint: label(body), status, ok: true, ms: Date.now() - started, error: null });
+    ctx.logs.push({ source, endpoint: label(body, feature), status, ok: true, ms: Date.now() - started, error: null });
     return json.data;
   } catch (e) {
     const err = e instanceof ConnectorError ? e
       : (e as Error)?.name === "TimeoutError" || (e as Error)?.name === "AbortError" ? new ConnectorError(source, "timeout", "A GeckoAPI demorou demais")
       : new ConnectorError(source, "unavailable", "Falha de rede na GeckoAPI");
-    ctx.logs.push({ source, endpoint: label(body), status, ok: false, ms: Date.now() - started, error: err.code });
+    ctx.logs.push({ source, endpoint: label(body, feature), status, ok: false, ms: Date.now() - started, error: err.code });
     throw err;
   }
 }
@@ -98,7 +99,7 @@ async function extract(source: SourceId, kind: Kind, body: Json, ctx: ConnectorC
     if (prev) return prev;
     throw new ConnectorError(source, "daily_limit", "Limite diário de consultas à GeckoAPI atingido");
   }
-  const data = await call(source, body, ctx);
+  const data = await call(source, body, ctx, kind);
   await dbPut(key, data, kind === "ranking" ? body : null);
   return { data, at: new Date().toISOString() };
 }
@@ -160,7 +161,7 @@ export async function refreshStaleGecko(): Promise<{ refreshed: number; added: n
     if (!source) { out.skipped++; continue; }
     if (!(await claim(key))) { out.skipped++; continue; }
     try {
-      const data = await call(source, req, ctx);
+      const data = await call(source, req, ctx, "refresh");
       await dbPut(key, data, req);
       await recordPrices(source, data);
       out.refreshed++;
@@ -187,7 +188,7 @@ export async function refreshStaleGecko(): Promise<{ refreshed: number; added: n
       if (!(await claim(keys[i]!))) break;
       budget--;
       try {
-        const data = await call(order[i]!.source, order[i]!.body, ctx);
+        const data = await call(order[i]!.source, order[i]!.body, ctx, "fill");
         await dbPut(keys[i]!, data, order[i]!.body);
         await recordPrices(order[i]!.source, data);
         out.added++;

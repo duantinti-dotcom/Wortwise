@@ -21,9 +21,13 @@
     "HEROPAY_API_URL": "https://api.heropay.tech",
     "AI_PROVIDER": "workers-ai",
     "AI_MODEL": "@cf/openai/gpt-oss-120b",
-    "AI_FALLBACK_MODEL": "@cf/meta/llama-4-scout-17b-16e-instruct"
+    "AI_FALLBACK_MODEL": "@cf/meta/llama-4-scout-17b-16e-instruct",
+    // Worthwise Control: o painel só responde neste subdomínio (adicione-o em Settings → Domains & Routes).
+    "CONTROL_HOST": "admin.worthwise.site"
   }
   // Segredos (wrangler secret put ...): WW_SERVER_SECRET, CRON_SECRET, HEROPAY_JWT_TOKEN,
   // HEROPAY_WEBHOOK_SECRET, MELI_CLIENT_ID, MELI_CLIENT_SECRET, AMAZON_PAAPI_ACCESS_KEY, AMAZON_PAAPI_SECRET_KEY,
   // AMAZON_PARTNER_TAG, TURNSTILE_SECRET_KEY, AI_API_KEY
+  // Painel (opcionais): CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID, CLOUDFLARE_ACCOUNT_ID, SUPABASE_ACCESS_TOKEN,
+  // RESEND_API_KEY, CONTROL_ALERT_EMAIL
 }

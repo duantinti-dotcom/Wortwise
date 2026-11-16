@@ -27,6 +27,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   if (task === "purge" || task === "maintenance") {
     return NextResponse.json({ task: "maintenance", result: await runMaintenance() });
   }
+  if (task === "control") {
+    // Worthwise Control: saldo GeckoAPI, eventos de segurança, consolidação diária e alertas.
+    const { runControlMonitor } = await import("@/lib/control/monitor");
+    return NextResponse.json({ task, result: await runControlMonitor() });
+  }
   if (task === "amz-search-sample") {
     const r = await fetch("https://www.amazon.com.br/s?k=garrafa+termica", { headers: { accept: "text/html", "accept-language": "pt-BR,pt;q=0.9", "user-agent": "Mozilla/5.0 (compatible; WorthwiseBot/1.0; +https://worthwise.site)" }, signal: AbortSignal.timeout(12000) });
     const t = await r.text();

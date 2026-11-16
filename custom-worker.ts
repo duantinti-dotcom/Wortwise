@@ -11,7 +11,8 @@ const worker = {
     const base = env.APP_URL ?? "https://worthwise.internal";
     const daily = event.cron === "17 6 * * *";
     // Diário: manutenção do banco e atualização dos rankings da GeckoAPI (a cada 3 dias por lista). (O preparo das ideias da IA fica em /api/cron/ideas, para rodar sob demanda.)
-    const tasks = daily ? ["purge", "gecko-refresh"] : ["monitor"];
+    // "control" (painel administrativo) roda a cada 30 min: alertas, saldo da GeckoAPI e agregados diários.
+    const tasks = daily ? ["purge", "gecko-refresh"] : ["monitor", "control"];
     for (const task of tasks) {
       const req = new Request(`${base}/api/cron/${task}`, {
         method: "POST",

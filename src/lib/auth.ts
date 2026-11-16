@@ -49,7 +49,13 @@ export const isAdmin = cache(async (): Promise<boolean> => {
 /** Páginas administrativas: a checagem é feita no banco (user_roles), nunca no cliente. */
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireUser("/admin");
-  if (!(await isAdmin())) redirect("/app");
+  if (!(await isAdmin())) {
+    // Tentativa de abrir a administração sem permissão: vai para a Central de Segurança (sem dados pessoais).
+    const { logControlEvent } = await import("@/lib/control/events");
+    const { headers } = await import("next/headers");
+    await logControlEvent(await headers(), { kind: "admin_denied", severity: "medium", class: "blocked", path: "/admin" });
+    redirect("/app");
+  }
   return user;
 }
 
