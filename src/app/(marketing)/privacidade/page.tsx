@@ -38,6 +38,7 @@ export default function Page() {
         <p>Você pode confirmar a existência de tratamento, acessar, corrigir, portar e eliminar seus dados, além de revogar consentimentos. A exclusão da conta está disponível em Planos e configurações. Para as demais solicitações, use {contact}. Você também pode recorrer à Autoridade Nacional de Proteção de Dados (ANPD).</p>
         <h2>6. Cookies</h2>
         <p>Usamos somente cookies essenciais para manter sua sessão. Quando a verificação de segurança (Cloudflare Turnstile) está ativa, ela pode usar armazenamento próprio para distinguir pessoas de robôs. Não usamos cookies de publicidade.</p>
+        <p>Para saber quantas pessoas visitam o site, contamos visitas de forma anônima e agregada, sem cookie: cada visita vira um código que muda todos os dias e não permite identificar você nem ligar visitas de dias diferentes. Guardamos só o total diário e o país informado pela rede. Se o seu navegador enviar “Do Not Track” ou “Global Privacy Control”, a visita não é contada.</p>
         <h2>7. Segurança</h2>
         <p>Os dados trafegam por conexão cifrada, o acesso é isolado por usuário no banco de dados (Row Level Security) e as chaves de serviços ficam apenas no servidor. Nenhum sistema é infalível: em caso de incidente relevante, comunicaremos os titulares afetados e a ANPD.</p>
         <h2>8. Alterações</h2>

@@ -5,7 +5,7 @@ import { sourcesOverview } from "@/lib/connectors/registry";
 import { isSmallTalk } from "@/lib/ai/small-talk";
 import { getAiProvider, type ChatMessage } from "@/lib/ai/provider";
 import { apiError, parseBody, sameOrigin } from "@/lib/http";
-import { serverRpcSafe, supabaseAnon, supabaseServer } from "@/lib/supabase/server";
+import { serverRpc, serverRpcSafe, supabaseAnon, supabaseServer } from "@/lib/supabase/server";
 
 const schema = z.object({ conversationId: z.string().uuid().nullish(), message: z.string().trim().min(2).max(1500) });
 
@@ -37,6 +37,14 @@ export async function POST(req: Request) {
       .insert({ user_id: user.id, title: body.message.slice(0, 60) }).select("id").single();
     if (error || !conv) return apiError("internal", "Não foi possível iniciar a conversa.");
     conversationId = conv.id as string;
+  }
+
+  // Limites definidos no painel administrativo (gasto mensal e cota diária por usuário). Sem limites, sempre libera.
+  const guard = await serverRpc<{ allowed: boolean; reason?: string }>("server_ai_guard", { p_user: user.id }).catch((): { allowed: boolean; reason?: string } => ({ allowed: true }));
+  if (!guard.allowed) {
+    return apiError("rate_limited", guard.reason === "budget_exceeded"
+      ? "A assistente atingiu o limite de uso deste mês. Tente novamente mais tarde."
+      : "Você atingiu o limite diário de mensagens da assistente. Tente novamente amanhã.");
   }
 
   // Cumprimentos e agradecimentos curtos não gastam mensagens do plano.
@@ -94,16 +102,23 @@ export async function POST(req: Request) {
         if (e.type === "block") blocks.push(e.block);
         controller.enqueue(encoder.encode(JSON.stringify(e) + "\n"));
       };
+      const started = Date.now();
+      // Painel administrativo: só contadores (modelo, tokens, tempo, erro) — nunca o conteúdo da conversa.
+      const usage = (ok: boolean, tin: number | null, tout: number | null, error: string | null) => serverRpcSafe("server_ai_usage", {
+        p_user: user.id, p_feature: "assistant", p_provider: provider.id, p_model: provider.model, p_tokens_in: tin, p_tokens_out: tout,
+        p_latency_ms: Date.now() - started, p_ok: ok, p_error: error });
       try {
         emit({ type: "status", text: "Pensando…" });
         const out = await runAgent(provider, history, emit, { maxRounds: settings.max_tool_rounds ?? 4, maxTokens: Math.max(settings.max_output_tokens ?? 0, 1600) }, context);
         emit({ type: "text", text: out.text });
         await save("assistant", out.text, blocks, out.tokensIn, out.tokensOut);
+        await usage(true, out.tokensIn, out.tokensOut, null);
         await serverRpcSafe("server_set_source_status", { p_source: "assistant", p_status: "connected", p_detail: `Modelo ${provider.model}` });
         emit({ type: "done", remaining: q?.remaining ?? null, conversationId: convId });
       } catch (e) {
         // Todas as IAs ocupadas: responde com os dados reais dos mais vendidos, sem mensagem de erro.
         console.error("[assistant]", e instanceof Error ? e.message : e);
+        await usage(false, null, null, e instanceof Error ? (/quota|429|limit/i.test(e.message) ? "quota" : /timeout|abort/i.test(e.message) ? "timeout" : "unavailable") : "unavailable");
         try {
           const text = await fallbackAnswer(body.message, emit);
           emit({ type: "text", text });

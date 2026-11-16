@@ -67,13 +67,15 @@ export async function startDb(opts: { legacyFreeQuotas?: boolean } = {}) {
       return r.rows[0].id as string;
     },
     /** Executa SQL como um usuário autenticado (mesma mecânica do PostgREST: SET ROLE + claim). */
-    async as<T = Record<string, unknown>>(userId: string | null, sql: string, params: unknown[] = []): Promise<T[]> {
+    async as<T = Record<string, unknown>>(userId: string | null, sql: string, params: unknown[] = [], opts: { aal?: "aal1" | "aal2" } = {}): Promise<T[]> {
       const c = await pool.connect();
       c.on("error", () => {});
       try {
         await c.query("begin");
         await c.query(`set local role ${userId ? "authenticated" : "anon"}`);
         await c.query("select set_config('request.jwt.claim.sub', $1, true)", [userId ?? ""]);
+        // Mesmo formato do PostgREST: as claims do JWT (inclui o nível de autenticação, aal1/aal2).
+        await c.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: userId ?? undefined, aal: opts.aal ?? "aal1" })]);
         const r = await c.query(sql, params);
         await c.query("commit");
         return r.rows as T[];
