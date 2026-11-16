@@ -24,7 +24,7 @@ export default function Page() {
           <li><strong>Preço mínimo</strong>: preço em que o lucro é zero.</li>
         </ul>
         <p>As taxas sugeridas por canal são pontos de partida editáveis, não tarifas oficiais: elas variam por categoria, tipo de anúncio e programa de frete. Confira sempre a tabela do marketplace. Na plataforma, o Worthwise consulta as tarifas oficiais do Mercado Livre para o preço e a categoria do produto analisado.</p>
-        <p><Link href="/cadastro">Crie uma conta gratuita</Link> para salvar simulações, comparar cenários e analisar produtos reais.</p>
+        <p><Link href="/cadastro">Crie sua conta</Link> para salvar simulações, comparar cenários e analisar produtos reais.</p>
       </section>
     </PageShell>
   );

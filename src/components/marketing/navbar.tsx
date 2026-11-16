@@ -39,7 +39,7 @@ export function Navbar() {
         <div className="col-start-3 flex items-center justify-self-end gap-1.5">
           <ThemeToggle size="sm" className="mr-1 hidden sm:inline-flex" />
           <Link href="/entrar" className="hidden rounded-[10px] px-3 py-2 text-[14px] font-medium text-soft transition-colors hover:text-fg sm:inline-flex">Entrar</Link>
-          <Link href="/cadastro" className="btn btn-primary btn-sm">Começar grátis</Link>
+          <Link href="/cadastro" className="btn btn-primary btn-sm">Começar por R$ 9,90</Link>
           <D.Root open={open} onOpenChange={setOpen}>
             <D.Trigger className="btn btn-ghost btn-sm !px-2 lg:hidden" aria-label="Abrir menu"><Menu size={20} /></D.Trigger>
             <D.Portal>
@@ -60,7 +60,7 @@ export function Navbar() {
                 <div className="mt-2 flex items-center justify-between rounded-2xl px-4 py-3 text-[15px] text-soft">Tema<ThemeToggle /></div>
                 <div className="mt-2 grid grid-cols-2 gap-2 border-t border-tint/8 pt-3">
                   <Link href="/entrar" onClick={() => setOpen(false)} className="btn btn-secondary btn-lg">Entrar</Link>
-                  <Link href="/cadastro" onClick={() => setOpen(false)} className="btn btn-primary btn-lg">Começar grátis</Link>
+                  <Link href="/cadastro" onClick={() => setOpen(false)} className="btn btn-primary btn-lg">Começar por R$ 9,90</Link>
                 </div>
               </D.Content>
             </D.Portal>

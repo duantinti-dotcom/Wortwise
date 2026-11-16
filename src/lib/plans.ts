@@ -9,14 +9,14 @@ export interface PlanInfo {
 }
 
 export const DEFAULT_PLANS: PlanInfo[] = [
-  { id: "free", name: "Grátis", description: "Para conhecer a plataforma.", price_cents: 0, sort_order: 0,
-    features: ["3 pesquisas de produtos no total", "Calculadora de lucro", "Visualização parcial dos resultados", "5 mensagens no assistente"] },
-  { id: "pro", name: "Pro", description: "Para quem vende e precisa decidir com dados.", price_cents: 2990, sort_order: 1,
-    features: ["300 pesquisas por mês", "Comparação de fornecedores", "Histórico de preços observado", "Calculadora avançada e cenários",
-      "200 mensagens no assistente por mês", "25 produtos monitorados", "Favoritos e 20 coleções", "30 exportações por mês"] },
-  { id: "business", name: "Business", description: "Para operação comercial intensiva.", price_cents: 5990, sort_order: 2,
-    features: ["1.000 pesquisas por mês", "600 mensagens no assistente por mês", "100 produtos monitorados", "100 coleções",
-      "Relatórios completos", "200 exportações por mês"] },
+  { id: "inicial", name: "Primeiro mês", description: "Experimente tudo do Essencial por 30 dias.", price_cents: 990, sort_order: 0,
+    features: ["Tudo do plano Essencial por 30 dias", "Pagamento único: não renova sozinho", "Uma vez por pessoa", "Depois, continue no Essencial por R$ 19,90/mês"] },
+  { id: "pro", name: "Essencial", description: "Para quem vende e quer decidir com dados.", price_cents: 1990, sort_order: 1,
+    features: ["Mais vendidos do Mercado Livre, Shopee, Amazon e TikTok Shop", "150 pesquisas de produtos por mês", "Wise, a assistente de vendas: 150 mensagens por mês",
+      "Calculadora de lucro e preço recomendado", "Histórico de preço dos produtos", "Comparador de fornecedores", "15 produtos monitorados e 10 coleções"] },
+  { id: "business", name: "Profissional", description: "Para quem vende todo dia e em várias lojas.", price_cents: 3990, sort_order: 2,
+    features: ["Tudo do Essencial", "500 pesquisas de produtos por mês", "500 mensagens com a Wise por mês", "60 produtos monitorados",
+      "50 coleções e 300 simulações salvas", "Relatórios completos e 100 exportações por mês"] },
 ];
 
 export const RESOURCE_LABELS: Record<string, string> = {

@@ -45,7 +45,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <div className="prose-ww" dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content_md) }} />
         <aside className="card mt-14 flex flex-wrap items-center justify-between gap-4 p-6">
           <div><div className="font-semibold">Coloque em prática</div><p className="mt-1 text-sm text-muted">Pesquise produtos reais e simule seu lucro com três pesquisas gratuitas.</p></div>
-          <Link href="/cadastro" className="btn btn-primary">Começar grátis</Link>
+          <Link href="/cadastro" className="btn btn-primary">Começar por R$ 9,90</Link>
         </aside>
       </div>
     </article>

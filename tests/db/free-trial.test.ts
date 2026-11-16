@@ -3,7 +3,7 @@ import { SERVER_SECRET, startDb, type TestDb } from "./harness";
 
 /** Uma conta grátis por aparelho e por rede: a segunda conta é criada, mas sem as cotas grátis. */
 let db: TestDb;
-beforeAll(async () => { db = await startDb(); });
+beforeAll(async () => { db = await startDb({ legacyFreeQuotas: true }); });
 afterAll(async () => { await db?.stop(); });
 
 const register = (user: string, ip: string, device: string | null) =>

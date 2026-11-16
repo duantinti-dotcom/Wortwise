@@ -13,6 +13,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import type { PlanInfo } from "@/lib/plans";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { Paywall } from "./paywall";
 import { UpgradeProvider, useUpgrade } from "./upgrade";
 
 const NAV = [
@@ -40,6 +41,7 @@ export interface ShellProps {
   unreadAlerts: number;
   admin: boolean;
   plans: PlanInfo[];
+  introEligible?: boolean;
   children: ReactNode;
 }
 
@@ -96,9 +98,9 @@ function UsageCard({ plan, planName, search }: Pick<ShellProps, "plan" | "planNa
         {search ? <span className="tabular text-muted">{search.used}/{search.limit}</span> : null}</div>
       {search ? (<>
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-tint/10"><div className={cn("h-full rounded-full transition-[width] duration-700", pct >= 100 ? "bg-neg" : "bg-brand")} style={{ width: `${Math.max(pct, 2)}%` }} /></div>
-        <div className="mt-2 text-[11px] text-muted">pesquisas {search.period === "total" ? "gratuitas usadas" : "usadas neste mês"}</div>
+        <div className="mt-2 text-[11px] text-muted">pesquisas usadas neste mês</div>
       </>) : null}
-      {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-upgrade mt-4 w-full !h-10 !text-[14px] font-semibold"><Sparkles size={15} /><span>Fazer upgrade</span></button> : null}
+      {plan === "free" ? <button onClick={() => openUpgrade()} className="btn btn-upgrade mt-4 w-full !h-10 !text-[14px] font-semibold"><Sparkles size={15} /><span>Assinar</span></button> : null}
     </div>
   );
 }
@@ -138,7 +140,7 @@ export function AppShell(props: ShellProps) {
   }, []);
   return (
     <ToastProvider>
-      <UpgradeProvider plans={props.plans} currentPlan={props.plan}>
+      <UpgradeProvider plans={props.plans} currentPlan={props.plan} introEligible={props.introEligible}>
         <div className="min-h-dvh lg:pl-[284px]">
           <Ambient variant="calm" />
           {/* Sidebar — desktop */}
@@ -180,7 +182,7 @@ export function AppShell(props: ShellProps) {
           </header>
 
           <main id="conteudo" key={path} className="relative animate-[page-in_0.45s_cubic-bezier(0.16,1,0.3,1)] px-5 pb-32 pt-8 lg:px-12 lg:pb-20 lg:pt-12">
-                        <div className="page-stagger mx-auto max-w-[1120px]">{props.children}</div>
+                        <div className="page-stagger mx-auto max-w-[1120px]"><Paywall plan={props.plan} plans={props.plans} introEligible={Boolean(props.introEligible)}>{props.children}</Paywall></div>
           </main>
 
           {/* Navegação inferior — mobile */}

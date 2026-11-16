@@ -3,6 +3,8 @@ import { CONNECTORS, isSourceId } from "@/lib/connectors/registry";
 import { ConnectorError, USER_MESSAGES, type ConnectorContext, type ProductResult } from "@/lib/connectors/types";
 import { calculateProfit, DEFAULT_INPUTS, priceForTargetMargin, type ProfitInputs, type ProfitResult } from "@/lib/profit/calc";
 import { flushLogs, runSearch } from "@/lib/search/service";
+import { isStore, loadOverall, loadStoreTrending } from "@/lib/trending";
+import { loadHistories } from "@/lib/product";
 import { supabaseServer } from "@/lib/supabase/server";
 import { AiUnavailable, type AiProvider, type ChatMessage, type ToolDef } from "./provider";
 
@@ -52,6 +54,8 @@ O WORTHWISE (não invente telas ou botões além destes)
 - A pessoa NÃO conecta a loja dela ao Worthwise e não existe tela de "conectar loja". Os dados das lojas vêm de conexões oficiais feitas pela equipe do Worthwise. Se uma loja não estiver conectada, diga apenas que os produtos dela aparecem aqui quando a conexão estiver ativa.
 
 FERRAMENTAS
+- mais_vendidos mostra os rankings que o Worthwise já tem (por loja e tópico), com preço, quantidade vendida informada pela loja, nota, link e histórico de preço de cada produto. Não gasta pesquisa: use sempre que a pessoa perguntar o que está vendendo, o que vale a pena vender, ou citar um produto da tela Mais vendidos. Use "geral" para todas as lojas juntas.
+- Ao comentar produtos, cite os números que vieram (preço, vendidos, nota, variação de preço) e dê uma opinião prática: concorrência, margem possível (use calcular_lucro), público, sazonalidade.
 - pesquisar_produtos gasta 1 pesquisa do plano da pessoa: use quando ela pedir para ver produtos, preços ou concorrência de algo específico. Não use para cumprimentos nem para dúvidas gerais.
 - Depois de pesquisar, resuma: faixa de preço, o que se destaca, e o que observar. Os cartões dos produtos já aparecem na tela; não repita a lista inteira.`;
 
@@ -89,6 +93,11 @@ const TOOLS: ToolDef[] = [
       preco_maximo: { type: "number", description: "Preço máximo em reais (opcional)" },
       preco_minimo: { type: "number", description: "Preço mínimo em reais (opcional)" },
     }, required: ["consulta"] } },
+  { name: "mais_vendidos", description: "Ranking de mais vendidos que o Worthwise já tem guardado (sem gastar pesquisa), com preço, vendidos, nota, link e histórico de preço. Lojas: mercadolivre, shopee, amazon, tiktokshop ou geral.",
+    parameters: { type: "object", properties: {
+      loja: { type: "string", description: "mercadolivre | shopee | amazon | tiktokshop | geral" },
+      topico: { type: "string", description: "Opcional: id do tópico (ex.: geral, eletronicos, casa, beleza, MLB1000). Sem ele, usa o geral da loja." },
+    }, required: ["loja"] } },
   { name: "detalhar_produto", description: "Busca detalhes, ofertas concorrentes e avaliações de um produto retornado por pesquisar_produtos.",
     parameters: { type: "object", properties: { fonte: { type: "string" }, id: { type: "string", description: "externalId do produto" } }, required: ["fonte", "id"] } },
   { name: "calcular_lucro", description: "Calcula lucro, margem, ponto de equilíbrio e preço mínimo. Percentuais em pontos (12 = 12%).",
@@ -112,9 +121,20 @@ const n = (v: unknown, d = 0) => (typeof v === "number" && Number.isFinite(v) ? 
 const clean = (s: string | null | undefined, max = 140) => (s ?? "").replace(/[\r\n\t`<>{}]+/g, " ").slice(0, max);
 
 const compact = (p: ProductResult) => ({
-  fonte: p.source, id: p.externalId, titulo: clean(p.title), preco: p.price, moeda: p.currency, avaliacao: p.rating,
-  avaliacoes: p.reviewsCount, frete_gratis: p.freeShipping, marca: clean(p.brand, 40) || null, coletado_em: p.collectedAt,
+  fonte: p.source, id: p.externalId, titulo: clean(p.title), preco: p.price, preco_antes: p.originalPrice, moeda: p.currency, avaliacao: p.rating,
+  avaliacoes: p.reviewsCount, vendidos_segundo_a_loja: p.soldQuantity ?? null, vendas_texto: clean(p.soldLabel, 60) || null, vendedor: clean(p.sellerName, 50) || null,
+  frete_gratis: p.freeShipping, marca: clean(p.brand, 40) || null, link: p.permalink, coletado_em: p.collectedAt,
 });
+
+/** Resumo do histórico de preço observado (para a IA comentar se subiu ou caiu). */
+function trend(points: { date: string; price: number }[] | undefined) {
+  if (!points?.length) return null;
+  const first = points[0]!, last = points.at(-1)!;
+  const prices = points.map((p) => p.price);
+  return { observacoes: points.length, desde: first.date.slice(0, 10), primeiro_preco: first.price, preco_atual: last.price,
+    menor: Math.min(...prices), maior: Math.max(...prices),
+    variacao_pct: first.price ? Math.round(((last.price - first.price) / first.price) * 1000) / 10 : null };
+}
 
 async function runTool(name: string, args: Record<string, unknown>, emit: (e: AssistantEvent) => void): Promise<unknown> {
   const ctx: ConnectorContext = { logs: [] };
@@ -135,6 +155,22 @@ async function runTool(name: string, args: Record<string, unknown>, emit: (e: As
         return { resultados: items.map(compact), total_visivel: out.results.length, pesquisas_restantes: out.remaining,
           fontes: out.sources.map((s) => ({ fonte: s.name, situacao: s.status })) };
       }
+      case "mais_vendidos": {
+        const loja = String(args.loja ?? "geral");
+        const topico = args.topico ? String(args.topico) : "geral";
+        emit({ type: "status", text: "Lendo os mais vendidos…" });
+        const data = loja === "geral" || !isStore(loja) ? await loadOverall() : await loadStoreTrending(loja, topico);
+        const products = data.products;
+        if (!products.length) return { produtos: [], observacao: "Ainda não há ranking guardado para essa loja/tópico." };
+        const hist = await loadHistories(products);
+        emit({ type: "block", block: { kind: "products", query: `Mais vendidos${"category" in data ? ` · ${data.category.name}` : ""}`, items: products, collectedAt: new Date().toISOString() } });
+        return {
+          loja, topico: "category" in data ? data.category : { id: "geral", name: "Todas as lojas" },
+          topicos_disponiveis: "categories" in data ? data.categories.map((c) => c.id) : undefined,
+          produtos: products.map((p) => ({ posicao: p.rank, ...compact(p), historico_de_preco: trend(hist[`${p.source}:${p.externalId}`]) })),
+          natureza: "ranking e números informados pela própria loja; histórico = preços que o Worthwise observou",
+        };
+      }
       case "detalhar_produto": {
         const fonte = String(args.fonte ?? "");
         if (!isSourceId(fonte)) return { erro: "fonte_desconhecida" };
@@ -143,7 +179,7 @@ async function runTool(name: string, args: Record<string, unknown>, emit: (e: As
         const prices = d.offers.map((o) => o.price).filter((p): p is number => p != null).sort((a, b) => a - b);
         return { ...compact(d), descricao: clean(d.description, 400), caracteristicas: d.features.slice(0, 6).map((f) => clean(f)),
           ofertas_concorrentes: d.offersTotal ?? d.offers.length, menor_preco: prices[0] ?? null, maior_preco: prices.at(-1) ?? null,
-          link: d.permalink, vendas: "não disponível (o marketplace não informa vendas de terceiros)" };
+          link: d.permalink, vendidos_segundo_a_loja: d.soldQuantity ?? null };
       }
       case "calcular_lucro": {
         const inputs: ProfitInputs = { ...DEFAULT_INPUTS, costPrice: n(args.preco_aquisicao), salePrice: n(args.preco_venda),

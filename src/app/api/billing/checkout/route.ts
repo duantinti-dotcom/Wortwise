@@ -5,7 +5,7 @@ import { checkoutUrlFor } from "@/lib/billing/heropay";
 import { apiError, parseBody, sameOrigin } from "@/lib/http";
 import { supabaseServer } from "@/lib/supabase/server";
 
-const schema = z.object({ plan: z.enum(["pro", "business"]) });
+const schema = z.object({ plan: z.enum(["inicial", "pro", "business"]) });
 
 /**
  * Inicia a assinatura: cria uma intenção de checkout (token) e devolve a URL do checkout hospedado
@@ -27,6 +27,9 @@ export async function POST(req: Request) {
   const intent = data as { status: string; token?: string; checkout_url?: string | null; plan?: string };
   if (intent.status === "already_subscribed") {
     return apiError("invalid_input", "Você já tem uma assinatura ativa. Para trocar de plano, cancele a atual e assine o novo plano ao fim do período.", { plan: intent.plan });
+  }
+  if (intent.status === "intro_unavailable") {
+    return apiError("invalid_input", "O primeiro mês por R$ 9,90 vale uma vez por pessoa, aparelho e internet, e já foi usado. Escolha o Essencial ou o Profissional.");
   }
   if (!intent.checkout_url || !intent.token) {
     return apiError("not_configured", "O pagamento ainda não está habilitado para este plano. Tente novamente mais tarde.");

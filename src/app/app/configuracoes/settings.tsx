@@ -21,7 +21,7 @@ const SUB_STATUS: Record<string, { label: string; cls: string }> = {
 };
 const PAY_STATUS: Record<string, string> = { paid: "Pago", refused: "Recusado", refunded: "Estornado", chargeback: "Contestado", pending: "Pendente" };
 const METHOD: Record<string, string> = { pix: "Pix", credit_card: "Cartão", bank_slip: "Boleto", boleto: "Boleto" };
-const PLAN_NAMES: Record<string, string> = { free: "Grátis", pro: "Pro", business: "Business" };
+const PLAN_NAMES: Record<string, string> = { free: "Sem plano", inicial: "Primeiro mês", pro: "Essencial", business: "Profissional", ilimitado: "Ilimitado" };
 
 function Card({ icon: Icon, title, children }: { icon: typeof UserRound; title: string; children: React.ReactNode }) {
   return <section className="card p-6"><h2 className="mb-5 flex items-center gap-2.5 text-base font-semibold"><Icon size={17} className="text-brand" />{title}</h2>{children}</section>;
@@ -46,7 +46,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
   // Vindo da página de preços (/cadastro?plano=pro): abre o checkout do plano escolhido.
   useEffect(() => {
     const plan = params.get("assinar");
-    if (auto.current || !plan || !["pro", "business"].includes(plan) || usage.plan !== "free") return;
+    if (auto.current || !plan || !["inicial", "pro", "business"].includes(plan) || usage.plan !== "free") return;
     auto.current = true;
     openUpgrade(`Assinar o plano ${PLAN_NAMES[plan]}`);
   }, [params, usage.plan, openUpgrade]);
@@ -93,7 +93,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
             <div><div className="text-2xl font-semibold tracking-tight">Plano {PLAN_NAMES[usage.plan] ?? usage.plan}</div>
               {live ? <p className="mt-1 text-sm text-muted">{subscription!.cancel_at_period_end || subscription!.status === "canceled" ? `Cancelada — acesso até ${formatDate(subscription!.current_period_end)}` : `Próxima renovação prevista para ${formatDate(subscription!.current_period_end)}`}
                 {subscription!.payment_method ? ` · ${METHOD[subscription!.payment_method] ?? subscription!.payment_method}` : ""}</p>
-                : <p className="mt-1 text-sm text-muted">Três pesquisas gratuitas no total{requireCard ? "" : ", sem cartão"}.</p>}</div>
+                : <p className="mt-1 text-sm text-muted">Você ainda não tem um plano ativo. Comece pelo primeiro mês por R$ 9,90.</p>}</div>
             {live ? <span className={cn("badge", SUB_STATUS[subscription!.status]?.cls)}>{SUB_STATUS[subscription!.status]?.label ?? subscription!.status}</span> : null}
           </div>
           {subscription?.status === "past_due" ? <p className="mt-4 rounded-xl border border-neg/30 bg-neg/8 px-3.5 py-3 text-sm text-danger">A última cobrança foi recusada. A HeroPay tentará novamente; você pode atualizar o meio de pagamento pelo link enviado ao seu e-mail.</p> : null}

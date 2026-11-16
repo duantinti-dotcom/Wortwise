@@ -50,7 +50,7 @@ async function call<T>(method: string, path: string, body?: unknown): Promise<T>
     throw new HeroPayError("HeroPay indisponível ou tempo esgotado");
   }
   const text = await res.text();
-  if (!res.ok) throw new HeroPayError(`HeroPay respondeu ${res.status}`, res.status);
+  if (!res.ok) throw new HeroPayError(`HeroPay respondeu ${res.status}: ${text.replace(/\s+/g, " ").slice(0, 300)}`, res.status);
   try {
     return JSON.parse(text) as T;
   } catch {
@@ -60,16 +60,17 @@ async function call<T>(method: string, path: string, body?: unknown): Promise<T>
 
 export interface PaymentLink { id: number; url: string }
 
-/** Cria o link de assinatura mensal de um plano (um link por plano). */
+/** Cria o link de pagamento de um plano: assinatura mensal ou, no "Primeiro mês", pagamento único (sem "period"). */
 export async function createSubscriptionLink(plan: { id: string; name: string; description: string | null; price_cents: number }): Promise<PaymentLink> {
+  const once = plan.id === "inicial";
   const r = await call<{ data?: { id?: number; offer?: { url?: string } } }>("POST", "/payment_links", {
     payment_link: {
       name: `Worthwise ${plan.name}`,
-      description: plan.description ?? `Assinatura mensal do plano ${plan.name}`,
+      description: plan.description ?? (once ? `Plano ${plan.name}` : `Assinatura mensal do plano ${plan.name}`),
       price_cents: plan.price_cents,
       absorbs_fees: true,
-      period: "monthly",
-      frequency_type: "unlimited",
+      // Sem "period" o link é de pagamento único (documentação HeroPay).
+      ...(once ? {} : { period: "monthly", frequency_type: "unlimited" }),
       payment_methods: ["credit_card", "pix", "bank_slip"],
       src: `plan-${plan.id}`,
     },

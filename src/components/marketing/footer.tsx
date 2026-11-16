@@ -16,7 +16,7 @@ export function Footer() {
           <div className="flex flex-col items-center">
             <Logo />
             <p className="mt-4 max-w-xs text-center text-sm leading-relaxed text-muted">Inteligência comercial para quem vende online. Dados com fonte, cálculos transparentes e conclusões fundamentadas.</p>
-            <Link href="/cadastro" className="btn btn-secondary btn-sm mt-6">Começar grátis <ArrowRight className="btn-arrow" size={14} /></Link>
+            <Link href="/cadastro" className="btn btn-secondary btn-sm mt-6">Começar por R$ 9,90 <ArrowRight className="btn-arrow" size={14} /></Link>
           </div>
           {COLS.map((c) => (
             <nav key={c.title} aria-label={c.title}>

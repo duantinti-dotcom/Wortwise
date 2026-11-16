@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { SERVER_SECRET, startDb, type TestDb } from "./harness";
 
 let db: TestDb;
-beforeAll(async () => { db = await startDb(); });
+beforeAll(async () => { db = await startDb({ legacyFreeQuotas: true }); });
 afterAll(async () => { await db?.stop(); });
 
 const results = (n = 2) => JSON.stringify(Array.from({ length: n }, (_, i) => ({ id: `MLB${i}` })));
@@ -112,7 +112,7 @@ describe("cobrança HeroPay", () => {
 
     // cota passa a ser a do plano Pro
     const [{ p }] = await db.as<{ p: { status: string; remaining: number } }>(u, "select public.search_precheck('novo') p");
-    expect(p).toMatchObject({ status: "proceed", remaining: 300 });
+    expect(p).toMatchObject({ status: "proceed", remaining: 150 });
 
     // cancelamento mantém o acesso até o fim do período pago
     expect((await event("subscription_cancel", "cancel:sub-1", paid(i.token, "901"))).outcome).toBe("canceled");
@@ -121,6 +121,25 @@ describe("cobrança HeroPay", () => {
     // estorno revoga imediatamente
     expect((await event("refunded", "refund:901", paid(i.token, "901"))).outcome).toBe("revoked");
     expect((await db.as<{ my_plan: string }>(u, "select public.my_plan()"))[0].my_plan).toBe("free");
+  });
+
+  it("primeiro mês: R$ 9,90 libera o Essencial por 30 dias, uma vez por pessoa e aparelho", async () => {
+    const u = await db.createUser("intro1@test.dev");
+    await db.pool.query("insert into public.signup_events (user_id, ip_hash, device_hash, trial_granted) values ($1, 'ip-a', 'dev-a', true)", [u]);
+    expect((await db.as<{ e: boolean }>(u, "select public.my_intro_eligible() e"))[0].e).toBe(true);
+    const [{ i }] = await db.as<{ i: { token: string } }>(u, "select public.create_checkout_intent('inicial') i");
+    expect((await event("spark_payment_confirmed", "pay:i1", { ...paid(i.token, "i1", "9.90"), subscription: {} })).outcome).toBe("activated");
+    expect((await db.as<{ my_plan: string }>(u, "select public.my_plan()"))[0].my_plan).toBe("pro");
+    const { rows } = await db.pool.query("select current_period_end - now() < interval '33 days' ok, provider_subscription_id from public.subscriptions where user_id = $1", [u]);
+    expect(rows[0]).toMatchObject({ ok: true, provider_subscription_id: null });
+    // mesma pessoa não pode comprar de novo
+    expect((await db.as<{ e: boolean }>(u, "select public.my_intro_eligible() e"))[0].e).toBe(false);
+    // outra conta no mesmo aparelho também não
+    const v = await db.createUser("intro2@test.dev");
+    await db.pool.query("insert into public.signup_events (user_id, ip_hash, device_hash, trial_granted) values ($1, 'ip-b', 'dev-a', true)", [v]);
+    expect((await db.as<{ i: { status: string } }>(v, "select public.create_checkout_intent('inicial') i"))[0].i.status).toBe("intro_unavailable");
+    // mas pode assinar o Essencial normalmente
+    expect((await db.as<{ i: { status: string } }>(v, "select public.create_checkout_intent('pro') i"))[0].i.status).toBe("ok");
   });
 
   it("evento sem usuário identificável não ativa nada", async () => {

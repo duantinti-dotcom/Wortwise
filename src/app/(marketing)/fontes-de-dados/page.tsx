@@ -32,7 +32,7 @@ export default async function Page() {
     } catch { /* lista vazia */ }
   }
   return (
-    <PageShell narrow eyebrow="Transparência" title="Fontes de dados" lead="O Worthwise só consulta APIs oficiais e bases públicas. Esta página mostra, sem maquiagem, o que está funcionando agora.">
+    <PageShell narrow eyebrow="Transparência" title="Fontes de dados" lead="O Worthwise usa as páginas públicas das lojas (diretamente ou pela GeckoAPI) e bases públicas. Esta página mostra, sem maquiagem, o que está funcionando agora.">
       {rows.length ? (
         <ul className="space-y-4">
           {rows.map((s) => {

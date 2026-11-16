@@ -124,7 +124,7 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
 
   const copy = {
     login: { title: "Entrar no Worthwise", sub: "Continue de onde parou.", cta: "Entrar" },
-    signup: { title: "Crie sua conta", sub: "Três pesquisas gratuitas, sem cartão.", cta: "Criar conta" },
+    signup: { title: "Crie sua conta", sub: "Primeiro mês por R$ 9,90. Cancele quando quiser.", cta: "Criar conta" },
     recover: { title: "Recuperar acesso", sub: "Enviaremos um link para você criar uma nova senha.", cta: "Enviar link" },
     reset: { title: "Nova senha", sub: "Escolha uma senha com pelo menos 8 caracteres.", cta: "Salvar senha" },
   }[mode];
@@ -180,13 +180,13 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
       </form>
 
       <p className="mt-7 text-center text-sm text-muted">
-        {mode === "login" ? <>Ainda não tem conta? <Link href={`/cadastro${plan ? `?plano=${plan}` : ""}`} className="text-brand-hi hover:underline">Criar conta grátis</Link></> : null}
+        {mode === "login" ? <>Ainda não tem conta? <Link href={`/cadastro${plan ? `?plano=${plan}` : ""}`} className="text-brand-hi hover:underline">Criar conta</Link></> : null}
         {mode === "signup" ? <>Já tem conta? <Link href="/entrar" className="text-brand-hi hover:underline">Entrar</Link></> : null}
         {mode === "recover" ? <Link href="/entrar" className="text-brand-hi hover:underline">Voltar para o login</Link> : null}
       </p>
       {mode === "signup" ? (
         <p className="mt-5 text-center text-xs leading-relaxed text-faint">Ao criar a conta você concorda com os <Link href="/termos" className="underline">Termos de uso</Link> e a <Link href="/privacidade" className="underline">Política de privacidade</Link>.
-          O teste grátis vale para uma conta por aparelho e por internet: para isso guardamos, por até 90 dias, um código derivado do seu IP e do navegador (nunca o IP em si).</p>
+          O primeiro mês por R$ 9,90 vale uma vez por pessoa, aparelho e internet: para isso guardamos, por até 90 dias, um código derivado do seu IP e do navegador (nunca o IP em si).</p>
       ) : null}
     </div>
   );

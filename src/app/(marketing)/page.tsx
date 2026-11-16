@@ -49,10 +49,10 @@ export default function HomePage() {
             Veja os mais vendidos de cada loja, compare fornecedores e calcule o lucro real de cada venda. Tudo com a fonte de cada número.
           </p>
           <div className="mx-auto mt-10 grid max-w-[420px] gap-3 sm:grid-cols-2">
-            <Link href="/cadastro" className="btn btn-primary btn-lg w-full">Começar grátis</Link>
+            <Link href="/cadastro" className="btn btn-primary btn-lg w-full">Começar por R$ 9,90</Link>
             <Link href="#em-alta" className="btn btn-secondary btn-lg w-full">Ver mais vendidos</Link>
           </div>
-          <p className="mt-5 text-[13.5px] text-faint">Grátis para começar · Sem cartão de crédito</p>
+          <p className="mt-5 text-[13.5px] text-faint">Primeiro mês por R$ 9,90 · Depois R$ 19,90/mês · Cancele quando quiser</p>
           <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[14px] text-muted">
             <span className="text-faint">Lojas:</span>
             {STORES.map((s) => (
@@ -119,7 +119,7 @@ export default function HomePage() {
       {/* Planos */}
       <section id="planos" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page">
-          <SectionHead label="Planos" title="Comece grátis. Assine quando quiser." text="Limites claros. Cancele quando quiser." />
+          <SectionHead label="Planos" title="Primeiro mês por R$ 9,90." text="Teste tudo por 30 dias. Depois escolha o plano que combina com você." />
           <Pricing />
           <p className="mt-10 text-center text-sm text-faint">Pagamento pela HeroPay (Pix, cartão ou boleto). O Worthwise não guarda dados de cartão.</p>
         </div>
@@ -139,9 +139,9 @@ export default function HomePage() {
         <div className="container-page">
           <div className="card px-6 py-16 text-center md:py-24">
             <h2 className="display mx-auto max-w-2xl text-[32px] md:text-[48px]">Pronto para escolher melhor o que vender?</h2>
-            <p className="mx-auto mt-5 max-w-md text-[17px] text-muted">Crie sua conta grátis em menos de um minuto.</p>
+            <p className="mx-auto mt-5 max-w-md text-[17px] text-muted">Crie sua conta em menos de um minuto e comece pelo primeiro mês por R$ 9,90.</p>
             <div className="mx-auto mt-10 grid max-w-[420px] gap-3 sm:grid-cols-2">
-              <Link href="/cadastro" className="btn btn-primary btn-lg w-full">Começar grátis</Link>
+              <Link href="/cadastro" className="btn btn-primary btn-lg w-full">Começar por R$ 9,90</Link>
               <Link href="/precos" className="btn btn-secondary btn-lg w-full">Ver planos</Link>
             </div>
           </div>

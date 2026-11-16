@@ -7,7 +7,7 @@ import { apiError, parseBody, sameOrigin } from "@/lib/http";
 import { supabaseServer } from "@/lib/supabase/server";
 
 const schema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("create_link"), plan: z.enum(["pro", "business"]) }),
+  z.object({ action: z.literal("create_link"), plan: z.enum(["inicial", "pro", "business"]) }),
   z.object({ action: z.literal("register_webhooks") }),
 ]);
 

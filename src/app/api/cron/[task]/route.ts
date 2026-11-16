@@ -256,11 +256,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ task: s
   }
   if (task === "heropay-setup") {
     // Configuração inicial da HeroPay feita pelo servidor: links de assinatura e webhooks.
-    const { data: plans } = await supabaseAnon().from("plans").select("id, name, description, price_cents, provider_checkout_url").in("id", ["pro", "business"]);
+    const { data: plans } = await supabaseAnon().from("plans").select("id, name, description, price_cents, provider_checkout_url").in("id", ["inicial", "pro", "business"]);
     const links: { plan: string; id?: number; url?: string; error?: string; existing?: string }[] = [];
     for (const p of (plans ?? []) as { id: string; name: string; description: string | null; price_cents: number; provider_checkout_url: string | null }[]) {
       if (p.provider_checkout_url && new URL(req.url).searchParams.get("recriar") !== "1") { links.push({ plan: p.id, existing: p.provider_checkout_url }); continue; }
-      try { const l = await createSubscriptionLink(p); links.push({ plan: p.id, id: l.id, url: l.url }); }
+      try {
+        const l = await createSubscriptionLink(p);
+        await serverRpc("server_set_plan_link", { p_plan: p.id, p_link_id: String(l.id), p_url: l.url });
+        links.push({ plan: p.id, id: l.id, url: l.url });
+      }
       catch (e) { links.push({ plan: p.id, error: e instanceof Error ? e.message : "erro" }); }
     }
     const hooks = [];

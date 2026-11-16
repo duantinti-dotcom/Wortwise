@@ -22,7 +22,7 @@ export default function Page() {
         <ul>
           <li>Prestar o serviço contratado e aplicar os limites do seu plano — execução de contrato.</li>
           <li>Processar assinaturas e cumprir obrigações fiscais — execução de contrato e obrigação legal.</li>
-          <li>Garantir um teste grátis por pessoa — legítimo interesse, com tratamento mínimo: o IP e o cookie do navegador são convertidos em hash. Se o mesmo aparelho, ou a mesma rede nos últimos 30 dias, já tiver uma conta grátis, a nova conta é criada normalmente, só que sem as cotas grátis. Ninguém é impedido de se cadastrar ou de assinar, e não usamos fingerprinting oculto.</li>
+          <li>Garantir que o primeiro mês promocional seja usado uma vez por pessoa — legítimo interesse, com tratamento mínimo: o IP e o cookie do navegador são convertidos em hash. Se o mesmo aparelho, ou a mesma rede nos últimos 30 dias, já tiver uma conta grátis, a nova conta é criada normalmente, só que sem as cotas grátis. Ninguém é impedido de se cadastrar ou de assinar, e não usamos fingerprinting oculto.</li>
           <li>Personalizar o painel com as preferências que você informar — consentimento, revogável a qualquer momento.</li>
         </ul>
         <h2>3. Retenção</h2>

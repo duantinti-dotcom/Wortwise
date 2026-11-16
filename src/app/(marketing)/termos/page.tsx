@@ -13,9 +13,9 @@ export default function Page() {
         <h2>2. Natureza das informações</h2>
         <p>Dados de marketplaces refletem o momento da coleta e podem mudar. Indicadores de demanda, o Worthwise Score, cenários e simulações são apoio à decisão: <strong>não constituem garantia de vendas, de lucro ou de qualidade de fornecedores</strong>. Decisões comerciais, tributárias e de importação são de responsabilidade do usuário; consulte um contador quando necessário.</p>
         <h2>3. Conta</h2>
-        <p>Você deve fornecer informações verdadeiras, manter suas credenciais em sigilo e usar uma conta por pessoa. Contas criadas para burlar os limites do teste gratuito podem ser suspensas.</p>
-        <h2>4. Teste gratuito</h2>
-        <p>Cada conta tem direito a três pesquisas de produtos gratuitas, no total. Uma pesquisa só é descontada quando entrega resultados.</p>
+        <p>Você deve fornecer informações verdadeiras, manter suas credenciais em sigilo e usar uma conta por pessoa. Contas criadas para usar o primeiro mês promocional mais de uma vez podem ser suspensas.</p>
+        <h2>4. Primeiro mês promocional</h2>
+        <p>O primeiro mês custa R$ 9,90, em pagamento único, e dá acesso ao plano Essencial por 30 dias, sem renovação automática. Ele vale uma vez por pessoa, aparelho e conexão de internet. Uma pesquisa só é descontada da cota quando entrega resultados.</p>
         <h2>5. Planos, cobrança e cancelamento</h2>
         <ul>
           <li>Os planos pagos são mensais, com renovação automática, cobrados pela HeroPay nos meios por ela oferecidos.</li>

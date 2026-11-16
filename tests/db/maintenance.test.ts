@@ -6,7 +6,7 @@ import { SERVER_SECRET, startDb, type TestDb } from "./harness";
  * arquiva histórico antigo com restauração e avisa ao se aproximar da cota.
  */
 let db: TestDb;
-beforeAll(async () => { db = await startDb(); });
+beforeAll(async () => { db = await startDb({ legacyFreeQuotas: true }); });
 afterAll(async () => { await db?.stop(); });
 
 const q = <T = Record<string, unknown>>(sql: string, p: unknown[] = []) => db.pool.query(sql, p).then((r) => r.rows as T[]);

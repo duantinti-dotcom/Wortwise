@@ -9,7 +9,7 @@ import { supabaseAnon } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Planos e preços",
-  description: "Compare os planos Grátis, Pro e Business do Worthwise: limites de pesquisas, assistente de IA, monitoramento de preços e relatórios.",
+  description: "Primeiro mês por R$ 9,90. Depois, Essencial por R$ 19,90/mês ou Profissional por R$ 39,90/mês: mais vendidos de cada loja, assistente de IA, histórico de preços e calculadora de lucro.",
   alternates: { canonical: "/precos" },
 };
 export const dynamic = "force-dynamic"; // preços e cotas vêm do banco (editáveis no painel)
@@ -34,7 +34,7 @@ export default async function PricingPage() {
   }
   const resources = Object.keys(RESOURCE_LABELS).filter((r) => quotas.some((q) => q.resource === r));
   return (
-    <PageShell eyebrow="Planos" title="Preço simples, limites claros" lead="Comece com três pesquisas gratuitas. Assine quando o Worthwise fizer parte da sua rotina de compra.">
+    <PageShell eyebrow="Planos" title="Preço simples, limites claros" lead="Comece pelo primeiro mês por R$ 9,90 com tudo do Essencial. Depois, continue no plano que combina com o seu volume de vendas.">
       <Pricing initial={plans} />
       {resources.length ? (
         <div className="card mt-14 overflow-x-auto">
@@ -46,14 +46,14 @@ export default async function PricingPage() {
                 <tr key={r}><th scope="row" className="px-5 py-3.5 text-left font-normal text-muted">{RESOURCE_LABELS[r]}</th>
                   {plans.map((p) => {
                     const q = quotas.find((x) => x.plan_id === p.id && x.resource === r);
-                    return <td key={p.id} className="tabular px-5 py-3.5">{q ? q.limit_value === 0 ? <span className="text-faint">Não incluído</span> : <>{q.limit_value.toLocaleString("pt-BR")} <span className="text-faint">{PERIOD_LABELS[q.period]}</span></> : "—"}</td>;
+                    return <td key={p.id} className="tabular px-5 py-3.5">{q ? q.limit_value === 0 ? <span className="text-faint">Não incluído</span> : <>{q.limit_value.toLocaleString("pt-BR")} <span className="text-faint">{q.period === "month" ? "por mês" : PERIOD_LABELS[q.period]}</span></> : "—"}</td>;
                   })}</tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : null}
-      <p className="mt-6 text-center text-sm text-faint">Não prometemos uso “ilimitado”: todos os planos têm limites técnicos explícitos. Pagamento via HeroPay (Pix, cartão ou boleto), renovação mensal, cancelamento a qualquer momento.</p>
+      <p className="mt-6 text-center text-sm text-faint">Não prometemos uso “ilimitado”: todos os planos têm limites técnicos explícitos. Pagamento via HeroPay (Pix, cartão ou boleto). Primeiro mês em pagamento único, sem renovação; Essencial e Profissional com renovação mensal e cancelamento a qualquer momento.</p>
       <section className="mx-auto mt-24 max-w-3xl"><h2 className="mb-8 text-center text-3xl font-semibold">Perguntas frequentes</h2><Faq /></section>
       <p className="mt-10 text-center text-sm text-muted">Dúvidas sobre os dados? Leia a <Link href="/metodologia" className="text-brand-hi underline underline-offset-4">metodologia</Link>.</p>
     </PageShell>

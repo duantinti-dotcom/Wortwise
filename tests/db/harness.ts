@@ -28,7 +28,11 @@ alter default privileges in schema public grant all on sequences to anon, authen
 
 export const SERVER_SECRET = "test-server-secret";
 
-export async function startDb() {
+/**
+ * legacyFreeQuotas: recoloca as cotas do antigo plano grátis (3 pesquisas, 5 mensagens, 1 coleção, 3 simulações)
+ * para os testes que verificam a mecânica de cotas (atomicidade, concorrência, visibilidade).
+ */
+export async function startDb(opts: { legacyFreeQuotas?: boolean } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "ww-pg-"));
   const port = 54000 + Math.floor(Math.random() * 900);
   const server = new EmbeddedPostgres({
@@ -49,6 +53,10 @@ export async function startDb() {
     }
   }
   await pool.query("select app_private.set_server_secret($1)", [SERVER_SECRET]);
+  if (opts.legacyFreeQuotas) {
+    await pool.query(`update public.plan_quotas set limit_value = case resource when 'search' then 3 when 'ai_message' then 5
+      when 'collection' then 1 when 'simulation_saved' then 3 else limit_value end where plan_id = 'free'`);
+  }
   return {
     pool,
     async stop() { await pool.end(); await server.stop(); },

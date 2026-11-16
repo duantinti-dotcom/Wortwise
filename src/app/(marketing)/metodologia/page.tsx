@@ -14,10 +14,10 @@ export default function Page() {
       <article className="prose-ww">
         <h2>Princípios</h2>
         <ul>
-          <li><strong>Só dados com origem.</strong> Preços, avaliações e ofertas vêm de APIs oficiais ou bases públicas. Cada item guarda a fonte, o identificador externo e a data da coleta.</li>
+          <li><strong>Só dados com origem.</strong> Preços, avaliações, vendidos e posições vêm das páginas públicas das próprias lojas (diretamente ou pela GeckoAPI) e de bases públicas. Cada item guarda a fonte, o identificador externo e a data da coleta.</li>
           <li><strong>Ausência não vira zero.</strong> Quando a fonte não informa um campo, mostramos “Não disponível”.</li>
           <li><strong>Estimativa é chamada de estimativa.</strong> Indicadores indiretos nunca são apresentados como vendas confirmadas.</li>
-          <li><strong>Sem scraping.</strong> Não coletamos páginas à revelia das plataformas nem contornamos limites técnicos.</li>
+          <li><strong>Uso moderado.</strong> Cada ranking é lido no máximo a cada 3 dias e guardado; quem acessa o Worthwise vê a cópia guardada, sem sobrecarregar as lojas.</li>
         </ul>
         <h2>Pesquisa e comparação de produtos</h2>
         <p>Os títulos são normalizados (acentos, ruído promocional, palavras de ligação) e têm suas variantes extraídas — capacidade, quantidade do kit e cor. Dois anúncios só são tratados como comparáveis quando compartilham o mesmo código GTIN ou quando têm títulos muito semelhantes <strong>e</strong> a mesma capacidade e quantidade. Assim, um aparelho de 128 GB não é comparado a um de 256 GB.</p>

@@ -1,5 +1,5 @@
 "use client";
-import { Bell, Bookmark, ExternalLink, ImageOff, Loader2, Lock, Star, Truck } from "lucide-react";
+import { Bell, Bookmark, ExternalLink, Flame, ImageOff, Loader2, Lock, Star, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -82,6 +82,14 @@ export function Sparkline({ points }: { points: { date: string; price: number }[
   );
 }
 
+/** 16042 → "16 mil", 250000 → "250 mil", 1200000 → "1,2 mi". */
+function compactNumber(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mi`;
+  if (n >= 10_000) return `${Math.floor(n / 1000).toLocaleString("pt-BR")} mil`;
+  if (n >= 1000) return `${(Math.floor(n / 100) / 10).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mil`;
+  return n.toLocaleString("pt-BR");
+}
+
 const CALC_PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classico", shopee: "shopee", amazon: "amazon", tiktokshop: "tiktokshop" };
 
 export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void; rank?: number; history?: { date: string; price: number }[] }) {
@@ -116,7 +124,7 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           {rank != null && discount ? <span className="badge badge-pos !h-5 !px-1.5 !text-[11px]">−{discount}%</span> : null}
         </div>
         {p.soldLabel ? <div className="mt-1.5 text-[13px] font-medium text-pos">{p.soldLabel}</div>
-          : p.soldQuantity ? <div className="mt-1.5 text-[13px] font-medium text-soft">+{p.soldQuantity.toLocaleString("pt-BR")} vendidos</div> : null}
+          : p.soldQuantity ? <div className="mt-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-pos"><Flame size={13} />{p.source === "mercadolivre" ? "+" : ""}{compactNumber(p.soldQuantity)} vendidos</div> : null}
         {history ? (
           <div className="mt-3">
             <div className="text-[11.5px] text-faint">Preço nos últimos dias</div>
@@ -125,18 +133,17 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
         ) : null}
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
           {p.rating != null ? <span className="flex items-center gap-1"><Star size={12} className="fill-brand text-brand" />{p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{p.reviewsCount != null ? ` (${p.reviewsCount.toLocaleString("pt-BR")})` : ""}</span> : null}
-          <span className="truncate">{p.sellerName ?? (p.kind === "catalog_product" ? "Ficha de catálogo" : "Vendedor não informado")}</span>
+          {p.sellerName ? <span className="truncate">{p.sellerName}</span> : null}
         </div>
-        <div className="relative z-10 mt-auto grid grid-cols-[1fr_auto] gap-2 pt-4">
+        <div className={cn("relative z-10 mt-auto grid gap-2 pt-4", external ? "grid-cols-1" : "grid-cols-[1fr_auto]")}>
           <Link href={analyzeHref} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer nofollow" : undefined} className="btn btn-primary btn-sm">{external ? `Ver ${p.source === "amazon" ? "na Amazon" : p.source === "shopee" ? "na Shopee" : "no TikTok Shop"}` : "Analisar"}</Link>
-          {p.permalink ? (
+          {p.permalink && !external ? (
             <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !w-9 !px-0" aria-label={`Abrir no ${source}`} title={`Abrir no ${source}`}>
               <ExternalLink size={15} />
             </a>
           ) : null}
         </div>
         {p.price != null ? <Link href={`/app/calculadora?canal=${CALC_PRESET[p.source] ?? ""}&preco=${p.price}`} className="relative z-10 mt-2.5 text-[12.5px] font-medium text-brand-hi hover:underline">Calcular lucro e preço recomendado</Link> : null}
-        <div className="mt-2 text-[11.5px] text-faint">coletado {relativeTime(p.collectedAt)}</div>
       </div>
     </article>
   );
