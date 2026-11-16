@@ -23,8 +23,8 @@ function Panel({ item, flip }: { item: ShowcaseItem; flip: boolean }) {
         <h3 className="display mt-3 text-[34px] leading-[1.05] sm:text-[46px] lg:text-[56px]">{item.title}</h3>
         <p className="mx-auto mt-5 max-w-md text-[17px] leading-relaxed text-muted lg:mx-0 md:text-[19px]">{item.text}</p>
       </motion.div>
-      <motion.div style={{ scale, opacity }} className="relative">
-        <div aria-hidden className="pointer-events-none absolute inset-[-12%] -z-10 rounded-full blur-3xl" style={{ background: item.glow }} />
+      <motion.div style={{ scale, opacity, willChange: "transform, opacity" }} className="relative">
+        <div aria-hidden className="pointer-events-none absolute inset-[-14%] -z-10" style={{ background: item.glow }} />
         <div className="card overflow-hidden p-4 shadow-[0_40px_120px_-40px_rgba(37,99,235,0.45)] md:p-6">{item.visual}</div>
       </motion.div>
     </div>

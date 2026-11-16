@@ -675,3 +675,8 @@ html.theme-vt::view-transition-new(root) { animation: theme-reveal .75s cubic-be
   .chip[aria-pressed="true"]::before, .chip[aria-current="page"]::before { content: none; }
 }
 @media (prefers-reduced-motion: reduce) { .btn, .chip, .icon-btn { transition: none; } }
+
+/* v18 · Rolagem leve: sem desfoque no fundo animado (o degradê já é suave) — evita engasgos ao rolar. */
+.ambient .blob { filter: none; }
+/* Cartões grandes sem desfoque de fundo (pesava na rolagem); o vidro continua no menu, botões e abas. */
+.card, .lg { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
