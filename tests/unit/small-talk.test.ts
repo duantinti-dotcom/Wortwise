@@ -15,7 +15,7 @@ describe("assistente", () => {
     const p = buildSystemPrompt({ firstName: "Ana", plan: "Grátis", searchesLeft: 3, stores: [{ name: "Mercado Livre", connected: false }, { name: "Shopee", connected: false }], interests: [] });
     expect(p).toContain("Lojas com dados conectados agora: nenhuma");
     expect(p).toContain("NÃO chame pesquisar_produtos");
-    expect(p).toContain("Cumprimentos");
+    expect(p).toContain("Só cumprimente se a pessoa cumprimentar");
   });
 
   it("lê respostas do Workers AI no formato novo (choices) e no antigo (response)", () => {

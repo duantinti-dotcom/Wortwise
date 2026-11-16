@@ -19,18 +19,23 @@ const STORES: { preset: string; label: string; mark: string | null }[] = [
   { preset: "loja-propria", label: "Loja própria", mark: null },
 ];
 
-function parse(v: string) { const n = Number(v.replace(/\./g, "").replace(",", ".")); return Number.isFinite(n) && n >= 0 ? n : 0; }
+/** Lê o número digitado (até R$ 10 milhões, para nada absurdo quebrar a tela). */
+function parse(v: string, max = 10_000_000) { const n = Number(v.replace(/\./g, "").replace(",", ".")); return Number.isFinite(n) && n >= 0 ? Math.min(n, max) : 0; }
+const fit = (t: string) => (t.length > 18 ? "text-[28px]" : t.length > 14 ? "text-[36px]" : "text-[44px]");
 const show = (n: number) => (n ? String(n).replace(".", ",") : "");
 
 function Money({ id, label, help, value, onChange, big }: { id: string; label: string; help?: string; value: number; onChange: (v: number) => void; big?: boolean }) {
   const [text, setText] = useState(show(value));
+  // Quando o valor muda por fora (ex.: a barrinha de preço), o campo acompanha.
+  const [last, setLast] = useState(value);
+  if (value !== last) { setLast(value); if (parse(text) !== value) setText(show(Math.round(value * 100) / 100)); }
   return (
     <label htmlFor={id} className="block">
       <span className={cn("block font-semibold", big ? "text-[17px]" : "text-[14.5px]")}>{label}</span>
       {help ? <span className="mt-0.5 block text-[13px] text-muted">{help}</span> : null}
       <span className="relative mt-2.5 block">
         <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[16px] text-faint">R$</span>
-        <input id={id} inputMode="decimal" placeholder="0,00" value={text} onChange={(e) => { setText(e.target.value); onChange(parse(e.target.value)); }}
+        <input id={id} inputMode="decimal" placeholder="0,00" value={text} onChange={(e) => { const v = parse(e.target.value); setText(v >= 10_000_000 ? show(v) : e.target.value); setLast(v); onChange(v); }}
           className={cn("input !pl-12 tabular", big ? "!h-14 !text-[22px] font-semibold" : "!h-12 !text-[17px]")} />
       </span>
     </label>
@@ -44,15 +49,43 @@ function Pct({ id, label, help, value, onChange }: { id: string; label: string; 
       <span className="block text-[14.5px] font-semibold">{label}</span>
       {help ? <span className="mt-0.5 block text-[13px] text-muted">{help}</span> : null}
       <span className="relative mt-2.5 block">
-        <input id={id} inputMode="decimal" placeholder="0" value={text} onChange={(e) => { setText(e.target.value); onChange(parse(e.target.value)); }} className="input tabular !h-12 !pr-10 !text-[17px]" />
+        <input id={id} inputMode="decimal" placeholder="0" value={text} onChange={(e) => { const v = parse(e.target.value, 100); setText(v >= 100 ? "100" : e.target.value); onChange(v); }} className="input tabular !h-12 !pr-10 !text-[17px]" />
         <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[16px] text-faint">%</span>
       </span>
     </label>
   );
 }
 
-export function EasyProfit({ initialPrice, initialPreset, productName }: { initialPrice?: number; initialPreset?: string; productName?: string }) {
-  const [cost, setCost] = useState(0);
+function PriceSlider({ price, cost, minPrice, recommended, onChange }: { price: number; cost: number; minPrice: number | null; recommended: number | null; onChange: (v: number) => void }) {
+  const lo = Math.max(0, Math.floor(cost * 0.8));
+  const hi = Math.max(Math.ceil(Math.max(cost * 4, price * 1.5, (recommended ?? 0) * 1.3)), lo + 10);
+  const pct = (v: number) => Math.min(100, Math.max(0, ((v - lo) / (hi - lo)) * 100));
+  const fill = pct(price);
+  const mark = (v: number | null, cls: string, text: string) => v != null && v >= lo && v <= hi ? (
+    <span className={cn("absolute -translate-x-1/2 whitespace-nowrap text-[11px] font-medium", cls)} style={{ left: `${Math.min(90, Math.max(10, pct(v)))}%` }}>
+      <span className="mx-auto mb-0.5 block h-2 w-px bg-current" />{text}
+    </span>) : null;
+  return (
+    <div className="mt-7">
+      <div className="flex items-baseline justify-between gap-3"><span className="text-[14px] font-semibold">Arraste para testar outro preço</span>
+        <span className="tabular truncate text-[17px] font-semibold text-brand-hi">{formatMoney(price)}</span></div>
+      <div className="relative mt-4 h-7">
+        <div className="absolute inset-x-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-tint/[0.1] shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]" />
+        <div className="absolute left-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,#F87171,#F59E0B_35%,#22C55E_70%)]" style={{ width: `${fill}%` }} />
+        <div className="pointer-events-none absolute top-1/2 size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-[radial-gradient(circle_at_35%_30%,#fff,#dbe4ff_55%,#a5b4fc)] shadow-[0_4px_14px_rgba(37,99,235,0.55),inset_0_1px_0_#fff]" style={{ left: `${fill}%` }} />
+        <input type="range" aria-label="Preço de venda" min={lo} max={hi} step={0.1} value={Math.min(Math.max(price, lo), hi)} onChange={(e) => onChange(Number(e.target.value))}
+          className="absolute inset-0 w-full cursor-pointer opacity-0" />
+      </div>
+      <div className="relative mt-1 h-12">
+        {mark(minPrice, "top-0 text-neg", `mínimo ${formatMoney(minPrice)}`)}
+        {mark(recommended, "top-[22px] text-pos", `recomendado ${formatMoney(recommended)}`)}
+      </div>
+    </div>
+  );
+}
+
+export function EasyProfit({ initialPrice, initialPreset, productName, initialCost }: { initialPrice?: number; initialPreset?: string; productName?: string; initialCost?: number }) {
+  const [cost, setCost] = useState(initialCost ?? 0);
   const [price, setPrice] = useState(initialPrice ?? 0);
   const [preset, setPreset] = useState(STORES.some((s) => s.preset === initialPreset) ? initialPreset! : "mercadolivre-classico");
   const [more, setMore] = useState(false);
@@ -123,11 +156,14 @@ export function EasyProfit({ initialPrice, initialPreset, productName }: { initi
           <>
             <div className={cn("card p-7", profit < 0 && "!bg-[linear-gradient(180deg,rgba(248,113,113,0.12),rgba(248,113,113,0.03))]")}>
               <p className="text-[15px] text-muted">{profit >= 0 ? "Em cada venda sobra no seu bolso" : "Em cada venda você PERDE"}</p>
-              <p className={cn("tabular mt-1 text-[44px] font-semibold leading-none tracking-tight", profit >= 0 ? "text-pos" : "text-neg")}>{formatMoney(Math.abs(profit))}</p>
+              <p className={cn("tabular mt-1 break-all font-semibold leading-none tracking-tight", fit(formatMoney(Math.abs(profit))), profit >= 0 ? "text-pos" : "text-neg")}>{formatMoney(Math.abs(profit))}</p>
               <p className="mt-3 text-[15px] text-soft">
                 {profit >= 0 ? <>De cada <b>{formatMoney(price)}</b> que o cliente paga, <b>{Math.round((profit / total) * 100)}%</b> fica com você.</>
                   : <>Com esse preço você tem prejuízo. Venda por pelo menos <b>{formatMoney(r.minPrice)}</b>.</>}
               </p>
+
+              {/* Barrinha: arraste para mudar o preço de venda */}
+              <PriceSlider price={price} cost={cost} minPrice={r.minPrice} recommended={recommended} onChange={setPrice} />
 
               {/* Para onde vai o dinheiro */}
               <div className="mt-7">

@@ -5,7 +5,7 @@ import { BigStats, Showcase } from "@/components/marketing/showcase";
 import { LiveTrending } from "@/components/marketing/live-trending";
 import { Pricing } from "@/components/marketing/pricing";
 import { DemoTag, HeroPreview, VisualAssistant, VisualCalc, VisualChart, VisualCompare, VisualSearch } from "@/components/marketing/visuals";
-import { ProfitCalculator } from "@/components/profit-calculator";
+import { EasyProfit } from "@/components/easy-profit";
 import { SourceMark, sourceName } from "@/components/source-mark";
 import { Reveal } from "@/components/ui/reveal";
 import { publicEnv } from "@/lib/env";
@@ -121,7 +121,7 @@ export default function HomePage() {
       <section id="demonstracao" className="scroll-mt-24 pt-28 md:pt-40">
         <div className="container-page">
           <SectionHead label="Grátis, sem cadastro" title="Experimente a calculadora de lucro" text="Mexa nos números e veja o lucro e o preço mínimo na hora." />
-          <ProfitCalculator compact />
+          <EasyProfit initialCost={32} initialPrice={79.9} />
         </div>
       </section>
 

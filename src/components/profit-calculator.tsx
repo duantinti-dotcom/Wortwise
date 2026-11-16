@@ -27,7 +27,11 @@ function NumField({ id, label, value, onChange, prefix, suffix, hint }: {
             const raw = e.target.value.replace(/[^\d.,]/g, "");
             setText(raw);
             const norm = raw.includes(",") ? raw.replace(/\./g, "").replace(",", ".") : raw;
-            onChange(Number(norm) || 0);
+            // Limites para valores absurdos não quebrarem a tela: R$ 10 milhões, 100% e 1 milhão de unidades.
+            const limit = suffix === "%" ? 100 : suffix === "un." ? 1_000_000 : 10_000_000;
+            const n = Number(norm) || 0;
+            if (n > limit) { setText(String(limit).replace(".", ",")); onChange(limit); return; }
+            onChange(n);
           }}
           onBlur={() => setText(null)} />
         {suffix ? <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[13px] text-faint">{suffix}</span> : null}
@@ -47,6 +51,11 @@ function Section({ title, sub, children }: { title: string; sub: string; childre
 }
 
 /** Cascata da receita ao lucro: cada custo "desce" a barra a partir da receita. */
+/** Tamanho da fonte do resultado conforme o tamanho do número (para nunca vazar do cartão). */
+function fitSize(text: string) {
+  return text.length > 18 ? "text-[26px]" : text.length > 14 ? "text-[34px]" : "text-[44px] md:text-5xl";
+}
+
 function Waterfall({ revenue, items, profit }: { revenue: number; items: { label: string; value: number }[]; profit: number }) {
   const max = Math.max(revenue, revenue - profit, 1);
   const sorted = items.filter((i) => i.value > 0.004).sort((a, b) => b.value - a.value);
@@ -67,14 +76,14 @@ function Waterfall({ revenue, items, profit }: { revenue: number; items: { label
 
 function WRow({ label, value, start, width, tone, strong }: { label: string; value: number; start: number; width: number; tone: "pos" | "neg" | "brand"; strong?: boolean }) {
   return (
-    <div role="listitem" className="grid grid-cols-[minmax(0,118px)_1fr_auto] items-center gap-3 text-[12.5px]">
+    <div role="listitem" className="grid grid-cols-[minmax(0,108px)_minmax(0,1fr)_minmax(0,max-content)] items-center gap-3 text-[12.5px]">
       <span className={cn("truncate", strong ? "font-medium text-fg" : "text-muted")}>{label}</span>
       <span className="relative h-5 rounded-md bg-tint/[0.03]">
         <span className={cn("absolute inset-y-0 rounded-md transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
           tone === "pos" && "bg-gradient-to-r from-pos/50 to-pos/80", tone === "neg" && "bg-neg/45", tone === "brand" && "bg-brand")}
           style={{ left: `${Math.min(start, 1) * 100}%`, width: `${Math.max(Math.min(width, 1 - Math.min(start, 1)), 0.004) * 100}%` }} />
       </span>
-      <span className={cn("tabular w-[92px] text-right", strong ? "font-semibold" : "", value < 0 && !strong ? "text-danger" : "text-fg")}>{formatMoney(value)}</span>
+      <span className={cn("tabular min-w-[92px] whitespace-nowrap text-right", strong ? "font-semibold" : "", value < 0 && !strong ? "text-danger" : "text-fg")}>{formatMoney(value)}</span>
     </div>
   );
 }
@@ -108,7 +117,8 @@ export function ProfitCalculator({ initial, initialPreset, onSave, saving, compa
   const ready = i.costPrice > 0 && i.salePrice > 0;
   const sliderMin = Math.max(0, Math.floor(Math.min(r.minPrice ?? i.salePrice, i.salePrice || Infinity) * 0.6));
   const sliderMax = Math.max(sliderMin + 10, Math.ceil(Math.max(i.salePrice, r.minPrice ?? 0, target ?? 0) * 1.4) || 100);
-  const pos = (v: number | null) => (v == null ? null : Math.min(100, Math.max(0, ((v - sliderMin) / (sliderMax - sliderMin)) * 100)));
+  // Marcações sempre dentro da barra (entre 8% e 92%, para o texto não sair da tela).
+  const pos = (v: number | null) => (v == null || v < sliderMin || v > sliderMax ? null : Math.min(92, Math.max(8, ((v - sliderMin) / (sliderMax - sliderMin)) * 100)));
   const best = Math.max(...channels.map((x) => x.result.profit));
   const hiddenCosts = [i.purchaseFreight > 0 && "frete da compra", i.otherCosts > 0 && "outros custos", i.packaging > 0 && "embalagem", i.adsPct > 0 && "anúncios",
     i.paymentFeePct > 0 && "taxa do pagamento", i.returnsPct > 0 && "devoluções", i.lossPct > 0 && "perdas"].filter(Boolean).join(", ").replace(/, ([^,]*)$/, " e $1");
@@ -195,7 +205,7 @@ export function ProfitCalculator({ initial, initialPreset, onSave, saving, compa
         <div className={cn("edge-grad relative overflow-hidden rounded-2xl border p-6 md:p-7", ready && r.profit < 0 ? "border-neg/30 bg-surface" : "bg-surface")}>
           <div className="relative">
             <div className="text-[13px] text-muted">{ready && r.profit < 0 ? `Prejuízo total (${i.quantity} unidades)` : `Lucro total (${i.quantity} unidades)`}</div>
-            <div className={cn("tabular mt-1 text-[44px] font-semibold leading-none tracking-[-0.04em] transition-colors md:text-5xl", !ready ? "text-faint" : r.profit >= 0 ? "text-fg" : "text-danger")}
+            <div className={cn("tabular mt-1 break-all font-semibold leading-none tracking-[-0.04em] transition-colors", fitSize(ready ? formatMoney(r.profit) : ""), !ready ? "text-faint" : r.profit >= 0 ? "text-fg" : "text-danger")}
               data-testid="profit-total">{ready ? <AnimatedNumber value={r.profit} format={(v) => formatMoney(v)} /> : "R$ —"}</div>
             <p className="mt-3 text-[14px] leading-relaxed text-soft" data-testid="profit-verdict">
               {!ready ? "Preencha quanto você paga e por quanto vai vender para ver o resultado."
@@ -204,7 +214,7 @@ export function ProfitCalculator({ initial, initialPreset, onSave, saving, compa
             </p>
             <div className="mt-5 grid grid-cols-3 gap-2">
               {[["Por venda", ready ? formatMoney(r.profitPerUnit) : "—", "profit-unit"], ["Margem", ready ? formatPercent(r.marginPct) : "—", "profit-margin"], ["Retorno do investimento", ready ? formatPercent(r.roiPct) : "—", "profit-roi"]].map(([k, v, t]) => (
-                <div key={k} className="rounded-xl border border-tint/[0.08] bg-tint/[0.05] px-3 py-2.5"><div className="text-[11px] text-muted">{k}</div><div className="tabular mt-0.5 text-[15px] font-semibold" data-testid={t}>{v}</div></div>
+                <div key={k} className="min-w-0 rounded-2xl bg-[linear-gradient(180deg,rgb(var(--tint)/0.08),rgb(var(--tint)/0.03))] px-3.5 py-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.08),inset_0_0_0_1px_rgb(var(--tint)/0.08)]"><div className="truncate text-[11.5px] text-muted">{k}</div><div className="tabular mt-1 truncate text-[16px] font-semibold" title={v} data-testid={t}>{v}</div></div>
               ))}
             </div>
 
