@@ -22,7 +22,7 @@ const STORES: { preset: string; label: string; mark: string | null }[] = [
 /** Lê o número digitado (até R$ 10 milhões, para nada absurdo quebrar a tela). */
 function parse(v: string, max = 10_000_000) { const n = Number(v.replace(/\./g, "").replace(",", ".")); return Number.isFinite(n) && n >= 0 ? Math.min(n, max) : 0; }
 const fit = (t: string) => (t.length > 18 ? "text-[28px]" : t.length > 14 ? "text-[36px]" : "text-[44px]");
-const show = (n: number) => (n ? String(n).replace(".", ",") : "");
+const show = (n: number) => (n ? n.toLocaleString("pt-BR", { maximumFractionDigits: 2, useGrouping: false }) : "");
 
 function Money({ id, label, help, value, onChange, big }: { id: string; label: string; help?: string; value: number; onChange: (v: number) => void; big?: boolean }) {
   const [text, setText] = useState(show(value));
@@ -85,13 +85,20 @@ function PriceSlider({ price, cost, minPrice, recommended, onChange }: { price: 
 }
 
 export function EasyProfit({ initialPrice, initialPreset, productName, initialCost }: { initialPrice?: number; initialPreset?: string; productName?: string; initialCost?: number }) {
-  const [cost, setCost] = useState(initialCost ?? 0);
-  const [price, setPrice] = useState(initialPrice ?? 0);
+  const LIMIT = 10_000_000;
+  const [rawCost, setCost] = useState(initialCost ?? 0);
+  const [rawPrice, setPrice] = useState(initialPrice ?? 0);
+  // Segunda trava: a conta nunca usa valores acima de R$ 10 milhões.
+  const cost = Math.min(Math.max(rawCost, 0), LIMIT);
+  const price = Math.min(Math.max(rawPrice, 0), LIMIT);
   const [preset, setPreset] = useState(STORES.some((s) => s.preset === initialPreset) ? initialPreset! : "mercadolivre-classico");
   const [more, setMore] = useState(false);
-  const [shipping, setShipping] = useState(0);
-  const [tax, setTax] = useState(0);
-  const [packaging, setPackaging] = useState(0);
+  const [rawShipping, setShipping] = useState(0);
+  const shipping = Math.min(rawShipping, LIMIT);
+  const [rawTax, setTax] = useState(0);
+  const tax = Math.min(rawTax, 100);
+  const [rawPackaging, setPackaging] = useState(0);
+  const packaging = Math.min(rawPackaging, LIMIT);
   const [target, setTarget] = useState(30);
 
   const ch = CHANNEL_PRESETS.find((c) => c.id === preset)!;
