@@ -32,9 +32,11 @@ function SectionHead({ label, title, text, className }: { label?: string; title:
 
 export default function HomePage() {
   const jsonLd = [
-    { "@context": "https://schema.org", "@type": "Organization", name: "Worthwise", url: publicEnv.appUrl, logo: `${publicEnv.appUrl}/icon-512.png` },
+    { "@context": "https://schema.org", "@type": "Organization", name: "Worthwise", url: publicEnv.appUrl, logo: `${publicEnv.appUrl}/icon-512.png`, email: "contato@worthwise.site" },
+    { "@context": "https://schema.org", "@type": "WebSite", name: "Worthwise", url: publicEnv.appUrl, inLanguage: "pt-BR" },
     { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Worthwise", applicationCategory: "BusinessApplication", operatingSystem: "Web",
-      description: "Plataforma brasileira de inteligência comercial para vendedores online.", offers: { "@type": "AggregateOffer", priceCurrency: "BRL", lowPrice: "0", highPrice: "59.90", offerCount: 3 } },
+      description: "Descubra o que vender online: mais vendidos do Mercado Livre, Shopee, Amazon e TikTok Shop, histórico de preço, calculadora de lucro e assistente de vendas com IA.",
+      offers: { "@type": "AggregateOffer", priceCurrency: "BRL", lowPrice: "9.90", highPrice: "39.90", offerCount: 3 } },
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ_ITEMS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
   ];
   return (

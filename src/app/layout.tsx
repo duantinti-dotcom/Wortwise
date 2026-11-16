@@ -7,14 +7,17 @@ import { GlassFilters } from "@/components/ambient";
 import { GlassLight } from "@/components/ui/glass-light";
 import "./globals.css";
 
-const title = "Worthwise — Encontre produtos que realmente valem a pena";
-const description = "Inteligência comercial para quem vende online: descubra o que vender, compare fornecedores pelo custo total, acompanhe preços e calcule quanto você realmente lucra.";
+const title = "Worthwise — Descubra o que vender online e quanto você vai lucrar";
+const description = "Encontre produtos para vender: veja os mais vendidos do Mercado Livre, Shopee, Amazon e TikTok Shop, o histórico de preço, quanto sobra em cada venda e tire dúvidas com a Wise, assistente de vendas com IA.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.appUrl),
   title: { default: title, template: "%s · Worthwise" },
   description,
   applicationName: "Worthwise",
+  keywords: ["o que vender", "produtos para vender", "produtos mais vendidos", "mais vendidos Mercado Livre", "mais vendidos Shopee", "mais vendidos TikTok Shop", "mais vendidos Amazon",
+    "o que vender na Shopee", "o que vender no Mercado Livre", "produtos para revender", "calculadora de lucro", "como encontrar produtos para vender", "site para encontrar produtos para vender"],
+  category: "business",
   alternates: { canonical: "/" },
   openGraph: { type: "website", locale: "pt_BR", siteName: "Worthwise", title, description, url: "/", images: [{ url: "/og.png", width: 1200, height: 630, alt: "Worthwise" }] },
   twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },

@@ -5,6 +5,7 @@ import { contactEmail } from "@/lib/env";
 
 const COLS = [
   { title: "Produto", links: [["/#funcionalidades", "Funcionalidades"], ["/precos", "Preços"], ["/calculadora-de-lucro", "Calculadora de lucro"], ["/cadastro", "Começar por R$ 9,90"]] },
+  { title: "Mais vendidos", links: [["/mais-vendidos/mercado-livre", "Mercado Livre"], ["/mais-vendidos/shopee", "Shopee"], ["/mais-vendidos/tiktok-shop", "TikTok Shop"], ["/mais-vendidos/amazon", "Amazon"]] },
   { title: "Transparência", links: [["/metodologia", "Metodologia"], ["/fontes-de-dados", "Fontes de dados"], ["/blog", "Blog"]] },
   { title: "Legal", links: [["/privacidade", "Privacidade"], ["/termos", "Termos de uso"]] },
 ] as const;
@@ -13,7 +14,7 @@ export function Footer() {
   return (
     <footer className="relative border-t border-tint/[0.08]">
       <div className="relative mx-auto max-w-[1160px]">
-        <div className="grid justify-items-center gap-10 px-6 py-12 text-center md:grid-cols-[1.4fr_repeat(3,1fr)] md:px-12 md:py-14">
+        <div className="grid justify-items-center gap-10 px-6 py-12 text-center md:grid-cols-[1.4fr_repeat(4,1fr)] md:px-12 md:py-14">
           <div className="flex flex-col items-center">
             <Logo />
             <p className="mt-4 max-w-xs text-center text-sm leading-relaxed text-muted">Inteligência comercial para quem vende online. Dados com fonte, cálculos transparentes e conclusões fundamentadas.</p>
