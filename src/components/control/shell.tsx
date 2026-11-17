@@ -52,7 +52,7 @@ export function ControlShell({ base, email, areas, openIncidents, children }: { 
         if (!items.length) return null;
         return (
           <div key={g.group}>
-            <div className="c-eyebrow mb-1.5 px-2.5">{g.group}</div>
+            <div className="c-eyebrow mb-2 px-3">{g.group}</div>
             <ul className="flex flex-col gap-0.5">
               {items.map((i) => {
                 const on = i.href === "" ? current === "" : current.startsWith(i.href);
@@ -77,8 +77,8 @@ export function ControlShell({ base, email, areas, openIncidents, children }: { 
     <Link href={base || "/"} className="flex items-center gap-2.5 px-2.5" prefetch={false}>
       <LogoMark size={24} />
       <span className="flex flex-col leading-tight">
-        <span className="text-[13.5px] font-semibold tracking-[-0.01em]">Worthwise</span>
-        <span className="c-faint text-[11px] font-medium tracking-[0.04em]">CONTROL</span>
+        <span className="text-[14px] font-semibold tracking-[-0.02em]">Worthwise</span>
+        <span className="c-eyebrow">control · v1</span>
       </span>
     </Link>
   );
@@ -86,7 +86,7 @@ export function ControlShell({ base, email, areas, openIncidents, children }: { 
   return (
     <div className="flex min-h-dvh">
       {/* Barra lateral (desktop) */}
-      <aside className="c-rail sticky top-0 hidden h-dvh w-[236px] shrink-0 flex-col gap-6 overflow-y-auto px-3 py-4 lg:flex">
+      <aside className="c-rail sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-7 overflow-y-auto px-3 py-5 lg:flex">
         {brand}
         {nav}
         <div className="mt-auto"><Account base={base} email={email} /></div>
@@ -107,16 +107,17 @@ export function ControlShell({ base, email, areas, openIncidents, children }: { 
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="c-topbar sticky top-0 z-40">
-          <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-2 px-3 sm:px-5 lg:px-8">
+          <div className="mx-auto flex h-16 max-w-[1480px] items-center gap-3 px-3 sm:px-5 lg:px-8">
             <button type="button" className="c-btn c-btn-ghost c-btn-icon lg:hidden" onClick={() => setDrawer(true)} aria-label="Abrir menu"><Menu size={18} /></button>
             <div className="lg:hidden"><LogoMark size={22} /></div>
+            <span className="c-badge c-badge-neutral hidden gap-2 sm:inline-flex"><span className="c-live" aria-hidden />Ao vivo</span>
             <div className="ml-auto flex min-w-0 items-center gap-2">
               {RANGED.has(current) && <RangeControl />}
               <AutoRefresh />
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full min-w-0 max-w-[1440px] flex-1 px-3 py-6 sm:px-5 lg:px-8 lg:py-8">{children}</main>
+        <main className="mx-auto w-full min-w-0 max-w-[1480px] flex-1 px-3 py-7 sm:px-5 lg:px-8 lg:py-10">{children}</main>
       </div>
     </div>
   );
@@ -130,7 +131,7 @@ function Account({ base, email }: { base: string; email: string }) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger className="c-nav-item w-full">
-        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold" style={{ background: "var(--c-navy)", color: "var(--c-accent)" }}>
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold" style={{ background: "#fff", color: "#000" }}>
           {email.slice(0, 1).toUpperCase()}
         </span>
         <span className="min-w-0 flex-1 truncate text-left text-[12.5px]">{email}</span>

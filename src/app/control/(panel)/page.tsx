@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { TimeChart } from "@/components/control/charts";
-import { Grid, Kpi, KV, Notice, Panel, PRIORITY, Status, Updated } from "@/components/control/ui";
+import { Ring, Spark, TimeChart } from "@/components/control/charts";
+import { Grid, Kpi, KV, Notice, Panel, PRIORITY, Status } from "@/components/control/ui";
 import { controlRpc, requireControl } from "@/lib/control/auth";
 import { computeCosts, type CostSettings } from "@/lib/control/finance";
 import { cents, int, pct, relative } from "@/lib/control/format";
@@ -62,8 +62,9 @@ export default async function Overview({ searchParams }: { searchParams: SP }) {
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-2">
-        <h1 className="c-h1">Visão executiva</h1>
+      <div className="mb-7 flex flex-col gap-2">
+        <span className="c-eyebrow">central de comando</span>
+        <h1 className="c-h1 text-[30px]">Visão executiva</h1>
         <div className="flex flex-wrap items-center gap-2"><RangeMeta range={range} generatedAt={o.generated_at} /></div>
       </div>
 
@@ -74,6 +75,31 @@ export default async function Overview({ searchParams }: { searchParams: SP }) {
           <Link href={`${session.base}/alertas`} className="c-fg inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline">Ver alertas <ArrowRight size={13} /></Link>
         </Notice>
       )}
+
+      <section className="c-card c-rise mb-4 grid grid-cols-1 overflow-hidden xl:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 p-5 sm:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <span className="c-eyebrow">receita líquida · {range.label.toLowerCase()}</span>
+              <div className="c-big mt-2 text-[44px] font-semibold leading-none sm:text-[56px]">{cents(o.revenue.range_net)}</div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[12.5px]">
+                <span className="c-badge c-badge-neutral">bruto {cents(o.revenue.range)}</span>
+                <span className="c-badge c-badge-neutral">hoje {cents(o.revenue.today)}</span>
+                <span className="c-badge c-badge-neutral">MRR {cents(o.mrr_cents)}</span>
+              </div>
+            </div>
+            <Spark values={o.series.map((d) => d.net)} />
+          </div>
+          <div className="mt-6">
+            <TimeChart title="Receita diária" x="day" unit="cents" height={280} data={o.series}
+              series={[{ key: "revenue", label: "Pago", color: 1, kind: "area" }, { key: "net", label: "Líquido", color: 2, kind: "line" }]} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 place-items-center gap-4 border-t p-6 xl:grid-cols-1 xl:border-l xl:border-t-0" style={{ borderColor: "var(--c-line)" }}>
+          <Ring value={conv} label="conversão" sub={`${int(o.users.converted)} de ${int(o.users.signups)}`} tone="white" />
+          <Ring value={live.filter((c) => c.ok).length} max={Math.max(1, live.filter((c) => c.ok !== null).length)} label="integrações" sub={`${live.filter((c) => c.ok).length} de ${live.filter((c) => c.ok !== null).length}`} tone="white" />
+        </div>
+      </section>
 
       <Grid cols={4}>
         <Kpi label="Receita recebida hoje" value={cents(o.revenue.today)} sub={`líquido ${cents(o.revenue.today_net)}`} updated={o.revenue.last_at} />
@@ -101,14 +127,9 @@ export default async function Overview({ searchParams }: { searchParams: SP }) {
       </Grid>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Panel className="xl:col-span-2" title="Receita diária" description="Valores pagos e líquidos por dia (horário de Brasília)."
-          footer={<Updated at={o.revenue.last_at} source="Webhooks HeroPay" />}>
-          <TimeChart title="Receita diária" x="day" unit="cents" data={o.series}
-            series={[{ key: "revenue", label: "Pago", color: 1, kind: "area" }, { key: "net", label: "Líquido", color: 3, kind: "line" }]} />
-        </Panel>
-        <Panel title="Integrações" description="Verificação ao vivo e último estado registrado."
+        <Panel className="xl:col-span-3" title="Integrações" description="Verificação ao vivo e último estado registrado."
           footer={<span>Verificado agora</span>}>
-          <ul className="c-divide text-[13px]">
+          <ul className="grid grid-cols-1 gap-x-8 text-[13px] md:grid-cols-2 [&>li]:border-b [&>li]:border-[var(--c-line)]">
             {live.map((c) => (
               <li key={c.id} className="flex items-start justify-between gap-3 py-2.5">
                 <div className="min-w-0"><div className="c-fg font-medium">{c.name}</div><div className="c-muted truncate text-[12px]" title={c.detail}>{c.detail}</div></div>
@@ -129,7 +150,7 @@ export default async function Overview({ searchParams }: { searchParams: SP }) {
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Panel title="Cadastros e visitantes" description="Por dia, no período." className="xl:col-span-2">
           <TimeChart title="Cadastros e visitantes" x="day" unit="int" data={o.series}
-            series={[{ key: "visitors", label: "Visitantes únicos", color: 1, kind: "area" }, { key: "signups", label: "Cadastros", color: 2, kind: "bar" }]} />
+            series={[{ key: "visitors", label: "Visitantes únicos", color: 1, kind: "area" }, { key: "signups", label: "Cadastros", color: 4, kind: "bar" }]} />
           {cf.ok && <p className="c-faint mt-2 text-[12px]">Cloudflare registrou {int(cfVisitors)} IPs únicos/dia somados no período (inclui robôs).</p>}
         </Panel>
         <Panel title="Segurança e disponibilidade" description="Últimas 24 horas."
