@@ -7,7 +7,8 @@ export const dynamic = "force-dynamic"; // inclui automaticamente os posts publi
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = publicEnv.appUrl;
   const pages = ["", "/precos", "/mais-vendidos/mercado-livre", "/mais-vendidos/shopee", "/mais-vendidos/tiktok-shop", "/mais-vendidos/amazon", "/calculadora-de-lucro", "/calculadora-de-lucro/mercado-livre", "/calculadora-de-lucro/shopee", "/calculadora-de-lucro/amazon", "/calculadora-de-lucro/tiktok-shop", "/metodologia", "/fontes-de-dados", "/blog", "/privacidade", "/termos"];
-  const out: MetadataRoute.Sitemap = pages.map((p) => ({ url: `${base}${p}`, changeFrequency: p === "" ? "weekly" : "monthly", priority: p === "" ? 1 : 0.7 }));
+  const now = new Date().toISOString();
+  const out: MetadataRoute.Sitemap = pages.map((p) => ({ url: `${base}${p}`, lastModified: now, changeFrequency: p === "" ? "weekly" : "monthly", priority: p === "" ? 1 : 0.7 }));
   if (isSupabaseConfigured()) {
     try {
       const { data } = await supabaseAnon().from("blog_posts").select("slug, updated_at").eq("status", "published").order("published_at", { ascending: false }).limit(500);

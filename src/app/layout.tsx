@@ -8,21 +8,23 @@ import { GlassLight } from "@/components/ui/glass-light";
 import { VisitBeacon } from "@/components/visit-beacon";
 import "./globals.css";
 
-const title = "Worthwise — Descubra o que vender online e quanto você vai lucrar";
-const description = "Encontre produtos para vender: veja os mais vendidos do Mercado Livre, Shopee, Amazon e TikTok Shop, o histórico de preço, quanto sobra em cada venda e tire dúvidas com a Wise, assistente de vendas com IA.";
+const title = "Worthwise — Melhores produtos para revender e fornecedores para revenda";
+const description = "Worthwise mostra os melhores produtos para revender: mais vendidos do Mercado Livre, Shopee, Amazon e TikTok Shop, fornecedores para revenda mais baratos, histórico de preço e calculadora de lucro.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.appUrl),
   title: { default: title, template: "%s · Worthwise" },
   description,
   applicationName: "Worthwise",
-  keywords: ["o que vender", "produtos para vender", "produtos mais vendidos", "mais vendidos Mercado Livre", "mais vendidos Shopee", "mais vendidos TikTok Shop", "mais vendidos Amazon",
+  keywords: ["Worthwise", "melhores produtos para revender", "fornecedores para revenda", "produtos para revenda", "o que vender", "produtos para vender", "produtos mais vendidos", "mais vendidos Mercado Livre", "mais vendidos Shopee", "mais vendidos TikTok Shop", "mais vendidos Amazon",
     "o que vender na Shopee", "o que vender no Mercado Livre", "produtos para revender", "calculadora de lucro", "como encontrar produtos para vender", "site para encontrar produtos para vender"],
   category: "business",
   alternates: { canonical: "/" },
   openGraph: { type: "website", locale: "pt_BR", siteName: "Worthwise", title, description, url: "/", images: [{ url: "/og.png", width: 1200, height: 630, alt: "Worthwise" }] },
   twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
-  robots: { index: true, follow: true },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  // Google Search Console: defina GOOGLE_SITE_VERIFICATION com o código da "tag HTML".
+  ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
   formatDetection: { telephone: false },
 };
 
