@@ -4,7 +4,8 @@ import { DataTable } from "@/components/control/table";
 import { Grid, Kpi, Notice, Panel, PRIORITY, Status } from "@/components/control/ui";
 import { controlRpc, requireControl } from "@/lib/control/auth";
 import { dateTime, int, relative } from "@/lib/control/format";
-import { incidentMenu, saveRule } from "../actions";
+import { ackAllIncidents, incidentMenu, saveRule } from "../actions";
+import { AckAllButton } from "@/components/control/ack-button";
 import { LoadError, safe } from "../shared";
 
 export const metadata: Metadata = { title: "Alertas" };
@@ -35,17 +36,17 @@ export default async function Page() {
       </Notice>
 
       <Grid cols={4}>
-        <Kpi label="Abertos" value={int(open.filter((i) => i.status === "open").length)} goodWhen="down" />
-        <Kpi label="Reconhecidos" value={int(open.filter((i) => i.status === "acknowledged").length)} />
+        <Kpi label="Não lidos" value={int(open.filter((i) => i.status === "open").length)} goodWhen="down" />
+        <Kpi label="Lidos (em aberto)" value={int(open.filter((i) => i.status === "acknowledged").length)} />
         <Kpi label="P1 em aberto" value={int(open.filter((i) => i.priority === "P1").length)} goodWhen="down" />
         <Kpi label="Regras ativas" value={`${a.rules.filter((r) => r.enabled).length} de ${a.rules.length}`} />
       </Grid>
 
-      <Panel className="mt-4" title="Incidentes" description="Abertos primeiro. Clique com o botão direito (ou ⋯) para reconhecer, confirmar ou resolver.">
+      <Panel className="mt-4" title="Incidentes" description="Não lidos primeiro. Clique com o botão direito (ou ⋯) para marcar como lido, confirmar ou resolver." actions={open.some((i) => i.status === "open") ? <AckAllButton action={ackAllIncidents} /> : undefined}>
         <DataTable csvName="incidentes" pageSize={15} initialSort={{ key: "last_seen", dir: "desc" }}
-          filters={[{ key: "status", label: "Status", options: [{ value: "open", label: "Aberto" }, { value: "acknowledged", label: "Reconhecido" }, { value: "resolved", label: "Resolvido" }] },
+          filters={[{ key: "status", label: "Status", options: [{ value: "open", label: "Aberto" }, { value: "acknowledged", label: "Lido" }, { value: "resolved", label: "Resolvido" }] },
             { key: "priority", label: "Prioridade", options: ["P1", "P2", "P3", "P4"].map((p) => ({ value: p, label: p })) }]}
-          menu={[{ id: "acknowledge", label: "Reconhecer" }, { id: "confirm", label: "Confirmar como incidente" }, { id: "unconfirm", label: "Remover confirmação" }, { id: "resolve", label: "Resolver" }, { id: "copy-id", label: "Copiar ID" }]}
+          menu={[{ id: "acknowledge", label: "Marcar como lido" }, { id: "confirm", label: "Confirmar como incidente" }, { id: "unconfirm", label: "Remover confirmação" }, { id: "resolve", label: "Resolver" }, { id: "copy-id", label: "Copiar ID" }]}
           onMenu={incidentMenu} empty="Nenhum incidente registrado."
           columns={[{ key: "priority", label: "Prior." }, { key: "title", label: "Incidente" }, { key: "status", label: "Status" }, { key: "first_seen", label: "Início", hideBelow: "md" },
             { key: "last_seen", label: "Último" }, { key: "occurrences", label: "Verif.", align: "right", hideBelow: "sm" }]}
@@ -56,7 +57,7 @@ export default async function Page() {
               priority: <Status tone={PRIORITY[i.priority] ?? "warn"}>{i.priority}</Status>,
               title: <span className="c-fg">{i.title}</span>,
               status: <span className="flex flex-wrap gap-1">{i.confirmed && <Status tone="crit">Confirmado</Status>}
-                <Status tone={i.status === "resolved" ? "good" : i.status === "acknowledged" ? "info" : "warn"}>{i.status === "resolved" ? (i.auto_resolved ? "Resolvido (auto)" : "Resolvido") : i.status === "acknowledged" ? "Reconhecido" : "Aberto"}</Status></span>,
+                <Status tone={i.status === "resolved" ? "good" : i.status === "acknowledged" ? "info" : "warn"}>{i.status === "resolved" ? (i.auto_resolved ? "Resolvido (auto)" : "Resolvido") : i.status === "acknowledged" ? "Lido" : "Aberto"}</Status></span>,
               first_seen: <span className="whitespace-nowrap">{dateTime(i.first_seen)}</span>, last_seen: <span className="whitespace-nowrap">{relative(i.last_seen)}</span>,
             },
           }))} />
