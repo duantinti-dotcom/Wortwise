@@ -60,7 +60,12 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   // Plano B do login com Google: se o retorno cair na página inicial com o código, termina o login no lugar certo.
   if (pathname === "/" && !onControlHost) {
     const code = request.nextUrl.searchParams.get("code");
-    if (!code) return NextResponse.next();
+    if (!code) {
+      // Página inicial sempre conferida com o servidor (evita mostrar uma versão antiga sem o visual).
+      const r = NextResponse.next();
+      r.headers.set("Cache-Control", "public, max-age=0, s-maxage=60, must-revalidate");
+      return r;
+    }
     const cb = new URL("/auth/callback", request.url);
     cb.searchParams.set("code", code);
     return NextResponse.redirect(cb);
@@ -130,6 +135,8 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   if (isControl) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
     response.headers.set("Cache-Control", "no-store");
+  } else if (pathname === "/entrar" || pathname === "/cadastro") {
+    response.headers.set("Cache-Control", "private, no-cache, must-revalidate");
   }
   return response;
 }

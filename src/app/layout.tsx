@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { publicEnv } from "@/lib/env";
-import { INVIEW_SCRIPT, THEME_SCRIPT } from "@/components/theme/script";
+import { ASSET_GUARD_SCRIPT, INVIEW_SCRIPT, THEME_SCRIPT } from "@/components/theme/script";
 import { GlassFilters } from "@/components/ambient";
 import { GlassLight } from "@/components/ui/glass-light";
 import { VisitBeacon } from "@/components/visit-beacon";
@@ -31,7 +31,7 @@ export const viewport: Viewport = { themeColor: "#0F0F11", width: "device-width"
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" data-theme="dark" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
-      <head><script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} /><script dangerouslySetInnerHTML={{ __html: INVIEW_SCRIPT }} /></head>
+      <head><script dangerouslySetInnerHTML={{ __html: ASSET_GUARD_SCRIPT }} /><script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} /><script dangerouslySetInnerHTML={{ __html: INVIEW_SCRIPT }} /></head>
       <body className="min-h-dvh"><GlassFilters /><GlassLight />{children}<VisitBeacon /></body>
     </html>
   );
