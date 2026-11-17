@@ -31,7 +31,7 @@ function SectionHead({ label, title, text, className }: { label?: string; title:
 }
 
 /** Perfis oficiais da empresa (Instagram, TikTok, LinkedIn…): adicione aqui as URLs reais quando existirem. */
-const SAME_AS: string[] = [];
+const SAME_AS: string[] = ["https://www.instagram.com/worthwise.site", "https://www.tiktok.com/@worthwise.site"];
 
 export default function HomePage() {
   const jsonLd = [
