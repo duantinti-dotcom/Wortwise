@@ -92,7 +92,7 @@ function compactNumber(n: number) {
 
 const CALC_PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classico", shopee: "shopee", amazon: "amazon", tiktokshop: "tiktokshop" };
 
-interface Alt { source: string; title: string; price: number | null; imageUrl: string | null; permalink: string | null; rating: number | null; soldQuantity: number | null }
+interface Alt { source: string; title: string; price: number | null; imageUrl: string | null; permalink: string | null; rating: number | null; reviewsCount?: number | null; soldQuantity: number | null; sellerName?: string | null }
 
 /** Janela do produto: anúncio na loja, cálculo de lucro e onde comprar mais barato (sem gastar crédito). */
 function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult; open: boolean; onOpenChange: (v: boolean) => void; analyzeHref: string | null }) {
@@ -128,7 +128,7 @@ function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult
         </div>
 
         <h3 className="mt-7 text-[17px] font-semibold">Comprar mais barato para revender</h3>
-        <p className="mt-1 text-[13px] text-muted">Atacadistas e lojas baratas, já na busca deste produto, do menor preço:</p>
+        <p className="mt-1 text-[13px] text-muted">Buscas deste produto do menor preço. Escolha vendedores com nota alta e muitas avaliações.</p>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {(data?.links ?? []).map((l) => (
             <a key={l.name} href={l.url} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !h-auto flex-col !items-start !gap-0 !py-2.5 text-left">
@@ -139,7 +139,8 @@ function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult
           {!data ? [0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-14 !rounded-[10px]" />) : null}
         </div>
 
-        <h3 className="mt-7 text-[17px] font-semibold">Ofertas mais baratas que encontramos</h3>
+        <h3 className="mt-7 text-[17px] font-semibold">O mesmo produto mais barato</h3>
+        <p className="mt-1 text-[13px] text-muted">Só anúncios do mesmo produto (marca, modelo e quantidade iguais), com nota 4,0+ e avaliações, ou muitas vendas.</p>
         {loading || !data ? <div className="mt-3 space-y-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-14" />)}</div> : (
           <>
             {data.offers.length ? (
@@ -148,13 +149,18 @@ function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult
                   <li key={o.permalink}>
                     <a href={o.permalink ?? "#"} target="_blank" rel="noopener noreferrer nofollow" className="flex items-center gap-3 rounded-xl border border-tint/[0.08] bg-tint/[0.03] p-2.5 transition-colors hover:bg-tint/[0.07]">
                       <span className="size-12 shrink-0 overflow-hidden rounded-lg bg-white"><ProductImage src={o.imageUrl} alt="" className="size-12" /></span>
-                      <span className="min-w-0 flex-1"><span className="line-clamp-1 text-[13.5px]">{o.title}</span><span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-muted"><SourceMark source={o.source} size={14} />{SOURCE_LABELS[o.source] ?? o.source}{o.soldQuantity ? ` · ${o.soldQuantity.toLocaleString("pt-BR")} vendidos` : ""}</span></span>
+                      <span className="min-w-0 flex-1"><span className="line-clamp-1 text-[13.5px]">{o.title}</span><span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-muted">
+                        <span className="rounded-md bg-pos/15 px-1.5 py-0.5 text-[10.5px] font-semibold text-pos">Mesmo produto</span>
+                        <span className="flex items-center gap-1"><SourceMark source={o.source} size={14} />{SOURCE_LABELS[o.source] ?? o.source}</span>
+                        {o.rating != null ? <span className="flex items-center gap-0.5"><Star size={11} className="fill-brand text-brand" />{o.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{o.reviewsCount ? ` (${o.reviewsCount.toLocaleString("pt-BR")} avaliações)` : ""}</span> : null}
+                        {o.soldQuantity ? <span>{o.soldQuantity.toLocaleString("pt-BR")} vendidos</span> : null}
+                      </span></span>
                       <span className="text-right"><span className="tabular block text-[15px] font-semibold text-pos">{formatMoney(o.price)}</span>{p.price && o.price ? <span className="text-[11.5px] text-muted">{Math.round((1 - o.price / p.price) * 100)}% mais barato</span> : null}</span>
                     </a>
                   </li>
                 ))}
               </ul>
-            ) : <p className="mt-2 text-[14px] text-muted">Não achamos o mesmo produto mais barato entre os produtos que acompanhamos. Use os botões acima, que já abrem a busca do menor preço.</p>}
+            ) : <p className="mt-2 text-[14px] text-muted">Não encontramos este mesmo produto mais barato com vendedor bem avaliado nas lojas que acompanhamos. Para não indicar nada duvidoso, não mostramos produtos só parecidos. Você pode procurar nos botões acima; antes de comprar, confira a nota e as avaliações do vendedor.</p>}
             <p className="mt-4 text-[11.5px] text-faint">Preços das lojas no momento da coleta. Confira frete, prazo e reputação do vendedor antes de comprar.</p>
           </>
         )}
