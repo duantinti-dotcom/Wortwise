@@ -111,6 +111,17 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
 
   const { data } = await supabase.auth.getUser();
 
+  // Mantém a pessoa logada: o servidor renova os cookies de login a cada visita (no iPhone, o Safari
+  // apaga em 7 dias os cookies criados pela página; os enviados pelo servidor duram o prazo inteiro).
+  if (!isControl && data.user) {
+    const already = new Set(response.cookies.getAll().map((c) => c.name));
+    for (const c of request.cookies.getAll()) {
+      if (c.name.startsWith("sb-") && !already.has(c.name)) {
+        response.cookies.set(c.name, c.value, { path: "/", sameSite: "lax", secure: true, maxAge: 60 * 60 * 24 * 400 });
+      }
+    }
+  }
+
   // Identificador aleatório do navegador, usado só para a regra "uma conta grátis por aparelho".
   if (!isControl && !request.cookies.get("ww_did")) {
     response.cookies.set("ww_did", crypto.randomUUID(), { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 730 });
@@ -129,6 +140,15 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     const login = new URL("/entrar", request.url);
     login.searchParams.set("next", pathname + request.nextUrl.search);
     const redirect = NextResponse.redirect(login);
+    for (const c of response.cookies.getAll()) redirect.cookies.set(c);
+    return redirect;
+  }
+  // Já logado: "Entrar" e "Cadastro" levam direto para o app (a pessoa não precisa entrar de novo).
+  if (!isControl && data.user && (pathname === "/entrar" || pathname === "/cadastro")) {
+    const nextParam = request.nextUrl.searchParams.get("next");
+    const plano = request.nextUrl.searchParams.get("plano");
+    const dest = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : plano ? `/app/configuracoes?assinar=${encodeURIComponent(plano)}` : "/app";
+    const redirect = NextResponse.redirect(new URL(dest, request.url));
     for (const c of response.cookies.getAll()) redirect.cookies.set(c);
     return redirect;
   }
