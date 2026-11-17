@@ -82,6 +82,58 @@ export function Sparkline({ points }: { points: { date: string; price: number }[
   );
 }
 
+/** Histórico de preço completo: gráfico com pontos (toque para ver cada valor) e lista com data e preço. */
+function PriceHistory({ points }: { points: { date: string; price: number }[] }) {
+  const [sel, setSel] = useState<number | null>(null);
+  const ps = points.map((x) => x.price);
+  const min = Math.min(...ps), max = Math.max(...ps), span = max - min || 1;
+  const w = 600, h = 180, pad = 14;
+  const xy = ps.map((v, i) => [pad + (ps.length === 1 ? (w - 2 * pad) / 2 : (i / (ps.length - 1)) * (w - 2 * pad)), h - pad - ((v - min) / span) * (h - 2 * pad)] as const);
+  const d = xy.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const first = ps[0]!, last = ps.at(-1)!;
+  const pct = first ? ((last - first) / first) * 100 : 0;
+  const fmtDate = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
+  const cur = sel ?? ps.length - 1;
+  // Lista: só quando o preço muda (do mais novo para o mais antigo).
+  const changes = points.filter((x, i) => i === 0 || x.price !== points[i - 1]!.price).reverse();
+  return (
+    <div>
+      <div className="grid grid-cols-3 gap-2 text-center">
+        {[["Menor", min, "text-pos"], ["Maior", max, "text-neg"], ["Atual", last, "text-fg"]].map(([k, v, c]) => (
+          <div key={k as string} className="rounded-xl bg-tint/[0.05] px-2 py-2.5"><div className="text-[11.5px] text-muted">{k}</div><div className={cn("tabular text-[15px] font-semibold", c as string)}>{formatMoney(v as number)}</div></div>
+        ))}
+      </div>
+      <div className="mt-3 rounded-xl bg-tint/[0.03] p-2">
+        <div className="flex items-baseline justify-between px-1 text-[12.5px]">
+          <span className="text-muted">{fmtDate(points[cur]!.date)}</span>
+          <span className="tabular font-semibold">{formatMoney(ps[cur]!)}</span>
+        </div>
+        <svg viewBox={`0 0 ${w} ${h}`} className="mt-1 h-auto w-full touch-none" onPointerLeave={() => setSel(null)}
+          onPointerMove={(e) => { const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width) * w; let best = 0; xy.forEach(([px], i) => { if (Math.abs(px - x) < Math.abs(xy[best]![0] - x)) best = i; }); setSel(best); }}>
+          <path d={`${d} L${xy.at(-1)![0]},${h - pad} L${xy[0]![0]},${h - pad} Z`} fill="rgb(59 130 246 / 0.12)" />
+          <path d={d} fill="none" stroke="#3B82F6" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
+          {xy.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i === cur ? 7 : 4} fill={i === cur ? "#fff" : "#3B82F6"} stroke="#3B82F6" strokeWidth="2.5" />)}
+        </svg>
+        <div className="flex justify-between px-1 text-[11px] text-faint"><span>{fmtDate(points[0]!.date)}</span><span>{pct > 0.5 ? "▲" : pct < -0.5 ? "▼" : "="} {Math.abs(pct).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% no período</span><span>{fmtDate(points.at(-1)!.date)}</span></div>
+      </div>
+      <ul className="mt-3 max-h-48 divide-y divide-tint/[0.06] overflow-y-auto rounded-xl border border-tint/[0.08] text-[13.5px]">
+        {changes.map((x, i) => {
+          const prev = changes[i + 1];
+          const diff = prev ? x.price - prev.price : 0;
+          return (
+            <li key={x.date + i} className="flex items-center justify-between px-3.5 py-2">
+              <span className="text-muted">{fmtDate(x.date)}</span>
+              <span className="flex items-center gap-2"><span className="tabular font-semibold">{formatMoney(x.price)}</span>
+                {prev ? <span className={cn("tabular text-[11.5px]", diff > 0 ? "text-neg" : "text-pos")}>{diff > 0 ? "▲" : "▼"} {formatMoney(Math.abs(diff))}</span> : <span className="text-[11.5px] text-faint">primeiro registro</span>}</span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-[11.5px] text-faint">Preços que o Worthwise viu nas atualizações da loja. Toque ou passe o dedo no gráfico para ver cada valor.</p>
+    </div>
+  );
+}
+
 /** 16042 → "16 mil", 250000 → "250 mil", 1200000 → "1,2 mi". */
 function compactNumber(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mi`;
@@ -95,7 +147,7 @@ const CALC_PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classi
 interface Alt { source: string; title: string; price: number | null; imageUrl: string | null; permalink: string | null; rating: number | null; reviewsCount?: number | null; soldQuantity: number | null; sellerName?: string | null }
 
 /** Janela do produto: anúncio na loja, cálculo de lucro e onde comprar mais barato (sem gastar crédito). */
-function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult; open: boolean; onOpenChange: (v: boolean) => void; analyzeHref: string | null }) {
+function ProductSheet({ p, open, onOpenChange, analyzeHref, history }: { p: ProductResult; open: boolean; onOpenChange: (v: boolean) => void; analyzeHref: string | null; history?: { date: string; price: number }[] }) {
   const [data, setData] = useState<{ offers: Alt[]; links: { name: string; note: string; url: string }[] } | null>(null);
   const source = SOURCE_LABELS[p.source] ?? p.source;
   const loading = open && !data;
@@ -126,6 +178,13 @@ function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult
             </div>
           </div>
         </div>
+
+        {history?.length ? (
+          <>
+            <h3 className="mt-7 text-[17px] font-semibold">Histórico de preço</h3>
+            <div className="mt-3">{history.length >= 2 ? <PriceHistory points={history} /> : <p className="text-[14px] text-muted">Acompanhando desde {new Date(history[0]!.date).toLocaleDateString("pt-BR")}: {formatMoney(history[0]!.price)}. O gráfico aparece quando o preço for visto de novo.</p>}</div>
+          </>
+        ) : null}
 
         <h3 className="mt-7 text-[17px] font-semibold">Comprar mais barato para revender</h3>
         <p className="mt-1 text-[13px] text-muted">Buscas deste produto do menor preço. Escolha vendedores com nota alta e muitas avaliações.</p>
@@ -178,7 +237,7 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
   const [open, setOpen] = useState(false);
   return (
     <article className="card card-hover group relative flex flex-col overflow-hidden">
-      <ProductSheet p={p} open={open} onOpenChange={setOpen} analyzeHref={external ? null : analyzeHref} />
+      <ProductSheet p={p} open={open} onOpenChange={setOpen} analyzeHref={external ? null : analyzeHref} history={history} />
       <div className="relative m-2 overflow-hidden rounded-[10px]">
         <ProductImage src={p.imageUrl} alt={p.title} className="aspect-square w-full transition-transform duration-700 [transition-timing-function:var(--ease-out)] group-hover:scale-[1.05]" />
         {rank != null ? (
@@ -205,10 +264,10 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
         {p.soldLabel ? <div className="mt-1.5 text-[13px] font-medium text-pos">{p.soldLabel}</div>
           : p.soldQuantity ? <div className="mt-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-pos"><Flame size={13} />{p.source === "mercadolivre" ? "+" : ""}{compactNumber(p.soldQuantity)} vendidos</div> : null}
         {history ? (
-          <div className="mt-3">
-            <div className="text-[11.5px] text-faint">Preço nos últimos dias</div>
+          <button type="button" onClick={() => setOpen(true)} className="relative z-10 mt-3 block w-full rounded-lg text-left transition-colors hover:bg-tint/[0.04]" aria-label="Ver histórico de preço">
+            <div className="flex items-center justify-between text-[11.5px] text-faint"><span>Preço nos últimos dias</span><span className="text-brand-hi">ver valores ›</span></div>
             {history.length >= 2 ? <Sparkline points={history} /> : <div className="text-[12.5px] text-muted">Acompanhando desde hoje</div>}
-          </div>
+          </button>
         ) : null}
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
           {p.rating != null ? <span className="flex items-center gap-1"><Star size={12} className="fill-brand text-brand" />{p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{p.reviewsCount != null ? ` (${p.reviewsCount.toLocaleString("pt-BR")})` : ""}</span> : null}
