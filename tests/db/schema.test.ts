@@ -142,6 +142,14 @@ describe("cobrança HeroPay", () => {
     expect((await db.as<{ i: { status: string } }>(v, "select public.create_checkout_intent('pro') i"))[0].i.status).toBe("ok");
   });
 
+  it("primeiro mês continua disponível no mesmo aparelho enquanto ninguém comprou", async () => {
+    const a = await db.createUser("intro3@test.dev");
+    const b = await db.createUser("intro4@test.dev");
+    await db.pool.query("insert into public.signup_events (user_id, ip_hash, device_hash, trial_granted) values ($1, 'ip-z', 'dev-z', true), ($2, 'ip-z', 'dev-z', false)", [a, b]);
+    await db.pool.query("update public.profiles set free_trial_denied = 'same_device' where id = $1", [b]);
+    expect((await db.as<{ e: boolean }>(b, "select public.my_intro_eligible() e"))[0].e).toBe(true);
+  });
+
   it("evento sem usuário identificável não ativa nada", async () => {
     expect((await event("spark_payment_confirmed", "pay:777", { ...paid("desconhecido", "777"), subscription: { id: "sub-outro" } })).outcome).toBe("unmatched_user");
   });

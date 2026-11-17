@@ -147,6 +147,10 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 text-brand-hi"><MailCheck size={26} /></div>
         <h1 className="mt-6 text-2xl font-semibold">Verifique seu e-mail</h1>
         <p className="mt-3 text-muted">{mode === "signup" ? "Enviamos um link de confirmação para" : "Se existir uma conta, enviamos um link de recuperação para"} <span className="text-fg">{email}</span>.</p>
+        <div role="note" className="mx-auto mt-6 max-w-sm rounded-xl border border-[#F59E0B]/40 bg-[#F59E0B]/10 px-4 py-3.5 text-left text-[14px] leading-relaxed text-soft">
+          <b className="font-semibold text-fg">Não chegou?</b> Procure o e-mail de <b>contato@worthwise.site</b> nas pastas <b>Lixo eletrônico</b>, <b>Spam</b>, <b>Promoções</b> ou <b>Lixeira</b>.
+          Se estiver lá, marque como “Não é spam” para receber os próximos normalmente. Pode levar até 2 minutos para chegar.
+        </div>
         <Link href="/entrar" className="btn btn-secondary mt-8">Voltar para o login</Link>
       </div>
     );
