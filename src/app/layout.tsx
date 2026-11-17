@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   title: { default: title, template: "%s · Worthwise" },
   description,
   applicationName: "Worthwise",
+  icons: {
+    icon: [{ url: "/favicon.ico", sizes: "48x48" }, { url: "/icon-96.png", sizes: "96x96", type: "image/png" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }, { url: "/icon.svg", type: "image/svg+xml" }],
+    apple: "/apple-icon.png",
+  },
   keywords: ["Worthwise", "melhores produtos para revender", "fornecedores para revenda", "produtos para revenda", "o que vender", "produtos para vender", "produtos mais vendidos", "mais vendidos Mercado Livre", "mais vendidos Shopee", "mais vendidos TikTok Shop", "mais vendidos Amazon",
     "o que vender na Shopee", "o que vender no Mercado Livre", "produtos para revender", "calculadora de lucro", "como encontrar produtos para vender", "site para encontrar produtos para vender"],
   category: "business",
