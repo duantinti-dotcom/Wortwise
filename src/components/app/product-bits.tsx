@@ -2,7 +2,7 @@
 import { Bell, Bookmark, ExternalLink, Flame, ImageOff, Loader2, Lock, Star, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 import type { ProductResult } from "@/lib/connectors/types";
@@ -63,19 +63,49 @@ export function FavoriteButton({ product, initial, onChange, className }: { prod
  * O cartão inteiro abre a análise no Worthwise; o botão da fonte abre o anúncio original em nova aba.
  */
 /** Mini gráfico do preço (observações reais guardadas pelo Worthwise). */
+/**
+ * Caminho suave (curva monotônica): passa por todos os pontos sem criar picos que não existiram.
+ */
+function smoothPath(pts: (readonly [number, number])[]): string {
+  const n = pts.length;
+  if (n < 2) return n ? `M${pts[0]![0]},${pts[0]![1]}` : "";
+  const dx = pts.slice(1).map((p, i) => p[0] - pts[i]![0]);
+  const m = pts.slice(1).map((p, i) => (p[1] - pts[i]![1]) / (dx[i] || 1));
+  const t = pts.map((_, i) => (i === 0 ? m[0]! : i === n - 1 ? m[n - 2]! : m[i - 1]! * m[i]! <= 0 ? 0 : (m[i - 1]! + m[i]!) / 2));
+  for (let i = 0; i < n - 1; i++) {
+    if (m[i] === 0) { t[i] = 0; t[i + 1] = 0; continue; }
+    const a = t[i]! / m[i]!, b = t[i + 1]! / m[i]!, h = a * a + b * b;
+    if (h > 9) { const k = 3 / Math.sqrt(h); t[i] = k * a * m[i]!; t[i + 1] = k * b * m[i]!; }
+  }
+  let d = `M${pts[0]![0].toFixed(1)},${pts[0]![1].toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const [x0, y0] = pts[i]!, [x1, y1] = pts[i + 1]!, h = (x1 - x0) / 3;
+    d += ` C${(x0 + h).toFixed(1)},${(y0 + t[i]! * h).toFixed(1)} ${(x1 - h).toFixed(1)},${(y1 - t[i + 1]! * h).toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+  }
+  return d;
+}
+
 export function Sparkline({ points }: { points: { date: string; price: number }[] }) {
+  const id = `spk${useId().replace(/:/g, "")}`;
   const ps = points.map((x) => x.price);
   const min = Math.min(...ps), max = Math.max(...ps), span = max - min || 1;
-  const w = 120, h = 32;
-  const d = ps.map((v, i) => `${i ? "L" : "M"}${((i / (ps.length - 1)) * w).toFixed(1)},${(h - 3 - ((v - min) / span) * (h - 6)).toFixed(1)}`).join(" ");
+  const w = 120, h = 36;
+  const xy = ps.map((v, i) => [(i / (ps.length - 1)) * (w - 6) + 3, h - 5 - ((v - min) / span) * (h - 12)] as const);
+  const d = smoothPath(xy);
   const first = ps[0]!, last = ps.at(-1)!;
   const pct = first ? ((last - first) / first) * 100 : 0;
   const up = pct > 0.5, down = pct < -0.5;
-  const color = up ? "#F87171" : down ? "#4ADE80" : "#A1A1AA";
+  const color = up ? "#F87171" : down ? "#22C55E" : "#94A3B8";
+  const [lx, ly] = xy.at(-1)!;
   return (
-    <div className="flex items-center gap-3">
-      <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h} className="h-8 w-full max-w-[120px]" aria-hidden><path d={d} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      <span className={cn("tabular shrink-0 text-[12.5px] font-semibold", up ? "text-neg" : down ? "text-pos" : "text-muted")} title={`Desde ${relativeTime(points[0]!.date)}`}>
+    <div className="flex min-w-0 items-center gap-2">
+      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-9 min-w-0 flex-1 overflow-visible" aria-hidden>
+        <defs><linearGradient id={id} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor={color} stopOpacity="0.32" /><stop offset="1" stopColor={color} stopOpacity="0" /></linearGradient></defs>
+        <path d={`${d} L${lx},${h} L${xy[0]![0]},${h} Z`} fill={`url(#${id})`} />
+        <path d={d} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={lx} cy={ly} r="5" fill={color} opacity="0.25" /><circle cx={lx} cy={ly} r="2.6" fill={color} />
+      </svg>
+      <span className={cn("tabular shrink-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11.5px] font-semibold", up ? "bg-neg/12 text-neg" : down ? "bg-pos/12 text-pos" : "bg-tint/10 text-muted")} title={`Desde ${relativeTime(points[0]!.date)}`}>
         {up ? "▲" : down ? "▼" : "="} {Math.abs(pct).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%
       </span>
     </div>
@@ -89,7 +119,7 @@ function PriceHistory({ points }: { points: { date: string; price: number }[] })
   const min = Math.min(...ps), max = Math.max(...ps), span = max - min || 1;
   const w = 600, h = 180, pad = 14;
   const xy = ps.map((v, i) => [pad + (ps.length === 1 ? (w - 2 * pad) / 2 : (i / (ps.length - 1)) * (w - 2 * pad)), h - pad - ((v - min) / span) * (h - 2 * pad)] as const);
-  const d = xy.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const d = smoothPath(xy);
   const first = ps[0]!, last = ps.at(-1)!;
   const pct = first ? ((last - first) / first) * 100 : 0;
   const fmtDate = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
@@ -108,11 +138,21 @@ function PriceHistory({ points }: { points: { date: string; price: number }[] })
           <span className="text-muted">{fmtDate(points[cur]!.date)}</span>
           <span className="tabular font-semibold">{formatMoney(ps[cur]!)}</span>
         </div>
-        <svg viewBox={`0 0 ${w} ${h}`} className="mt-1 h-auto w-full touch-none" onPointerLeave={() => setSel(null)}
-          onPointerMove={(e) => { const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width) * w; let best = 0; xy.forEach(([px], i) => { if (Math.abs(px - x) < Math.abs(xy[best]![0] - x)) best = i; }); setSel(best); }}>
-          <path d={`${d} L${xy.at(-1)![0]},${h - pad} L${xy[0]![0]},${h - pad} Z`} fill="rgb(59 130 246 / 0.12)" />
-          <path d={d} fill="none" stroke="#3B82F6" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-          {xy.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i === cur ? 7 : 4} fill={i === cur ? "#fff" : "#3B82F6"} stroke="#3B82F6" strokeWidth="2.5" />)}
+        <svg viewBox={`0 0 ${w} ${h}`} className="mt-1 h-auto w-full touch-none select-none" onPointerLeave={() => setSel(null)}
+          onPointerMove={(e) => { const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width) * w; let best = 0; xy.forEach(([px], i) => { if (Math.abs(px - x) < Math.abs(xy[best]![0] - x)) best = i; }); setSel(best); }}
+          onPointerDown={(e) => { const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width) * w; let best = 0; xy.forEach(([px], i) => { if (Math.abs(px - x) < Math.abs(xy[best]![0] - x)) best = i; }); setSel(best); }}>
+          <defs>
+            <linearGradient id="ph-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#3B82F6" stopOpacity="0.35" /><stop offset="1" stopColor="#3B82F6" stopOpacity="0" /></linearGradient>
+            <linearGradient id="ph-line" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stopColor="#60A5FA" /><stop offset="1" stopColor="#2563EB" /></linearGradient>
+          </defs>
+          {/* Linhas-guia: maior e menor preço */}
+          {[pad, h - pad].map((gy) => <line key={gy} x1={pad} x2={w - pad} y1={gy} y2={gy} stroke="currentColor" strokeOpacity="0.08" strokeDasharray="4 6" />)}
+          <path d={`${d} L${xy.at(-1)![0]},${h - pad} L${xy[0]![0]},${h - pad} Z`} fill="url(#ph-fill)" />
+          <path d={d} fill="none" stroke="url(#ph-line)" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
+          {sel != null ? <line x1={xy[cur]![0]} x2={xy[cur]![0]} y1={pad / 2} y2={h - pad} stroke="#3B82F6" strokeOpacity="0.5" strokeDasharray="3 4" /> : null}
+          {xy.map(([x, y], i) => i === cur ? null : <circle key={i} cx={x} cy={y} r="3" fill="#3B82F6" opacity="0.55" />)}
+          <circle cx={xy[cur]![0]} cy={xy[cur]![1]} r="11" fill="#3B82F6" opacity="0.18" />
+          <circle cx={xy[cur]![0]} cy={xy[cur]![1]} r="6" fill="#fff" stroke="#2563EB" strokeWidth="3" />
         </svg>
         <div className="flex justify-between px-1 text-[11px] text-faint"><span>{fmtDate(points[0]!.date)}</span><span>{pct > 0.5 ? "▲" : pct < -0.5 ? "▼" : "="} {Math.abs(pct).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% no período</span><span>{fmtDate(points.at(-1)!.date)}</span></div>
       </div>
@@ -265,7 +305,7 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           : p.soldQuantity ? <div className="mt-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-pos"><Flame size={13} />{p.source === "mercadolivre" ? "+" : ""}{compactNumber(p.soldQuantity)} vendidos</div> : null}
         {history ? (
           <button type="button" onClick={() => setOpen(true)} className="relative z-10 mt-3 block w-full rounded-lg text-left transition-colors hover:bg-tint/[0.04]" aria-label="Ver histórico de preço">
-            <div className="flex items-center justify-between text-[11.5px] text-faint"><span>Preço nos últimos dias</span><span className="text-brand-hi">ver valores ›</span></div>
+            <div className="flex items-center justify-between gap-2 text-[11.5px] text-faint"><span className="truncate">Histórico de preço</span><span className="shrink-0 text-brand-hi">ver ›</span></div>
             {history.length >= 2 ? <Sparkline points={history} /> : <div className="text-[12.5px] text-muted">Acompanhando desde hoje</div>}
           </button>
         ) : null}
