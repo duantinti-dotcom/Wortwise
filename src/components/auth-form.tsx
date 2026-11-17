@@ -207,7 +207,7 @@ export function AuthForm({ mode, google: googleOn = false }: { mode: Mode; googl
       </p>
       {mode === "signup" ? (
         <p className="mt-5 text-center text-xs leading-relaxed text-faint">Ao criar a conta você concorda com os <Link href="/termos" className="underline">Termos de uso</Link> e a <Link href="/privacidade" className="underline">Política de privacidade</Link>.
-          O primeiro mês por R$ 9,90 vale uma vez por pessoa, aparelho e internet: para isso guardamos, por até 90 dias, um código derivado do seu IP e do navegador (nunca o IP em si).</p>
+          O primeiro mês por R$ 9,90 vale uma vez por pessoa, aparelho e internet: para isso guardamos um código embaralhado do seu IP e do navegador (nunca o IP em si).</p>
       ) : null}
     </div>
   );

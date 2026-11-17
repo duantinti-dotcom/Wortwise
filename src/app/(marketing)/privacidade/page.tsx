@@ -27,7 +27,7 @@ export default function Page() {
         </ul>
         <h2>3. Retenção</h2>
         <ul>
-          <li>Identificadores derivados do IP e do cookie do navegador: até 90 dias.</li>
+          <li>Identificadores embaralhados do IP e do cookie do navegador: até 90 dias no cadastro; de quem comprou o primeiro mês promocional, guardados sem prazo, só para impedir que a promoção seja usada de novo.</li>
           <li>Logs técnicos: até 30 dias.</li>
           <li>Dados da conta e do uso: enquanto a conta existir. Ao excluir a conta, são apagados de forma permanente.</li>
           <li>Registros de pagamento: pelo prazo exigido pela legislação fiscal.</li>

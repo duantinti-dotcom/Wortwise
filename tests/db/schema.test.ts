@@ -138,6 +138,9 @@ describe("cobrança HeroPay", () => {
     const v = await db.createUser("intro2@test.dev");
     await db.pool.query("insert into public.signup_events (user_id, ip_hash, device_hash, trial_granted) values ($1, 'ip-b', 'dev-a', true)", [v]);
     expect((await db.as<{ i: { status: string } }>(v, "select public.create_checkout_intent('inicial') i"))[0].i.status).toBe("intro_unavailable");
+    // nem outra conta criada depois de 90 dias, na mesma internet (bloqueio é para sempre)
+    const w = await db.createUser("intro5@test.dev");
+    expect((await db.as<{ i: { status: string } }>(w, "select public.create_checkout_intent('inicial', 'ip-a', null) i"))[0].i.status).toBe("intro_unavailable");
     // mas pode assinar o Essencial normalmente
     expect((await db.as<{ i: { status: string } }>(v, "select public.create_checkout_intent('pro') i"))[0].i.status).toBe("ok");
   });

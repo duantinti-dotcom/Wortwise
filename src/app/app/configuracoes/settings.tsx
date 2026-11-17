@@ -145,7 +145,7 @@ export function Settings({ email, emailVerified, usage, profile, subscription, p
         </Card>
 
         <Card icon={ShieldAlert} title="Privacidade e conta">
-          <p className="text-sm leading-relaxed text-muted">Seus favoritos, simulações, cotações e conversas são privados. Para prevenir abuso do teste gratuito guardamos um identificador derivado do IP do cadastro por até 90 dias. Detalhes na <a className="text-brand-hi underline underline-offset-2" href="/privacidade">Política de privacidade</a>.</p>
+          <p className="text-sm leading-relaxed text-muted">Seus favoritos, simulações, cotações e conversas são privados. Para que o primeiro mês promocional seja usado só uma vez, guardamos um código embaralhado do IP e do navegador (nunca o IP em si). Detalhes na <a className="text-brand-hi underline underline-offset-2" href="/privacidade">Política de privacidade</a>.</p>
           <button className="btn btn-danger mt-5" onClick={() => setDeleteOpen(true)}>Excluir minha conta</button>
         </Card>
       </div>
