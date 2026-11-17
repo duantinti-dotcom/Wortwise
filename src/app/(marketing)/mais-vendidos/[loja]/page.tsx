@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: { params: Promise<{ loja: str
   const p = PAGES[(await params).loja];
   if (!p) return {};
   const desc = `${p.lead} Veja o que vender ${inStore(p.store)} e calcule o seu lucro.`.slice(0, 300);
-  return { title: `${p.title} hoje`, description: desc, alternates: { canonical: `/mais-vendidos/${(await params).loja}` },
+  return { title: `${p.title}: produtos para revender`, description: desc, alternates: { canonical: `/mais-vendidos/${(await params).loja}` },
     openGraph: { title: `${p.title} · Worthwise`, description: desc, url: `/mais-vendidos/${(await params).loja}` } };
 }
 

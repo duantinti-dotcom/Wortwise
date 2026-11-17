@@ -30,10 +30,18 @@ function SectionHead({ label, title, text, className }: { label?: string; title:
   );
 }
 
+/** Perfis oficiais da empresa (Instagram, TikTok, LinkedIn…): adicione aqui as URLs reais quando existirem. */
+const SAME_AS: string[] = [];
+
 export default function HomePage() {
   const jsonLd = [
-    { "@context": "https://schema.org", "@type": "Organization", name: "Worthwise", url: publicEnv.appUrl, logo: `${publicEnv.appUrl}/icon-512.png`, email: "contato@worthwise.site" },
-    { "@context": "https://schema.org", "@type": "WebSite", name: "Worthwise", url: publicEnv.appUrl, inLanguage: "pt-BR" },
+    { "@context": "https://schema.org", "@type": "Organization", "@id": `${publicEnv.appUrl}/#organization`, name: "Worthwise", alternateName: ["Worthwise.site", "Worthwise Brasil"],
+      url: `${publicEnv.appUrl}/`, logo: { "@type": "ImageObject", url: `${publicEnv.appUrl}/icon-512.png`, width: 512, height: 512 }, image: `${publicEnv.appUrl}/og.png`,
+      description: "Inteligência comercial para revenda: produtos mais vendidos, fornecedores para revenda e calculadora de lucro.",
+      email: "contato@worthwise.site", contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "contato@worthwise.site", availableLanguage: "Portuguese" },
+      areaServed: "BR", ...(SAME_AS.length ? { sameAs: SAME_AS } : {}) },
+    { "@context": "https://schema.org", "@type": "WebSite", "@id": `${publicEnv.appUrl}/#website`, name: "Worthwise", alternateName: "Worthwise.site", url: `${publicEnv.appUrl}/`,
+      inLanguage: "pt-BR", publisher: { "@id": `${publicEnv.appUrl}/#organization` } },
     { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Worthwise", applicationCategory: "BusinessApplication", operatingSystem: "Web",
       description: "Descubra o que vender online: mais vendidos do Mercado Livre, Shopee, Amazon e TikTok Shop, histórico de preço, calculadora de lucro e assistente de vendas com IA.",
       offers: { "@type": "AggregateOffer", priceCurrency: "BRL", lowPrice: "9.90", highPrice: "39.90", offerCount: 3 } },
@@ -48,7 +56,7 @@ export default function HomePage() {
         <div className="container-page text-center">
           <h1 className="display mx-auto max-w-[860px] text-[40px] sm:text-[58px] lg:text-[68px]">Descubra o que vender e quanto você vai lucrar.</h1>
           <p className="mx-auto mt-6 max-w-[580px] text-[17px] leading-relaxed text-muted md:text-[19px]">
-            Veja os mais vendidos de cada loja, compare fornecedores e calcule o lucro real de cada venda. Tudo com a fonte de cada número.
+            O Worthwise mostra os produtos mais vendidos de cada loja, fornecedores para revenda e o lucro real de cada venda. Tudo com a fonte de cada número.
           </p>
           <div className="mx-auto mt-10 grid max-w-[420px] gap-3 sm:grid-cols-2">
             <Link href="/cadastro" className="btn btn-primary btn-lg w-full">Começar por R$ 9,90</Link>

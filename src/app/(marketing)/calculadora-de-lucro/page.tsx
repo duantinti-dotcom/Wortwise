@@ -5,7 +5,7 @@ import { EasyProfit } from "@/components/easy-profit";
 import { ProfitCalculator } from "@/components/profit-calculator";
 
 export const metadata: Metadata = {
-  title: "Calculadora de lucro para marketplace",
+  title: "Calculadora de lucro grátis para revenda e marketplace",
   description: "Calcule o lucro real de um produto no Mercado Livre, Shopee, Amazon ou loja própria: comissão, frete, impostos, publicidade, devoluções, margem e preço mínimo.",
   alternates: { canonical: "/calculadora-de-lucro" },
 };

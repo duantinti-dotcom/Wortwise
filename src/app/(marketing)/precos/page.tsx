@@ -8,7 +8,7 @@ import { DEFAULT_PLANS, PERIOD_LABELS, RESOURCE_LABELS, type PlanInfo } from "@/
 import { supabaseAnon } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Planos e preços",
+  title: "Planos e preços do Worthwise",
   description: "Primeiro mês por R$ 9,90. Depois, Essencial por R$ 19,90/mês ou Profissional por R$ 39,90/mês: mais vendidos de cada loja, assistente de IA, histórico de preços e calculadora de lucro.",
   alternates: { canonical: "/precos" },
 };
