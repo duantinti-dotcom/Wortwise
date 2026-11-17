@@ -183,13 +183,13 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
 
       <Panel className="mt-4" title="Histórico de incidentes" description="Alertas de segurança e incidentes confirmados. Use o menu para reconhecer, confirmar ou resolver.">
         <DataTable csvName="incidentes" pageSize={10} searchable={s.incidents.length > 10} empty="Nenhum incidente registrado."
-          menu={[{ id: "acknowledge", label: "Reconhecer" }, { id: "confirm", label: "Confirmar como incidente" }, { id: "unconfirm", label: "Remover confirmação" }, { id: "resolve", label: "Resolver" }]}
+          menu={[{ id: "acknowledge", label: "Marcar como lido" }, { id: "confirm", label: "Confirmar como incidente" }, { id: "unconfirm", label: "Remover confirmação" }, { id: "resolve", label: "Resolver" }]}
           onMenu={incidentMenu}
           columns={[{ key: "last_seen", label: "Último" }, { key: "title", label: "Incidente" }, { key: "priority", label: "Prioridade" }, { key: "status", label: "Status" }, { key: "occurrences", label: "Verif.", align: "right", hideBelow: "sm" }]}
           rows={s.incidents.map((i) => ({ id: String(i.id), menu: [i.status === "open" ? "acknowledge" : "", i.confirmed ? "unconfirm" : "confirm", i.status !== "resolved" ? "resolve" : ""].filter(Boolean),
             values: { last_seen: i.last_seen, title: i.title, priority: i.priority, status: i.status, occurrences: i.occurrences },
             cells: { last_seen: <span className="c-num whitespace-nowrap">{dateTime(i.last_seen)}</span>, priority: <Status tone={PRIORITY[i.priority] ?? "warn"}>{i.priority}</Status>,
-              status: <span className="flex flex-wrap gap-1">{i.confirmed && <Status tone="crit">Confirmado</Status>}<Status tone={i.status === "resolved" ? "good" : i.status === "acknowledged" ? "info" : "warn"}>{i.status === "resolved" ? "Resolvido" : i.status === "acknowledged" ? "Reconhecido" : "Aberto"}</Status></span> } }))} />
+              status: <span className="flex flex-wrap gap-1">{i.confirmed && <Status tone="crit">Confirmado</Status>}<Status tone={i.status === "resolved" ? "good" : i.status === "acknowledged" ? "info" : "warn"}>{i.status === "resolved" ? "Resolvido" : i.status === "acknowledged" ? "Lido" : "Aberto"}</Status></span> } }))} />
       </Panel>
     </>
   );

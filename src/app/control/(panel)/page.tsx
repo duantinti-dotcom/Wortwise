@@ -9,6 +9,8 @@ import { cents, int, pct, relative } from "@/lib/control/format";
 import { parseRange } from "@/lib/control/range";
 import { checkIntegrations, geckoCredits, zoneDaily } from "@/lib/control/sources";
 import { LoadError, RangeMeta, safe, type SP } from "./shared";
+import { AckAllButton } from "@/components/control/ack-button";
+import { ackAllIncidents } from "./actions";
 
 export const metadata: Metadata = { title: "Visão executiva" };
 
@@ -44,6 +46,8 @@ export default async function Overview({ searchParams }: { searchParams: SP }) {
   ]);
   if (!res.ok) return <LoadError e={res.error} />;
   const o = res.data;
+  // Alertas já lidos (reconhecidos) não aparecem na tela inicial.
+  o.incidents = o.incidents.filter((i) => i.status === "open");
 
   // Créditos oficiais da GeckoAPI quando a janela coincide com a da API (24 h / 7 / 30 dias).
   const official = gecko.ok ? ({ "24h": gecko.data.last24Hours, "7d": gecko.data.last7Days, "30d": gecko.data.last30Days } as Record<string, number | null>)[range.key] ?? null : null;
@@ -70,9 +74,12 @@ export default async function Overview({ searchParams }: { searchParams: SP }) {
 
       {o.incidents.length > 0 && (
         <Notice tone={o.incidents.some((i) => i.priority === "P1") ? "crit" : "warn"} className="mb-5"
-          title={`${o.incidents.length} alerta(s) em aberto`}>
+          title={`${o.incidents.length} alerta(s) não lido(s)`}>
           <span>{o.incidents.slice(0, 3).map((i) => i.title).join(" · ")}{o.incidents.length > 3 ? "…" : ""} </span>
-          <Link href={`${session.base}/alertas`} className="c-fg inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline">Ver alertas <ArrowRight size={13} /></Link>
+          <span className="mt-2 flex flex-wrap items-center gap-2">
+            <AckAllButton action={ackAllIncidents} />
+            <Link href={`${session.base}/alertas`} className="c-btn c-btn-ghost h-8">Ver alertas <ArrowRight size={13} /></Link>
+          </span>
         </Notice>
       )}
 

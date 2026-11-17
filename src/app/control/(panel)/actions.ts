@@ -131,3 +131,8 @@ export async function aiUserMenu(actionId: string, rowId: string): Promise<Resul
   }
   return { ok: false };
 }
+
+/* Marca todos os alertas abertos como lidos (somem da tela inicial e do contador). */
+export async function ackAllIncidents(): Promise<Result> {
+  return call("control_ack_all", {}, "Alertas marcados como lidos.");
+}
