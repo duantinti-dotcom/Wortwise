@@ -97,7 +97,7 @@ export function ControlShell({ base, email, areas, openIncidents, children }: { 
       {/* Gaveta (celular/tablet) */}
       <Dialog.Root open={drawer} onOpenChange={setDrawer}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] lg:hidden" />
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/70 lg:hidden" />
           <Dialog.Content className="ctl-portal c-rail fixed inset-y-0 left-0 z-50 flex w-[82vw] max-w-[300px] flex-col gap-6 overflow-y-auto px-3 py-4 lg:hidden" aria-describedby={undefined}>
             <Dialog.Title className="sr-only">Navegação</Dialog.Title>
             <div className="flex items-center justify-between">{brand}<Dialog.Close className="c-btn c-btn-ghost c-btn-icon" aria-label="Fechar menu"><X size={16} /></Dialog.Close></div>
