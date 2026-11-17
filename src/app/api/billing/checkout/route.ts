@@ -25,7 +25,9 @@ export async function POST(req: Request) {
 
   // Aparelho e internet de quem está comprando (o primeiro mês vale uma vez por pessoa, aparelho e internet).
   const { ipHash, deviceHash } = await currentHashes(req);
-  const { data, error } = await supabase.rpc("create_checkout_intent", { p_plan: body.plan, p_ip_hash: ipHash, p_device_hash: deviceHash });
+  let { data, error } = await supabase.rpc("create_checkout_intent", { p_plan: body.plan, p_ip_hash: ipHash, p_device_hash: deviceHash });
+  // Banco ainda sem a versão nova (com aparelho e internet): usa a versão anterior, que só recebe o plano.
+  if (error?.code === "PGRST202") ({ data, error } = await supabase.rpc("create_checkout_intent", { p_plan: body.plan }));
   if (error) return apiError("internal", "Não foi possível iniciar o checkout.");
   const intent = data as { status: string; token?: string; checkout_url?: string | null; plan?: string };
   if (intent.status === "already_subscribed") {
