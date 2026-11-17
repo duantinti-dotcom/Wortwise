@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog, DropdownMenu, Popover } from "radix-ui";
 import {
-  Activity, BadgeDollarSign, Eye, Bell, BrainCircuit, CalendarRange, ChevronDown, Coins, Filter, Gauge, LayoutDashboard, LogOut, Menu, Moon,
+  Activity, BadgeDollarSign, CandlestickChart, Eye, Bell, BrainCircuit, CalendarRange, ChevronDown, Coins, Filter, Gauge, LayoutDashboard, LogOut, Menu, Moon,
   RefreshCw, ScrollText, Server, Settings2, ShieldCheck, Sun, Users, X,
 } from "lucide-react";
 import { LogoMark } from "@/components/logo";
@@ -17,6 +17,7 @@ type Area = "overview" | "subscribers" | "finance" | "funnel" | "security" | "ge
 const NAV: { group: string; items: { area: Area; href: string; label: string; icon: typeof Activity }[] }[] = [
   { group: "Negócio", items: [
     { area: "overview", href: "", label: "Visão executiva", icon: LayoutDashboard },
+    { area: "overview", href: "/graficos", label: "Gráficos", icon: CandlestickChart },
     { area: "subscribers", href: "/assinantes", label: "Assinantes", icon: Users },
     { area: "finance", href: "/financeiro", label: "Financeiro", icon: BadgeDollarSign },
     { area: "funnel", href: "/funil", label: "Funil de conversão", icon: Filter },
@@ -36,7 +37,7 @@ const NAV: { group: string; items: { area: Area; href: string; label: string; ic
 ];
 
 /** Páginas que usam o filtro global de período. */
-const RANGED = new Set(["", "/visitantes", "/assinantes", "/financeiro", "/funil", "/seguranca", "/gecko", "/ia"]);
+const RANGED = new Set(["", "/graficos", "/visitantes", "/assinantes", "/financeiro", "/funil", "/seguranca", "/gecko", "/ia"]);
 
 export function ControlShell({ base, email, areas, openIncidents, children }: { base: string; email: string; areas: string[]; openIncidents: number; children: ReactNode }) {
   const path = usePathname();
