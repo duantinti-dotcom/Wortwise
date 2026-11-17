@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   // Google Search Console: defina GOOGLE_SITE_VERIFICATION com o código da "tag HTML".
-  ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION || "_VxPjI0n1XJiukDuyDw8LYSge7QAI6HM3isVt4iWhWY" },
   formatDetection: { telephone: false },
 };
 
