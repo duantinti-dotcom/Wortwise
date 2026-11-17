@@ -2,7 +2,7 @@
 import { Bell, Bookmark, ExternalLink, Flame, ImageOff, Loader2, Lock, Star, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 import type { ProductResult } from "@/lib/connectors/types";
@@ -92,14 +92,87 @@ function compactNumber(n: number) {
 
 const CALC_PRESET: Record<string, string> = { mercadolivre: "mercadolivre-classico", shopee: "shopee", amazon: "amazon", tiktokshop: "tiktokshop" };
 
+interface Alt { source: string; title: string; price: number | null; imageUrl: string | null; permalink: string | null; rating: number | null; soldQuantity: number | null }
+
+/** Janela do produto: anúncio na loja, cálculo de lucro e onde comprar mais barato (sem gastar crédito). */
+function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult; open: boolean; onOpenChange: (v: boolean) => void; analyzeHref: string | null }) {
+  const [data, setData] = useState<{ offers: Alt[]; links: { name: string; note: string; url: string }[] } | null>(null);
+  const source = SOURCE_LABELS[p.source] ?? p.source;
+  const loading = open && !data;
+  useEffect(() => {
+    if (!open || data) return;
+    let alive = true;
+    const qs = new URLSearchParams({ title: p.title, id: p.externalId, ...(p.price != null ? { price: String(p.price) } : {}) });
+    fetch(`/api/alternatives?${qs}`).then((r) => (r.ok ? r.json() : null)).then((d) => { if (alive) setData(d ?? { offers: [], links: [] }); })
+      .catch(() => { if (alive) setData({ offers: [], links: [] }); });
+    return () => { alive = false; };
+  }, [open, data, p.title, p.externalId, p.price]);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent wide title={p.title} description={source}>
+        <div className="grid gap-5 sm:grid-cols-[200px_1fr]">
+          <div className="overflow-hidden rounded-[14px] bg-white"><ProductImage src={p.imageUrl} alt={p.title} className="aspect-square w-full" /></div>
+          <div>
+            <div className="tabular text-[28px] font-semibold tracking-tight">{formatMoney(p.price, p.currency ?? "BRL")}</div>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-muted">
+              {p.soldQuantity ? <span className="flex items-center gap-1 font-semibold text-pos"><Flame size={14} />{p.soldQuantity.toLocaleString("pt-BR")} vendidos</span> : null}
+              {p.rating != null ? <span className="flex items-center gap-1"><Star size={13} className="fill-brand text-brand" />{p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{p.reviewsCount ? ` (${p.reviewsCount.toLocaleString("pt-BR")})` : ""}</span> : null}
+              {p.sellerName ? <span>{p.sellerName}</span> : null}
+            </div>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+              {p.permalink ? <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary">Ver anúncio na loja<ExternalLink size={15} /></a> : null}
+              {p.price != null ? <Link href={`/app/calculadora?canal=${CALC_PRESET[p.source] ?? ""}&preco=${p.price}`} className="btn btn-secondary">Calcular lucro</Link> : null}
+              {analyzeHref ? <Link href={analyzeHref} className="btn btn-secondary sm:col-span-2">Análise completa e histórico</Link> : null}
+            </div>
+          </div>
+        </div>
+
+        <h3 className="mt-8 text-[17px] font-semibold">Onde comprar mais barato para revender</h3>
+        {loading || !data ? <div className="mt-3 space-y-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-14" />)}</div> : (
+          <>
+            {data.offers.length ? (
+              <ul className="mt-3 space-y-2">
+                {data.offers.map((o) => (
+                  <li key={o.permalink}>
+                    <a href={o.permalink ?? "#"} target="_blank" rel="noopener noreferrer nofollow" className="flex items-center gap-3 rounded-xl border border-tint/[0.08] bg-tint/[0.03] p-2.5 transition-colors hover:bg-tint/[0.07]">
+                      <span className="size-12 shrink-0 overflow-hidden rounded-lg bg-white"><ProductImage src={o.imageUrl} alt="" className="size-12" /></span>
+                      <span className="min-w-0 flex-1"><span className="line-clamp-1 text-[13.5px]">{o.title}</span><span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-muted"><SourceMark source={o.source} size={14} />{SOURCE_LABELS[o.source] ?? o.source}{o.soldQuantity ? ` · ${o.soldQuantity.toLocaleString("pt-BR")} vendidos` : ""}</span></span>
+                      <span className="text-right"><span className="tabular block text-[15px] font-semibold text-pos">{formatMoney(o.price)}</span>{p.price && o.price ? <span className="text-[11.5px] text-muted">{Math.round((1 - o.price / p.price) * 100)}% mais barato</span> : null}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="mt-2 text-[14px] text-muted">Não achamos o mesmo produto mais barato entre os produtos que acompanhamos. Use as buscas abaixo, já ordenadas do menor preço.</p>}
+            {data.links.length ? (
+              <>
+                <p className="mt-5 text-[13px] font-semibold text-muted">Buscar fornecedores (do menor preço)</p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {data.links.map((l) => (
+                    <a key={l.name} href={l.url} target="_blank" rel="noopener noreferrer nofollow" className="flex items-center justify-between gap-2 rounded-xl border border-tint/[0.08] px-3.5 py-2.5 text-[13.5px] hover:bg-tint/[0.06]">
+                      <span><b className="font-semibold">{l.name}</b> <span className="text-muted">· {l.note}</span></span><ExternalLink size={14} className="shrink-0 text-muted" />
+                    </a>
+                  ))}
+                </div>
+              </>
+            ) : null}
+            <p className="mt-4 text-[11.5px] text-faint">Preços das lojas no momento da coleta. Confira frete, prazo e reputação do vendedor antes de comprar.</p>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: ProductResult; favorite: boolean; onFavorite?: (v: boolean) => void; rank?: number; history?: { date: string; price: number }[] }) {
   const discount = p.originalPrice && p.price && p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : null;
   const source = SOURCE_LABELS[p.source] ?? p.source;
   // Amazon, Shopee e TikTok Shop: o botão abre o produto direto na loja (sem gastar crédito de consulta).
   const external = (p.source === "amazon" || (p.provider === "geckoapi" && p.source !== "mercadolivre")) && Boolean(p.permalink);
   const analyzeHref = external ? p.permalink! : `/app/produto/${p.source}/${p.externalId}`;
+  const [open, setOpen] = useState(false);
   return (
     <article className="card card-hover group relative flex flex-col overflow-hidden">
+      <ProductSheet p={p} open={open} onOpenChange={setOpen} analyzeHref={external ? null : analyzeHref} />
       <div className="relative m-2 overflow-hidden rounded-[10px]">
         <ProductImage src={p.imageUrl} alt={p.title} className="aspect-square w-full transition-transform duration-700 [transition-timing-function:var(--ease-out)] group-hover:scale-[1.05]" />
         {rank != null ? (
@@ -116,7 +189,7 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           {p.salesRank ? <span className="ml-auto text-brand-hi" title={p.salesRank.category ? `Ranking de vendas em ${p.salesRank.category}` : "Ranking de vendas"}>#{p.salesRank.rank.toLocaleString("pt-BR")} em vendas</span> : null}
         </div>
         <h3 className="mt-2.5 line-clamp-2 text-[14.5px] font-medium leading-snug">
-          <Link href={analyzeHref} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer nofollow" : undefined} className="outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-brand-hi">{p.title}</Link>
+          <button type="button" onClick={() => setOpen(true)} className="text-left outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-brand-hi">{p.title}</button>
         </h3>
         <div className="mt-3 flex flex-wrap items-baseline gap-x-2">
           <span className={cn("tabular text-[20px] font-semibold tracking-tight", p.price == null && "text-sm font-normal text-faint")}>{formatMoney(p.price, p.currency ?? "BRL")}</span>
@@ -135,10 +208,10 @@ export function ProductCard({ p, favorite, onFavorite, rank, history }: { p: Pro
           {p.rating != null ? <span className="flex items-center gap-1"><Star size={12} className="fill-brand text-brand" />{p.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{p.reviewsCount != null ? ` (${p.reviewsCount.toLocaleString("pt-BR")})` : ""}</span> : null}
           {p.sellerName ? <span className="truncate">{p.sellerName}</span> : null}
         </div>
-        <div className={cn("relative z-10 mt-auto grid gap-2 pt-4", external ? "grid-cols-1" : "grid-cols-[1fr_auto]")}>
-          <Link href={analyzeHref} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer nofollow" : undefined} className="btn btn-primary btn-sm">{external ? `Ver ${p.source === "amazon" ? "na Amazon" : p.source === "shopee" ? "na Shopee" : "no TikTok Shop"}` : "Analisar"}</Link>
-          {p.permalink && !external ? (
-            <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !w-9 !px-0" aria-label={`Abrir no ${source}`} title={`Abrir no ${source}`}>
+        <div className="relative z-10 mt-auto grid grid-cols-[1fr_auto] gap-2 pt-4">
+          <button type="button" onClick={() => setOpen(true)} className="btn btn-primary btn-sm">Ver detalhes</button>
+          {p.permalink ? (
+            <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !w-9 !px-0" aria-label={`Abrir anúncio no ${source}`} title={`Abrir anúncio no ${source}`}>
               <ExternalLink size={15} />
             </a>
           ) : null}

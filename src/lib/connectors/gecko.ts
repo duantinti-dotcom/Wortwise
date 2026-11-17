@@ -148,6 +148,19 @@ async function recordPrices(source: SourceId, data: Json) {
   if (rows.length) await serverRpcSafe("server_upsert_market_data", { p_items: rows });
 }
 
+/** Procura nos produtos já guardados das 3 lojas (0 crédito; nunca chama a Gecko). */
+export async function searchCachedProducts(query: string): Promise<ProductResult[]> {
+  const words = query.trim().split(/\s+/).filter((w) => w.length >= 3).slice(0, 4);
+  if (!words.length) return [];
+  const targets: [string, (i: Json, at: string) => ProductResult | null][] = [
+    ["mercadolivre.com.br", mlItem], ["shopee.com.br", shopeeItem], ["tiktok.com", tiktokItem]];
+  const out = await Promise.all(targets.map(async ([t, toItem]) => {
+    const rows = await serverRpc<{ item: Json; at: string }[]>("server_gecko_search_items", { p_target: t, p_words: words, p_limit: 15 }).catch(() => []);
+    return rows.map((r) => toItem(r.item, r.at)).filter((p): p is ProductResult => Boolean(p));
+  }));
+  return out.flat();
+}
+
 const SOURCE_OF: Record<string, SourceId> = { "mercadolivre.com.br": "mercadolivre", "shopee.com.br": "shopee", "tiktok.com": "tiktokshop" };
 
 /** Tarefa diária: atualiza os rankings guardados há mais de 3 dias e carrega tópicos novos (tudo dentro do limite diário de consultas). */
