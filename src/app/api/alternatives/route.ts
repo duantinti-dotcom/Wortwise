@@ -42,12 +42,16 @@ export async function GET(req: Request) {
     .slice(0, 8)
     .map((p) => ({ source: p.source, title: p.title, price: p.price, imageUrl: p.imageUrl, permalink: p.permalink, rating: p.rating, soldQuantity: p.soldQuantity ?? null }));
   const e = encodeURIComponent(q);
+  const dash = encodeURIComponent(words.join("-"));
+  // Buscas já ordenadas do menor preço em atacadistas e lojas baratas (só links; nada é consultado).
   const links = [
-    { name: "AliExpress", note: "fornecedores da China, preço de atacado", url: `https://pt.aliexpress.com/w/wholesale-${encodeURIComponent(words.join("-"))}.html?SortType=price_asc` },
-    { name: "Shopee", note: "do menor preço", url: `https://shopee.com.br/search?keyword=${e}&order=asc&sortBy=price` },
-    { name: "Mercado Livre", note: "do menor preço", url: `https://lista.mercadolivre.com.br/${encodeURIComponent(words.join("-"))}_OrderId_PRICE_NoIndex_True` },
-    { name: "Amazon", note: "do menor preço", url: `https://www.amazon.com.br/s?k=${e}&s=price-asc-rank` },
-    { name: "Atacado no Google", note: "fornecedores e atacadistas", url: `https://www.google.com/search?q=${encodeURIComponent(`${q} atacado fornecedor`)}` },
+    { name: "AliExpress", note: "atacado da China", url: `https://pt.aliexpress.com/w/wholesale-${dash}.html?SortType=price_asc` },
+    { name: "Alibaba", note: "fábricas e atacado", url: `https://www.alibaba.com/trade/search?SearchText=${e}&sortType=price_asc` },
+    { name: "Temu", note: "preço baixo", url: `https://www.temu.com/br/search_result.html?search_key=${e}&sort_type=price_up` },
+    { name: "Shopee", note: "menor preço", url: `https://shopee.com.br/search?keyword=${e}&order=asc&sortBy=price` },
+    { name: "Mercado Livre", note: "atacado, menor preço", url: `https://lista.mercadolivre.com.br/${encodeURIComponent(`${words.join("-")}-atacado`)}_OrderId_PRICE_NoIndex_True` },
+    { name: "Amazon", note: "menor preço", url: `https://www.amazon.com.br/s?k=${e}&s=price-asc-rank` },
+    { name: "Atacadistas", note: "fornecedores no Brasil", url: `https://www.google.com/search?q=${encodeURIComponent(`${q} atacado fornecedor`)}` },
   ];
   return NextResponse.json({ query: q, offers, links });
 }

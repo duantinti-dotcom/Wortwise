@@ -120,14 +120,26 @@ function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult
               {p.sellerName ? <span>{p.sellerName}</span> : null}
             </div>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              {p.permalink ? <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary">Ver anúncio na loja<ExternalLink size={15} /></a> : null}
+              {p.permalink ? <a href={p.permalink} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary">Ver anúncio original<ExternalLink size={15} /></a> : null}
               {p.price != null ? <Link href={`/app/calculadora?canal=${CALC_PRESET[p.source] ?? ""}&preco=${p.price}`} className="btn btn-secondary">Calcular lucro</Link> : null}
               {analyzeHref ? <Link href={analyzeHref} className="btn btn-secondary sm:col-span-2">Análise completa e histórico</Link> : null}
             </div>
           </div>
         </div>
 
-        <h3 className="mt-8 text-[17px] font-semibold">Onde comprar mais barato para revender</h3>
+        <h3 className="mt-7 text-[17px] font-semibold">Comprar mais barato para revender</h3>
+        <p className="mt-1 text-[13px] text-muted">Atacadistas e lojas baratas, já na busca deste produto, do menor preço:</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {(data?.links ?? []).map((l) => (
+            <a key={l.name} href={l.url} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-secondary btn-sm !h-auto flex-col !items-start !gap-0 !py-2.5 text-left">
+              <span className="flex w-full items-center justify-between gap-1 text-[14px] font-semibold">{l.name}<ExternalLink size={13} className="text-muted" /></span>
+              <span className="text-[11.5px] font-normal text-muted">{l.note}</span>
+            </a>
+          ))}
+          {!data ? [0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-14 !rounded-[10px]" />) : null}
+        </div>
+
+        <h3 className="mt-7 text-[17px] font-semibold">Ofertas mais baratas que encontramos</h3>
         {loading || !data ? <div className="mt-3 space-y-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-14" />)}</div> : (
           <>
             {data.offers.length ? (
@@ -142,19 +154,7 @@ function ProductSheet({ p, open, onOpenChange, analyzeHref }: { p: ProductResult
                   </li>
                 ))}
               </ul>
-            ) : <p className="mt-2 text-[14px] text-muted">Não achamos o mesmo produto mais barato entre os produtos que acompanhamos. Use as buscas abaixo, já ordenadas do menor preço.</p>}
-            {data.links.length ? (
-              <>
-                <p className="mt-5 text-[13px] font-semibold text-muted">Buscar fornecedores (do menor preço)</p>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                  {data.links.map((l) => (
-                    <a key={l.name} href={l.url} target="_blank" rel="noopener noreferrer nofollow" className="flex items-center justify-between gap-2 rounded-xl border border-tint/[0.08] px-3.5 py-2.5 text-[13.5px] hover:bg-tint/[0.06]">
-                      <span><b className="font-semibold">{l.name}</b> <span className="text-muted">· {l.note}</span></span><ExternalLink size={14} className="shrink-0 text-muted" />
-                    </a>
-                  ))}
-                </div>
-              </>
-            ) : null}
+            ) : <p className="mt-2 text-[14px] text-muted">Não achamos o mesmo produto mais barato entre os produtos que acompanhamos. Use os botões acima, que já abrem a busca do menor preço.</p>}
             <p className="mt-4 text-[11.5px] text-faint">Preços das lojas no momento da coleta. Confira frete, prazo e reputação do vendedor antes de comprar.</p>
           </>
         )}
