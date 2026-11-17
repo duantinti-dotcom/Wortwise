@@ -3,7 +3,7 @@
    Preto absoluto como base, superfícies em vidro escuro, bordas de luz,
    tipografia mono nos números e um único acento azul usado com parcimônia.
    ═══════════════════════════════════════════════════════════════════════════ */
-.ctl {
+.ctl, .ctl-portal {
   --c-bg: #000000;
   --c-rail: #050505;
   --c-surface: #0a0a0b;
@@ -30,12 +30,9 @@
   --radius: 20px;
   --shadow: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 0 0 1px rgb(255 255 255 / 0.02), 0 24px 48px -24px rgb(0 0 0 / 0.9);
   color-scheme: dark;
-  background: var(--c-bg);
   color: var(--c-fg);
-  min-height: 100dvh;
-  position: relative;
-  isolation: isolate;
 }
+.ctl { background: var(--c-bg); min-height: 100dvh; position: relative; isolation: isolate; }
 /* fundo: grade técnica + brilho no topo (estático, sem custo de animação) */
 .ctl::before {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
@@ -49,6 +46,7 @@
 /* O painel é sempre escuro, mesmo com o tema claro do site. */
 [data-theme="light"] .ctl { color-scheme: dark; }
 
+@layer components {
 .ctl ::selection { background: rgb(255 255 255 / 0.18); }
 .ctl :focus-visible { outline: 2px solid var(--c-focus); outline-offset: 2px; border-radius: 10px; }
 
@@ -167,3 +165,5 @@
 .c-legend-btn[aria-pressed="false"] { opacity: .35; }
 
 .ctl .c-scroll { scrollbar-width: thin; scrollbar-color: #26262a transparent; }
+
+}

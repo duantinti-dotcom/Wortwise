@@ -88,7 +88,7 @@ export default async function Overview({ searchParams }: { searchParams: SP }) {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <span className="c-eyebrow">receita líquida · {range.label.toLowerCase()}</span>
-              <div className="c-big mt-2 text-[44px] font-semibold leading-none sm:text-[56px]">{cents(o.revenue.range_net)}</div>
+              <div className="c-big mt-2 text-[clamp(30px,9vw,56px)] font-semibold leading-none">{cents(o.revenue.range_net)}</div>
               <div className="mt-3 flex flex-wrap items-center gap-2 text-[12.5px]">
                 <span className="c-badge c-badge-neutral">bruto {cents(o.revenue.range)}</span>
                 <span className="c-badge c-badge-neutral">hoje {cents(o.revenue.today)}</span>

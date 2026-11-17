@@ -87,7 +87,7 @@ export function StockWorkbench({ data, metrics }: { data: Row[]; metrics: Metric
       <div className="flex flex-col gap-3">
         {groups.map((g) => (
           <div key={g} className="flex flex-wrap items-center gap-1.5">
-            <span className="c-eyebrow w-24 shrink-0">{g}</span>
+            <span className="c-eyebrow w-full shrink-0 sm:w-24">{g}</span>
             {metrics.filter((m) => m.group === g).map((m) => {
               const on = sel.includes(m.key);
               const ci = sel.indexOf(m.key);
@@ -108,7 +108,7 @@ export function StockWorkbench({ data, metrics }: { data: Row[]; metrics: Metric
         <div>
           <div className="c-eyebrow">{main.label}{hover != null ? ` · ${dayLabel(String(rows[idx]?.day))}` : " · último dia"}</div>
           <div className="mt-2 flex flex-wrap items-baseline gap-3">
-            <span className="c-big text-[44px] font-semibold leading-none sm:text-[52px]">{fmt(unit, cur)}</span>
+            <span className="c-big text-[clamp(30px,9vw,52px)] font-semibold leading-none">{fmt(unit, cur)}</span>
             {change != null && (
               <span className={cn("c-badge c-num h-7 gap-1 px-2.5 text-[13px]", good ? "c-badge-good" : "c-badge-crit")}>
                 {up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}{pct(Math.abs(change))}
@@ -131,7 +131,7 @@ export function StockWorkbench({ data, metrics }: { data: Row[]; metrics: Metric
       </div>
 
       {/* gráfico */}
-      <div className="-ml-2 h-[440px]" role="img" aria-label={`${main.label}: total ${fmt(unit, total)} no período`}>
+      <div className="-ml-2 h-[300px] sm:h-[440px]" role="img" aria-label={`${main.label}: total ${fmt(unit, total)} no período`}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={rows} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}
             onMouseMove={(s: { activeTooltipIndex?: number | string | null }) => setHover(s?.activeTooltipIndex != null ? Number(s.activeTooltipIndex) : null)}

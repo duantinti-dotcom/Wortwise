@@ -79,7 +79,7 @@ export function DataTable({ columns, rows, pageSize = 25, searchable = true, csv
 
   const MenuList = ({ r, Kind }: { r: Row; Kind: typeof DropdownMenu | typeof ContextMenu }) => (
     <Kind.Portal>
-      <Kind.Content className="c-menu" {...(Kind === DropdownMenu ? { align: "end" as const, sideOffset: 4 } : {})}>
+      <Kind.Content className="ctl-portal c-menu" {...(Kind === DropdownMenu ? { align: "end" as const, sideOffset: 4 } : {})}>
         {items(r).map((m, i) => (
           <div key={m.id}>
             {m.danger && i > 0 && <Kind.Separator className="c-menu-sep" />}
