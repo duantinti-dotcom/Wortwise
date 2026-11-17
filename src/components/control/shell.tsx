@@ -98,7 +98,7 @@ export function ControlShell({ base, email, areas, openIncidents, children }: { 
       <Dialog.Root open={drawer} onOpenChange={setDrawer}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] lg:hidden" />
-          <Dialog.Content className="ctl c-rail fixed inset-y-0 left-0 z-50 flex w-[82vw] max-w-[300px] flex-col gap-6 overflow-y-auto px-3 py-4 lg:hidden" aria-describedby={undefined}>
+          <Dialog.Content className="ctl-portal c-rail fixed inset-y-0 left-0 z-50 flex w-[82vw] max-w-[300px] flex-col gap-6 overflow-y-auto px-3 py-4 lg:hidden" aria-describedby={undefined}>
             <Dialog.Title className="sr-only">Navegação</Dialog.Title>
             <div className="flex items-center justify-between">{brand}<Dialog.Close className="c-btn c-btn-ghost c-btn-icon" aria-label="Fechar menu"><X size={16} /></Dialog.Close></div>
             {nav}
@@ -140,7 +140,7 @@ function Account({ base, email }: { base: string; email: string }) {
         <ChevronDown size={14} aria-hidden />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="ctl c-menu" side="top" align="start" sideOffset={6}>
+        <DropdownMenu.Content className="ctl-portal c-menu" side="top" align="start" sideOffset={6}>
           <DropdownMenu.Label className="c-faint px-2 py-1.5 text-[11.5px]">Proprietário · MFA ativo</DropdownMenu.Label>
           <DropdownMenu.Item className="c-menu-item" onSelect={(e) => toggleTheme(e as unknown as React.MouseEvent)}>
             <Sun size={14} className="hidden [[data-theme=dark]_&]:block" /><Moon size={14} className="hidden [[data-theme=light]_&]:block" />Alternar tema
@@ -179,17 +179,17 @@ export function RangeControl() {
           <button key={p.key} type="button" aria-pressed={r === p.key} onClick={() => go({ r: p.key, from: null, to: null })}>{p.key === "24h" ? "24h" : p.key.replace("d", "d")}</button>
         ))}
       </div>
-      <select className="c-select h-8 w-auto md:hidden" aria-label="Período" value={r === "custom" ? "" : r}
+      <select className="c-select h-8 w-auto min-w-0 px-2.5 md:hidden" aria-label="Período" value={r === "custom" ? "" : r}
         onChange={(e) => e.target.value && go({ r: e.target.value, from: null, to: null })}>
         {r === "custom" && <option value="">Personalizado</option>}
         {PRESETS.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}
       </select>
       <Popover.Root>
-        <Popover.Trigger className={cn("c-btn h-8", r === "custom" && "c-btn-primary")} aria-label="Intervalo personalizado e opções">
+        <Popover.Trigger className={cn("c-btn h-8 shrink-0 px-2.5 sm:px-3.5", r === "custom" && "c-btn-primary")} aria-label="Intervalo personalizado e opções">
           <CalendarRange size={14} /><span className="hidden sm:inline">{r === "custom" ? `${from.split("-").reverse().slice(0, 2).join("/")} – ${to.split("-").reverse().slice(0, 2).join("/")}` : "Personalizar"}</span>
         </Popover.Trigger>
         <Popover.Portal>
-          <Popover.Content className="ctl c-menu w-[290px] p-3" align="end" sideOffset={6}>
+          <Popover.Content className="ctl-portal c-menu w-[290px] p-3" align="end" sideOffset={6}>
             <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); if (from && to && from <= to) go({ r: null, from, to }); }}>
               <div className="c-label">Intervalo personalizado (horário de Brasília)</div>
               <div className="grid grid-cols-2 gap-2">
@@ -242,11 +242,11 @@ function AutoRefresh() {
   const toggle = () => { const n = !on; setOn(n); try { localStorage.setItem("ww-ctl-auto", n ? "1" : "0"); } catch { /* ignora */ } };
   return (
     <div className="flex items-center gap-1">
-      <button type="button" className="c-btn h-8 gap-1.5 px-2.5" onClick={refresh} aria-label="Atualizar agora" title={`Carregado ${relative(at)}`}>
+      <button type="button" className="c-btn h-8 shrink-0 gap-1.5 px-2.5" onClick={refresh} aria-label="Atualizar agora" title={`Carregado ${relative(at)}`}>
         <RefreshCw size={14} className={cn(pending && "animate-spin")} />
         <span className="c-muted hidden text-[12px] xl:inline">{relative(at)}</span>
       </button>
-      <button type="button" className={cn("c-btn h-8 px-2.5 text-[12px]", on ? "c-btn-ghost" : "")} onClick={toggle} aria-pressed={on}
+      <button type="button" className={cn("c-btn hidden h-8 shrink-0 px-2.5 text-[12px] sm:inline-flex", on ? "c-btn-ghost" : "")} onClick={toggle} aria-pressed={on}
         title={on ? "Atualização automática a cada 60 s (clique para pausar)" : "Atualização automática pausada"}>
         <Gauge size={14} /><span className="hidden sm:inline">{on ? "Auto" : "Pausado"}</span>
       </button>
