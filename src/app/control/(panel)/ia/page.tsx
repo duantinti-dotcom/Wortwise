@@ -96,7 +96,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Panel title="Limites de gasto" description="Aplicados antes de cada mensagem da Wise.">
           {budget != null && <div className="mb-3"><div className="c-label mb-1.5">Gasto estimado no mês: US$ {a.month_spend_usd.toFixed(2)} de US$ {budget.toFixed(2)}</div>
-            <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--c-surface-3)" }}><div className="h-full rounded-full" style={{ width: `${Math.min(100, (a.month_spend_usd / budget) * 100)}%`, background: a.month_spend_usd >= budget ? "var(--crit)" : "var(--c-accent)" }} /></div></div>}
+            <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--c-surface-3)" }}><div className="h-full rounded-full" style={{ width: `${Math.min(100, (a.month_spend_usd / budget) * 100)}%`, background: a.month_spend_usd >= budget ? "var(--crit)" : "#f4f4f5", boxShadow: "0 0 10px rgba(255,255,255,.4)" }} /></div></div>}
           <ActionForm action={saveAiLimits} submit="Salvar limites">
             <Field label="Orçamento mensal (US$)" hint="Calculado com os preços por modelo cadastrados em Configurações.">
               <input name="monthly_budget_usd" inputMode="decimal" className="c-input c-num" defaultValue={budget ?? ""} placeholder="sem limite" />

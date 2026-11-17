@@ -60,9 +60,9 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <div className="c-fg text-[13.5px] font-medium">{s.label}</div>
                   <div className="c-num c-muted text-[12.5px] md:hidden">{s.count == null ? "—" : int(s.count)}</div>
                 </div>
-                <div className="relative h-9 overflow-hidden rounded-[8px]" style={{ background: "var(--c-surface-2)" }}>
-                  <div className="flex h-full items-center rounded-[8px] px-3 transition-[width] duration-700" style={{ width: `${w}%`, background: `color-mix(in srgb, var(--s1) ${100 - i * 11}%, var(--c-surface-3))` }}>
-                    <span className="c-num hidden text-[12.5px] font-semibold text-white md:inline">{s.count == null ? "" : int(s.count)}</span>
+                <div className="relative h-11 overflow-hidden rounded-[12px]" style={{ background: "rgb(255 255 255 / 0.04)" }}>
+                  <div className="flex h-full items-center rounded-[12px] px-3.5 transition-[width] duration-1000" style={{ width: `${w}%`, background: `linear-gradient(90deg, color-mix(in srgb, #fff ${92 - i * 12}%, #000), color-mix(in srgb, #fff ${70 - i * 10}%, #000))`, boxShadow: i === 0 ? "0 0 24px rgb(255 255 255 / 0.15)" : undefined }}>
+                    <span className="c-big hidden text-[13px] font-semibold text-black md:inline">{s.count == null ? "" : int(s.count)}</span>
                   </div>
                 </div>
                 <div className="c-num flex gap-3 text-[12px] md:justify-end">
@@ -98,7 +98,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                       const v = r.weeks[k];
                       if (v == null) return <td key={k} className="r c-faint">·</td>;
                       const p = r.size ? (v / r.size) * 100 : 0;
-                      return <td key={k} className="r" style={{ background: `color-mix(in srgb, var(--s1) ${Math.min(70, p * 1.2)}%, transparent)`, color: p > 40 ? "#fff" : undefined }}>{pct(p, 0)}</td>;
+                      return <td key={k} className="r" style={{ background: `color-mix(in srgb, var(--s1) ${Math.min(70, p * 1.2)}%, transparent)`, color: p > 40 ? "#000" : undefined }}>{pct(p, 0)}</td>;
                     })}
                   </tr>
                 ))}</tbody>

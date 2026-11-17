@@ -24,7 +24,7 @@ export function Panel({ title, description, actions, children, footer, className
   return (
     <section id={id} className={cn("c-card c-rise flex min-w-0 flex-col", className)}>
       {(title || actions) && (
-        <header className="flex items-start justify-between gap-3 px-4 pt-4 sm:px-5">
+        <header className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
           <div className="min-w-0">
             {title && <h2 className="c-h2">{title}</h2>}
             {description && <p className="c-muted mt-0.5 text-[12.5px] leading-relaxed">{description}</p>}
@@ -32,8 +32,8 @@ export function Panel({ title, description, actions, children, footer, className
           {actions && <div className="flex shrink-0 items-center gap-1.5">{actions}</div>}
         </header>
       )}
-      <div className={cn("min-w-0 flex-1 px-4 py-4 sm:px-5", bodyClass)}>{children}</div>
-      {footer && <footer className="c-faint flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-4 py-2.5 text-[11.5px] sm:px-5" style={{ borderColor: "var(--c-line)" }}>{footer}</footer>}
+      <div className={cn("min-w-0 flex-1 px-5 py-5 sm:px-6", bodyClass)}>{children}</div>
+      {footer && <footer className="c-faint flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-5 py-3 font-mono text-[11px] sm:px-6" style={{ borderColor: "var(--c-line)" }}>{footer}</footer>}
     </section>
   );
 }
@@ -65,18 +65,18 @@ export function Kpi({ label, value, sub, cur, prev, goodWhen = "up", basis = "re
   const up = d != null && d > 0;
   const good = d == null || goodWhen === "none" ? null : (goodWhen === "up") === up;
   return (
-    <div className={cn("c-card c-rise flex min-w-0 flex-col gap-2 p-4", className)} title={hint}>
+    <div className={cn("c-card c-lift c-rise flex min-w-0 flex-col gap-3 p-5", className)} title={hint}>
       <div className="flex items-center justify-between gap-2">
-        <span className="c-label truncate">{label}</span>
+        <span className="c-eyebrow truncate">{label}</span>
         <BasisBadge basis={basis} />
       </div>
       <div className="flex items-end justify-between gap-3">
-        <div className="c-num truncate text-[26px] font-semibold leading-none tracking-[-0.02em]">{value}</div>
+        <div className="c-big truncate text-[30px] font-semibold leading-none">{value}</div>
         {spark}
       </div>
       <div className="flex min-h-[18px] flex-wrap items-center gap-x-2 gap-y-1 text-[12px]">
         {d != null && (
-          <span className={cn("inline-flex items-center gap-0.5 font-medium", good === null ? "c-muted" : good ? "c-pos" : "c-neg")}>
+          <span className={cn("c-badge c-num gap-0.5", good === null ? "c-badge-neutral" : good ? "c-badge-good" : "c-badge-crit")}>
             {up ? <ArrowUpRight size={13} aria-hidden /> : <ArrowDownRight size={13} aria-hidden />}
             {pct(Math.abs(d), Math.abs(d) >= 100 ? 0 : 1)}
             <span className="sr-only">{up ? "acima" : "abaixo"} do período anterior</span>
@@ -106,10 +106,10 @@ export const PRIORITY: Record<string, Tone> = { P1: "crit", P2: "serious", P3: "
 
 export function Notice({ tone = "info", title, children, className }: { tone?: Tone; title?: ReactNode; children?: ReactNode; className?: string }) {
   const Icon = TONE_ICON[tone];
-  const bg = tone === "neutral" ? "var(--c-surface-2)" : tone === "info" ? "var(--info-bg)" : `var(--${tone === "crit" ? "crit" : tone === "warn" ? "warn" : tone === "serious" ? "serious" : "good"}-bg)`;
-  const fg = tone === "neutral" ? "var(--c-muted)" : tone === "info" ? "var(--c-accent)" : `var(--${tone === "crit" ? "crit" : tone === "warn" ? "warn" : tone === "serious" ? "serious" : "good"})`;
+  const bg = tone === "neutral" ? "rgb(255 255 255 / 0.03)" : tone === "info" ? "var(--info-bg)" : `var(--${tone === "crit" ? "crit" : tone === "warn" ? "warn" : tone === "serious" ? "serious" : "good"}-bg)`;
+  const fg = tone === "neutral" ? "var(--c-muted)" : tone === "info" ? "var(--c-fg)" : `var(--${tone === "crit" ? "crit" : tone === "warn" ? "warn" : tone === "serious" ? "serious" : "good"})`;
   return (
-    <div role={tone === "crit" ? "alert" : "note"} className={cn("flex gap-2.5 rounded-[10px] border px-3.5 py-3 text-[13px] leading-relaxed", className)}
+    <div role={tone === "crit" ? "alert" : "note"} className={cn("flex gap-3 rounded-[16px] border px-4 py-3.5 text-[13px] leading-relaxed", className)}
       style={{ background: bg, borderColor: "var(--c-line)" }}>
       <Icon size={16} className="mt-[2px] shrink-0" style={{ color: fg }} aria-hidden />
       <div className="min-w-0">
@@ -133,16 +133,16 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
 /* ───────────── Medidor ───────────── */
 export function Meter({ value, max, label, warnAt = 70, critAt = 90 }: { value: number; max: number; label?: string; warnAt?: number; critAt?: number }) {
   const p = Math.max(0, Math.min(100, (value / max) * 100));
-  const color = p >= critAt ? "var(--crit)" : p >= warnAt ? "var(--warn)" : "var(--c-accent)";
+  const color = p >= critAt ? "var(--crit)" : p >= warnAt ? "var(--warn)" : "#f4f4f5";
   return (
     <div role="meter" aria-valuemin={0} aria-valuemax={max} aria-valuenow={value} aria-label={label} className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--c-surface-3)" }}>
-      <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${p}%`, background: color }} />
+      <div className="h-full rounded-full transition-[width] duration-1000" style={{ width: `${p}%`, background: color, boxShadow: `0 0 12px ${color}` }} />
     </div>
   );
 }
 
 /* ───────────── Barras horizontais ranqueadas (HTML) ───────────── */
-export function RankBars({ rows, format = (n) => n.toLocaleString("pt-BR"), color = "var(--s1)", empty = "Sem dados no período." }: {
+export function RankBars({ rows, format = (n) => n.toLocaleString("pt-BR"), color = "#f4f4f5", empty = "Sem dados no período." }: {
   rows: { label: ReactNode; value: number; hint?: ReactNode }[]; format?: (n: number) => string; color?: string; empty?: string;
 }) {
   const max = Math.max(1, ...rows.map((r) => r.value));
@@ -152,9 +152,9 @@ export function RankBars({ rows, format = (n) => n.toLocaleString("pt-BR"), colo
       {rows.map((r, i) => (
         <li key={i} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-[12.5px]">
           <span className="c-soft truncate">{r.label}</span>
-          <span className="c-num c-fg text-right font-medium">{format(r.value)}{r.hint && <span className="c-faint ml-1.5 font-normal">{r.hint}</span>}</span>
-          <div className="col-span-2 h-1.5 overflow-hidden rounded-full" style={{ background: "var(--c-surface-3)" }}>
-            <div className="h-full rounded-full" style={{ width: `${(r.value / max) * 100}%`, background: color, minWidth: r.value > 0 ? 3 : 0 }} />
+          <span className="c-big c-fg text-right font-medium">{format(r.value)}{r.hint && <span className="c-faint ml-1.5 font-normal">{r.hint}</span>}</span>
+          <div className="col-span-2 h-1.5 overflow-hidden rounded-full" style={{ background: "rgb(255 255 255 / 0.06)" }}>
+            <div className="h-full rounded-full transition-[width] duration-1000" style={{ width: `${(r.value / max) * 100}%`, background: `linear-gradient(90deg, transparent, ${color})`, boxShadow: `0 0 10px ${color}`, minWidth: r.value > 0 ? 3 : 0 }} />
           </div>
         </li>
       ))}
@@ -168,12 +168,12 @@ export function SegmentBar({ parts }: { parts: { label: string; value: number; c
   if (!total) return <Empty title="Sem dados." />;
   return (
     <div>
-      <div className="flex h-7 w-full gap-[2px] overflow-hidden rounded-[6px]" role="img"
+      <div className="flex h-9 w-full gap-[3px] overflow-hidden rounded-[12px]" role="img"
         aria-label={parts.map((p) => `${p.label}: ${p.value} (${Math.round((p.value / total) * 100)}%)`).join("; ")}>
         {parts.filter((p) => p.value > 0).map((p) => {
           const share = (p.value / total) * 100;
           return (
-            <div key={p.label} className="flex h-full items-center px-2 text-[11.5px] font-medium text-white" style={{ width: `${share}%`, background: p.color, minWidth: 4 }}
+            <div key={p.label} className="flex h-full items-center px-2.5 font-mono text-[11.5px] font-semibold" style={{ width: `${share}%`, background: p.color, minWidth: 4, color: p.color.includes("prev") ? "#fff" : "#000", borderRadius: 6 }}
               title={`${p.label}: ${p.value.toLocaleString("pt-BR")} (${share.toFixed(1)}%)`}>
               {share >= 12 ? `${Math.round(share)}%` : ""}
             </div>

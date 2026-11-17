@@ -100,7 +100,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                     const m = c.months.find((x) => x.k === k);
                     if (!m) return <td key={k} className="r c-faint">·</td>;
                     const p = c.size ? (m.paying / c.size) * 100 : 0;
-                    return <td key={k} className="r" title={`${m.paying} pagantes`} style={{ background: `color-mix(in srgb, var(--s1) ${Math.min(70, p * 1.5)}%, transparent)`, color: p > 30 ? "#fff" : undefined }}>{pct(p, 0)}</td>;
+                    return <td key={k} className="r" title={`${m.paying} pagantes`} style={{ background: `color-mix(in srgb, var(--s1) ${Math.min(70, p * 1.5)}%, transparent)`, color: p > 30 ? "#000" : undefined }}>{pct(p, 0)}</td>;
                   })}
                 </tr>
               ))}</tbody>
