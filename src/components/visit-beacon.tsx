@@ -8,7 +8,8 @@ export function VisitBeacon() {
   useEffect(() => {
     if (typeof navigator === "undefined" || location.hostname.startsWith("admin.") || path.startsWith("/control")) return;
     const t = setTimeout(() => {
-      try { navigator.sendBeacon?.("/api/track") || fetch("/api/track", { method: "POST", keepalive: true }); } catch { /* ignora */ }
+      const body = JSON.stringify({ p: location.pathname, r: document.referrer });
+      try { navigator.sendBeacon?.("/api/track", body) || fetch("/api/track", { method: "POST", body, keepalive: true }); } catch { /* ignora */ }
     }, 400);
     return () => clearTimeout(t);
   }, [path]);
