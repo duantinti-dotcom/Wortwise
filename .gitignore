@@ -12,3 +12,6 @@ playwright-report
 .DS_Store
 wrangler.localtest.jsonc
 AGENTS.md
+
+# Pacote de entrega do Treasure Hunter (binários gerados)
+/entrega/
