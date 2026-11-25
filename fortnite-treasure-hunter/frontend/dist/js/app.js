@@ -185,7 +185,6 @@ function renderPainel() {
       <div><h1>Início</h1><p>Você joga, o Treasure Hunter observa: conta partidas e baús e guarda uma foto de cada tesouro encontrado.</p></div>
       <div class="actions"><span class="pill" id="pGame"><span class="dot"></span><span>Fortnite</span></span></div>
     </div>
-    <div class="glass steps" id="steps"></div>
     <div class="grid g-hero">
       <div class="glass op-card" id="opCard">
         <svg class="bgmark" viewBox="0 0 24 24"><use href="#i-compass"/></svg>
@@ -201,7 +200,7 @@ function renderPainel() {
           <div class="eyebrow" id="opLabel">Operação parada</div>
           <div class="state" id="stLabel">Inativo</div>
           <div class="state-help" id="stHelp"></div>
-          <div class="sub">
+          <div class="sub hidden">
             <span>${icon('monitor')}<span id="stRegion">Área de captura: —</span></span>
             <span>${icon('clock')}<span id="stSince">—</span></span>
           </div>

@@ -16,7 +16,6 @@ export function render(el) {
         <button class="btn gold" id="cGrab">${icon('camera')}<span>Capturar tela agora</span></button>
       </div>
     </div>
-    <div class="glass wizard" id="wiz"></div>
     <div class="calib">
       <div class="stack">
         <div class="glass card" style="padding:14px">
@@ -207,6 +206,7 @@ const GUIDE = [
 
 function drawWizard(cnt) {
   const w = $('#wiz', root);
+  if (!w) return;
   const step = GUIDE.find((g) => !cnt[g.id]);
   const n = step ? GUIDE.indexOf(step) + 1 : 0;
   if (!step) {
