@@ -1,0 +1,17 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "TreasureHunter",
+  "outputfilename": "TreasureHunter",
+  "frontend:install": "",
+  "frontend:build": "",
+  "author": {
+    "name": "Treasure Hunter"
+  },
+  "info": {
+    "companyName": "Treasure Hunter",
+    "productName": "Treasure Hunter",
+    "productVersion": "1.0.0",
+    "copyright": "Treasure Hunter",
+    "comments": "Acompanhamento de tesouros no Fortnite (modo somente leitura da tela). Não afiliado à Epic Games."
+  }
+}
