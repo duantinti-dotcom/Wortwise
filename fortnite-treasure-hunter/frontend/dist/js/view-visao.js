@@ -10,12 +10,13 @@ export function render(el) {
   const targets = S.snap.targets;
   el.innerHTML = `
     <div class="head">
-      <div><h1>Visão</h1><p>Ensine o Treasure Hunter a reconhecer cada tela: capture o jogo, arraste uma caixa sobre um elemento característico e salve. As posições são relativas e a busca tolera variações de escala, então funciona em outras resoluções.</p></div>
+      <div><h1>Ensinar o app</h1><p>Mostre ao Treasure Hunter como são as telas do seu jogo. É feito uma vez só e funciona em qualquer resolução.</p></div>
       <div class="actions">
         <button class="btn" id="cFile">${icon('image')}<span>Abrir captura</span></button>
         <button class="btn gold" id="cGrab">${icon('camera')}<span>Capturar tela agora</span></button>
       </div>
     </div>
+    <div class="glass wizard" id="wiz"></div>
     <div class="calib">
       <div class="stack">
         <div class="glass card" style="padding:14px">
@@ -71,6 +72,7 @@ export function render(el) {
     if (fT.value === 'recompensa') pickSeg('fArea', 'coluna');
   };
   fT.onchange();
+  fT.addEventListener('pointerdown', () => { wizardTouched = true; });
   for (const id of ['fScope', 'fArea']) {
     $(`#${id}`, el).onclick = (e) => { const b = e.target.closest('button'); if (b) pickSeg(id, b.dataset.v); };
   }
@@ -196,11 +198,40 @@ function drawHits() {
   }
 }
 
+const GUIDE = [
+  { id: 'lobby', name: 'Lobby', when: 'Deixe o Fortnite no <b>lobby</b>', what: 'o <b>botão JOGAR</b>' },
+  { id: 'partida', name: 'Em partida', when: 'Entre numa <b>partida</b> (já no chão)', what: 'a <b>moldura do minimapa</b> ou da barra de vida' },
+  { id: 'squad_eliminado', name: 'Fim de partida', when: 'Quando o Squad cair, na <b>tela de resultado</b>', what: 'a <b>placa de colocação</b> (ex.: "#12")' },
+  { id: 'recompensa', name: 'Token da Loja Pirata (opcional)', when: 'Quando aparecer a <b>notificação do Token</b> (sua ou do Squad)', what: 'o <b>ícone ou nome do item</b>' },
+];
+
+function drawWizard(cnt) {
+  const w = $('#wiz', root);
+  const step = GUIDE.find((g) => !cnt[g.id]);
+  const n = step ? GUIDE.indexOf(step) + 1 : 0;
+  if (!step) {
+    w.classList.add('ok');
+    w.innerHTML = `<div class="badge-n">${icon('check')}</div><div><h2>Tudo pronto!</h2><span class="muted">O app já reconhece as telas principais e o Token. Volte ao Início e clique em Iniciar.</span></div><button class="btn gold" id="wGo">${icon('compass')}<span>Ir para o Início</span></button>`;
+    $('#wGo', w).onclick = () => window.__go?.('painel');
+    return;
+  }
+  w.classList.remove('ok');
+  w.innerHTML = `<div class="badge-n">${n}</div>
+    <div><h2>Passo ${n} de ${GUIDE.length}: ${step.name}</h2>
+      <ol><li>${step.when}.</li><li>Clique em <b>Capturar tela agora</b> (ou use uma captura salva).</li><li>Na imagem, arraste uma caixa em volta de ${step.what}.</li><li>Clique em <b>Salvar elemento</b>.</li></ol></div>
+    <button class="btn gold" id="wCap">${icon('camera')}<span>Capturar tela agora</span></button>`;
+  $('#wCap', w).onclick = () => load(call('CalibCapture'));
+  const ft = $('#fTarget', root);
+  if (ft.value !== step.id && !wizardTouched) { ft.value = step.id; ft.onchange(); }
+}
+let wizardTouched = false;
+
 function drawTemplates() {
   if (!root) return;
   const list = S.templates || [];
   const cnt = {};
   list.forEach((t) => { cnt[t.target] = (cnt[t.target] || 0) + 1; });
+  drawWizard(cnt);
   $('#cCount', root).textContent = `${list.length} elemento(s)`;
   $('#checklist', root).innerHTML = S.snap.targets.map((t) => `<div class="${cnt[t.id] ? 'done' : ''} ${t.required ? 'req' : ''}">${icon(cnt[t.id] ? 'checkCircle' : 'circle')}${esc(t.label)}${cnt[t.id] > 1 ? ` <span class="faint">×${cnt[t.id]}</span>` : ''}</div>`).join('');
   const scores = {};

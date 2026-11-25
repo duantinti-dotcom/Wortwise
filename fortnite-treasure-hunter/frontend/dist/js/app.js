@@ -11,15 +11,66 @@ import * as config from './view-config.js';
 import * as diagnostico from './view-diagnostico.js';
 
 const VIEWS = {
-  painel: { label: 'Painel', icon: 'dashboard' },
-  tesouros: { label: 'Tesouros', icon: 'chest', mod: tesouros },
-  visao: { label: 'Visão', icon: 'scan', mod: visao },
+  painel: { label: 'Início', icon: 'compass' },
+  visao: { label: 'Ensinar o app', icon: 'scan', mod: visao },
+  tesouros: { label: 'Meus tesouros', icon: 'chest', mod: tesouros },
   video: { label: 'Vídeo', icon: 'monitor', mod: video },
   parada: { label: 'Condições de parada', icon: 'flag', mod: parada },
   desempenho: { label: 'Desempenho', icon: 'gauge', mod: desempenho },
   config: { label: 'Configurações', icon: 'gear', mod: config },
   diagnostico: { label: 'Diagnóstico', icon: 'pulse', mod: diagnostico },
 };
+
+const STATE_HELP = {
+  inativo: 'Clique em Iniciar quando for jogar. O app observa a tela e anota tudo sozinho.',
+  aguardando_fortnite: 'Abra o Fortnite. O acompanhamento começa assim que o jogo aparecer.',
+  desconhecido: 'Ainda não reconheci esta tela. Se continuar assim, ensine-a em "Ensinar o app".',
+  lobby: 'Você está no lobby. Entre na partida quando quiser.',
+  modo_incorreto: 'Escolha Battle Royale Sem Construção — Squad no lobby.',
+  fila: 'Procurando partida…',
+  carregando: 'Carregando a partida…',
+  em_partida: 'Partida em andamento. Abra baús à vontade: os tesouros que aparecerem serão fotografados.',
+  espectando: 'Você caiu, mas o Squad continua vivo. A partida segue contando.',
+  squad_eliminado: 'Fim da partida. Volte ao lobby para a próxima.',
+  vitoria: 'Vitória Royale! Volte ao lobby para a próxima.',
+  erro: 'Apareceu um erro ou desconexão no jogo.',
+};
+
+const REQUIRED = ['lobby', 'partida', 'squad_eliminado'];
+
+function renderSteps(d) {
+  const el = $('#steps');
+  if (!el) return;
+  let hidden = false;
+  try { hidden = !!localStorage.getItem('stepsHidden'); } catch { /* sem armazenamento */ }
+  const cal = d.calibrated || {};
+  const taught = REQUIRED.filter((t) => cal[t]).length;
+  const steps = [
+    { done: d.gameRunning, t: 'Abra o Fortnite', d: 'De preferência em "Janela sem bordas" (Configurações de vídeo do jogo).', btn: d.gameRunning ? '' : `<button class="btn sm" data-act="launch">${icon('external')}Abrir Fortnite</button>` },
+    { done: taught === REQUIRED.length, t: `Ensine 3 telas ao app (${taught}/3)`, d: 'Lobby, partida e fim de partida. Leva 2 minutos e só precisa ser feito uma vez.', btn: `<button class="btn sm" data-act="teach">${icon('scan')}Ensinar agora</button>` },
+    { done: d.op === 'executando', t: 'Clique em Iniciar e jogue', d: 'Pode minimizar o app. Ele avisa quando achar o seu tesouro.', btn: d.op === 'executando' ? '' : `<button class="btn sm gold" data-act="start">${icon('play')}Iniciar</button>` },
+  ];
+  const doneN = steps.filter((s) => s.done).length;
+  if (hidden || doneN === steps.length) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  const next = steps.findIndex((s) => !s.done);
+  const html = `<div class="top"><div><h2>Primeiros passos</h2><p>Siga na ordem. Depois disso é só jogar.</p></div>
+      <div class="prog">${doneN} de 3<div class="bar"><i style="width:${(doneN / 3) * 100}%"></i></div>
+      <button class="btn sm ghost icon" data-act="hide" title="Ocultar">${icon('x')}</button></div></div>
+    <div class="step-list">${steps.map((s, i) => `<div class="step ${s.done ? 'done' : i === next ? 'next' : ''}"><span class="n">${s.done ? '✓' : i + 1}</span><b>${s.t}</b><span class="d">${s.d}</span>${s.done ? '' : s.btn}</div>`).join('')}</div>`;
+  if (el.dataset.html === html) return;
+  el.dataset.html = html;
+  el.innerHTML = html;
+  el.onclick = (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'launch') call('LaunchFortnite').then(() => toast('ok', 'Pedido enviado ao Epic Games Launcher')).catch((er) => errToast(er, 'Abrir Fortnite'));
+    if (act === 'teach') go('visao');
+    if (act === 'start') call('StartOperation').catch((er) => errToast(er, 'Não foi possível iniciar'));
+    if (act === 'hide') { try { localStorage.setItem('stepsHidden', '1'); } catch { /* sem armazenamento */ } el.classList.add('hidden'); }
+  };
+}
 
 const STATES_ICON = {
   inativo: 'power', aguardando_fortnite: 'hourglass', desconhecido: 'eye', lobby: 'anchor', modo_incorreto: 'alert', fila: 'search',
@@ -49,6 +100,8 @@ async function init() {
     a.innerHTML = `${icon(v.icon)}<span>${v.label}</span>`;
     a.onclick = () => go(a.dataset.view);
   }
+  $('#navMore').innerHTML = `${icon('gear')}<span>Mais opções</span><svg class="chev"><use href="#i-chevron"/></svg>`;
+  $('#navMore').onclick = () => toggleAdv();
 
   try {
     S.snap = await call('GetSnapshot');
@@ -64,6 +117,8 @@ async function init() {
   applyLite();
   $('#btnEmergency').insertAdjacentHTML('beforeend', `<kbd>${esc(S.settings.hotkeys.emergency || '')}</kbd>`);
 
+  try { if (localStorage.getItem('navAdv')) toggleAdv(true); } catch { /* sem armazenamento */ }
+  window.__go = go;
   renderPainel();
   for (const [id, v] of Object.entries(VIEWS)) v.mod?.render($(`#v-${id}`));
   await refreshRewards();
@@ -90,12 +145,28 @@ function applyLite() {
   document.documentElement.classList.toggle('lite', !!S.settings?.reduceEffects);
 }
 
+function toggleAdv(force) {
+  const open = force ?? !$('#navAdv').classList.contains('open');
+  $('#navAdv').classList.toggle('open', open);
+  $('#navMore').classList.toggle('open', open);
+  try { localStorage.setItem('navAdv', open ? '1' : ''); } catch { /* sem armazenamento */ }
+  setTimeout(() => { const a = $(`#nav a[data-view="${S.view}"]`); if (a) moveInd(a); }, 320);
+}
+
+function moveInd(a) {
+  const ind = $('#navInd');
+  const hidden = a.closest('.nav-adv') && !$('#navAdv').classList.contains('open');
+  ind.style.opacity = hidden ? 0 : 1;
+  ind.style.transform = `translateY(${a.offsetTop}px)`;
+}
+
 function go(view) {
+  if ($(`#navAdv a[data-view="${view}"]`) && !$('#navAdv').classList.contains('open')) toggleAdv(true);
   S.view = view;
   for (const a of $$('#nav a')) a.classList.toggle('active', a.dataset.view === view);
   for (const s of $$('.view')) s.classList.toggle('active', s.id === `v-${view}`);
   const a = $(`#nav a[data-view="${view}"]`);
-  $('#navInd').style.transform = `translateY(${a.offsetTop}px)`;
+  moveInd(a);
   $('#crumb').textContent = VIEWS[view].label;
   VIEWS[view].mod?.show?.();
 }
@@ -111,9 +182,10 @@ function renderPainel() {
   const objIcons = { token_pirata: 'coin', skin_dourada: 'gold', elemental: 'flame', raro: 'gem', baus: 'chest' };
   el.innerHTML = `
     <div class="head">
-      <div><h1>Painel do Caçador</h1><p>Acompanhe em tempo real a sua rotina de Battle Royale Sem Construção em Squad: partidas, baús e tesouros identificados na tela.</p></div>
+      <div><h1>Início</h1><p>Você joga, o Treasure Hunter observa: conta partidas e baús e guarda uma foto de cada tesouro encontrado.</p></div>
       <div class="actions"><span class="pill" id="pGame"><span class="dot"></span><span>Fortnite</span></span></div>
     </div>
+    <div class="glass steps" id="steps"></div>
     <div class="grid g-hero">
       <div class="glass op-card" id="opCard">
         <svg class="bgmark" viewBox="0 0 24 24"><use href="#i-compass"/></svg>
@@ -128,6 +200,7 @@ function renderPainel() {
         <div class="op-info">
           <div class="eyebrow" id="opLabel">Operação parada</div>
           <div class="state" id="stLabel">Inativo</div>
+          <div class="state-help" id="stHelp"></div>
           <div class="sub">
             <span>${icon('monitor')}<span id="stRegion">Área de captura: —</span></span>
             <span>${icon('clock')}<span id="stSince">—</span></span>
@@ -152,15 +225,18 @@ function renderPainel() {
     </div>
 
     <div class="grid g-stats mt">
-      ${statTile('mStart', 'Partidas iniciadas', 'flag')}
+      ${statTile('mStart', 'Partidas', 'flag')}
+      ${statTile('chests', 'Baús abertos', 'chest')}
+      ${statTile('tokens', 'Tokens da Loja Pirata', 'coin')}
+      ${statTile('time', 'Tempo jogando', 'hourglass')}
+    </div>
+    <div class="grid g-stats mt extra-stats" id="extraStats">
       ${statTile('mDone', 'Partidas concluídas', 'trophy')}
-      ${statTile('chests', 'Baús identificados', 'chest')}
       ${statTile('avg', 'Média de baús/partida', 'scale')}
       ${statTile('rare', 'Itens raros', 'gem')}
-      ${statTile('tokens', 'Tokens da Loja Pirata', 'coin')}
-      ${statTile('time', 'Tempo total de operação', 'hourglass')}
       ${statTile('special', 'Skins douradas · Elementais', 'gold')}
     </div>
+    <div class="more-toggle"><button class="btn sm ghost" id="bMoreStats">${icon('plus')}<span>Ver mais números</span></button></div>
 
     <div class="grid g-bottom mt">
       <div class="glass card">
@@ -169,8 +245,8 @@ function renderPainel() {
       </div>
       <div class="stack">
         <div class="glass card">
-          <h3>${icon('hand')}Acompanhamento manual</h3>
-          <p class="muted" style="margin:-4px 0 14px;font-size:12.5px">Registre o que o reconhecimento não viu. Também funciona pelos atalhos globais, sem sair do jogo.</p>
+          <h3>${icon('hand')}O app não viu? Registre você</h3>
+          <p class="muted" style="margin:-4px 0 14px;font-size:12.5px">Use os botões ou os atalhos sem sair do jogo.</p>
           <div class="row wrap">
             <button class="btn" id="bChest">${icon('plus')}<span>Baú aberto</span><kbd id="kChest"></kbd></button>
             <button class="btn" id="bReward">${icon('camera')}<span>Registrar recompensa</span><kbd id="kReward"></kbd></button>
@@ -188,6 +264,10 @@ function renderPainel() {
       </div>
     </div>`;
 
+  $('#bMoreStats').onclick = () => {
+    const open = $('#extraStats').classList.toggle('open');
+    $('#bMoreStats').querySelector('span').textContent = open ? 'Mostrar menos' : 'Ver mais números';
+  };
   $('#bStart').onclick = async () => { try { await call('StartOperation'); } catch (e) { errToast(e, 'Não foi possível iniciar'); } };
   $('#bPause').onclick = () => (S.live?.op === 'pausado' ? call('ResumeOperation') : call('PauseOperation'));
   $('#bStop').onclick = () => call('StopOperation');
@@ -271,11 +351,15 @@ function updateLive(d) {
   $('#ringProg').style.strokeDashoffset = 502.65 * (1 - Math.min(1, Math.max(0, prog)));
 
   const u = d.usage || {};
+  if ($('#uCpu')) {
   $('#uCpu').innerHTML = `${nf1.format(u.cpu || 0)}<small>%</small>`;
   $('#uGpu').innerHTML = u.gpuAvailable ? `${nf1.format(u.gpu || 0)}<small>%</small>` : '<small>n/d</small>';
   $('#uRam').innerHTML = `${nf.format(Math.round(u.ramMb || 0))}<small>MB</small>`;
   $('#uAn').textContent = d.perf.frames ? `${nf1.format(d.perf.analyzeMs)} ms` : '—';
   $('#uFps').textContent = `${nf1.format(d.perf.targetFps)} quadros/s`;
+  }
+  $('#stHelp').textContent = STATE_HELP[d.state] || '';
+  renderSteps(d);
 
   renderLast(d.lastReward);
   for (const v of Object.values(VIEWS)) v.mod?.live?.(d);

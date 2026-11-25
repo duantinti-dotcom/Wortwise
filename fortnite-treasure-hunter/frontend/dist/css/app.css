@@ -501,3 +501,46 @@ kbd, .kbd { font-family: var(--mono); font-size: 11.5px; padding: 3px 8px; borde
   .g-hero, .g-bottom, .calib { grid-template-columns: 1fr; }
   .g-3 { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---------- Menu: mais opções ---------- */
+.nav-more { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px; margin-top: 10px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--text-3); font-weight: 700; font-size: 12.5px; cursor: pointer; transition: color .25s; }
+.nav-more:hover { color: var(--text); }
+.nav-more svg { width: 16px; height: 16px; }
+.nav-more .chev { margin-left: auto; transition: transform .35s var(--ease); }
+.nav-more.open .chev { transform: rotate(180deg); }
+.nav-adv { display: flex; flex-direction: column; gap: 2px; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .4s var(--ease), opacity .3s; }
+.nav-adv.open { max-height: 260px; opacity: 1; }
+.nav-adv a { font-size: 13px; }
+.nav .indicator { transition: transform .45s var(--ease), opacity .25s; }
+
+/* ---------- Primeiros passos ---------- */
+.steps { padding: 22px 24px; margin-bottom: 16px; }
+.steps .top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.steps .top h2 { margin: 0; font-family: var(--serif); font-size: 19px; letter-spacing: .04em; }
+.steps .top p { margin: 2px 0 0; color: var(--text-2); font-size: 12.5px; }
+.steps .prog { margin-left: auto; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 12px; color: var(--gold-2); }
+.steps .prog .bar { width: 140px; }
+.step-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.step { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: rgba(0, 0, 0, .22); border: 1px solid var(--line); transition: border-color .3s, background .3s; }
+.step .n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: rgba(255, 255, 255, .07); border: 1px solid var(--line-2); color: var(--text-2); }
+.step b { font-size: 14px; }
+.step span.d { font-size: 12.5px; color: var(--text-3); flex: 1; }
+.step.done { border-color: rgba(95, 211, 154, .35); background: rgba(95, 211, 154, .06); }
+.step.done .n { background: var(--ok); color: #04261a; border-color: transparent; }
+.step.next { border-color: rgba(246, 207, 116, .5); background: rgba(246, 207, 116, .07); box-shadow: 0 0 0 1px rgba(246, 207, 116, .2), 0 16px 40px -24px rgba(227, 166, 59, .8); }
+.step.next .n { background: var(--gold-grad); color: #2a1a03; border-color: transparent; }
+.step .btn { align-self: flex-start; }
+
+/* ---------- Frase de ajuda do estado ---------- */
+.state-help { font-size: 14px; color: var(--text); opacity: .86; margin: 2px 0 6px; max-width: 520px; }
+.more-toggle { display: flex; justify-content: center; margin-top: 12px; }
+.extra-stats { display: none; }
+.extra-stats.open { display: grid; }
+
+/* ---------- Assistente da calibração ---------- */
+.wizard { display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center; padding: 20px 22px; margin-bottom: 16px; }
+.wizard .badge-n { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: var(--gold-grad); color: #2a1a03; font-family: var(--serif); font-weight: 700; font-size: 22px; box-shadow: 0 10px 26px -12px rgba(227, 166, 59, .9); }
+.wizard.ok .badge-n { background: linear-gradient(135deg, #b9f5d6, #5fd39a); }
+.wizard h2 { margin: 0 0 4px; font-size: 17px; }
+.wizard ol { margin: 6px 0 0; padding-left: 18px; color: var(--text-2); font-size: 13px; line-height: 1.7; }
+.wizard ol b { color: var(--gold-1); }
